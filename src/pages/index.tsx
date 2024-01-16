@@ -579,8 +579,7 @@ const cardData = [
     price: "$ 200.00",
   },
 ];
-//@ts-expect-error
-const DropDowns = ({ list }) => {
+const DropDowns = ({ list }: {list: any[]}) => {
   const [selected, setSelected] = useState(list[0]);
   return (
     <Listbox value={selected} onChange={setSelected}>
@@ -643,7 +642,7 @@ const DropDowns = ({ list }) => {
 
 const IndexPage = () => {
   const [showMenu, setShowMenu] = useState(false);
-  const [openSideBar, setOpenSieBar] = useState(true);
+  const [openSideBar, setOpenSieBar] = useState(false);
 
   const changeSideBar = () => {
     setOpenSieBar(!openSideBar);

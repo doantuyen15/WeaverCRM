@@ -8,6 +8,7 @@ import "./styles/tailwind.css";
 import "./styles/titlebar.css";
 
 import { Router } from "./router";
+import { ThemeProvider } from "@material-tailwind/react";
 
 const root = ReactDOM.createRoot(
 	document.getElementById("root") as HTMLElement,
@@ -15,7 +16,9 @@ const root = ReactDOM.createRoot(
 
 root.render(
 	<React.StrictMode>
-		<ToastContainer position="bottom-right" autoClose={2500} />
-		<Router />
+		<ThemeProvider>
+			<ToastContainer position="bottom-right" autoClose={2500} />
+			<Router />
+		</ThemeProvider>
 	</React.StrictMode>,
 );

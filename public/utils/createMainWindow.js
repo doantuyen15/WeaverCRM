@@ -6,17 +6,16 @@ const config = require("./config");
 
 exports.createMainWindow = async () => {
 	const window = new BrowserWindow({
-		fullscreen: true,
 		webPreferences: {
 			nodeIntegration: true,
 			enableRemoteModule: true,
 			devTools: config.isDev,
 			contextIsolation: false,
 		},
-		frame: false,
 		icon: config.icon,
 		title: config.appName,
 	});
+    window.maximize()
 
 	remote.enable(window.webContents);
 
