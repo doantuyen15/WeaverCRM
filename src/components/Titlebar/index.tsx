@@ -28,7 +28,7 @@ export const Titlebar: FC = () => {
 	const onQuit = () => app.quit();
 
 	return (
-		<div className="title-bar sticky top-0 select-none">
+		<div className="title-bar sticky top-0 select-none" onDoubleClick={onMaximize}>
 			<div className="menu-button-container">
 				<img
 					id="icon"
@@ -38,7 +38,7 @@ export const Titlebar: FC = () => {
 				/>
 			</div>
 			<div className="app-name-container select-none">
-				<p>Electron React Tailwind Template</p>
+				<p>CRM Weaver</p>
 			</div>
 			<div className="window-controls-container">
 				<button

@@ -10,6 +10,12 @@ module.exports = withMT({
 	],
 	theme: {
 		extend: {},
+		colors: {
+			transparent: 'transparent',
+			current: 'currentColor',
+			'primary': '#fd5f00',
+			'white': '#FFF'
+		}
 	},
 	plugins: [],
 	darkMode: "media",

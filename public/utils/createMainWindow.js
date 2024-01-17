@@ -12,10 +12,12 @@ exports.createMainWindow = async () => {
 			devTools: config.isDev,
 			contextIsolation: false,
 		},
+		frame: false,
 		icon: config.icon,
 		title: config.appName,
 	});
     window.maximize()
+	window.setMenuBarVisibility(false)
 
 	remote.enable(window.webContents);
 
