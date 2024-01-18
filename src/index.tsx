@@ -3,12 +3,13 @@ import ReactDOM from "react-dom/client";
 import { ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
-import "./styles/index.css";
-import "./styles/tailwind.css";
-import "./styles/titlebar.css";
+import "./styles/css/index.css";
+import "./styles/css/tailwind.css";
+import "./styles/css/titlebar.css";
 
 import { Router } from "./router";
 import { ThemeProvider } from "@material-tailwind/react";
+import { MaterialTailwindControllerProvider } from "./context";
 
 const root = ReactDOM.createRoot(
 	document.getElementById("root") as HTMLElement,
@@ -17,8 +18,10 @@ const root = ReactDOM.createRoot(
 root.render(
 	<React.StrictMode>
 		<ThemeProvider>
-			<ToastContainer position="bottom-right" autoClose={2500} />
-			<Router />
+			<MaterialTailwindControllerProvider>
+				<ToastContainer position="bottom-right" autoClose={2500} />
+				<Router />
+			</MaterialTailwindControllerProvider>
 		</ThemeProvider>
 	</React.StrictMode>,
 );
