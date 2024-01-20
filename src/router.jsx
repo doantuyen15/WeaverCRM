@@ -28,7 +28,7 @@ export const Router = () => {
 };
 
 const icon = {
-	className: "w-5 h-5 text-inherit",
+	className: "w-7 h-7 transition-all duration-200 hover:h-10 hover:w-10",
 };
 
 export const routes = [

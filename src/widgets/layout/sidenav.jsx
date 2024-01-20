@@ -1,6 +1,7 @@
+import React, { useState } from 'react';
 import PropTypes from "prop-types";
 import { Link, NavLink } from "react-router-dom";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
 import {
   Avatar,
   Button,
@@ -8,10 +9,13 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { useMaterialTailwindController, setOpenSidenav } from "./../../context";
+import LogoDark from "../../assets/logo/we_logo_dark.png"
+import LogoLight from "../../assets/logo/we_logo_light.png"
 
-export function Sidenav({ brandImg, brandName, routes }) {
+export function Sidenav({ brandName, routes }) {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavColor, sidenavType, openSidenav } = controller;
+  const [collapsed, setCollapsed] = useState(false)
   const sidenavTypes = {
     dark: "bg-gradient-to-br from-gray-800 to-gray-900",
     white: "bg-white shadow-sm",
@@ -20,21 +24,37 @@ export function Sidenav({ brandImg, brandName, routes }) {
 
   return (
     <aside
-      className={`${sidenavTypes[sidenavType]} ${
-        openSidenav ? "translate-x-0" : "-translate-x-80"
-      } fixed inset-0 z-50 my-4 ml-4 h-[calc(100vh-32px)] w-72 rounded-xl transition-transform duration-300 xl:translate-x-0 border border-blue-gray-100`}
+      className={`${sidenavTypes[sidenavType]} ${openSidenav ? "translate-x-0" : "-translate-x-80"}
+      ${collapsed ? "max-h-[60vh] lg:-translate-x-0 w-20" : "ml-4 w-72 max-h-[calc(100vh-32px)]"} 
+      fixed inset-0 z-50 my-auto rounded-xl transition-all duration-500 border border-blue-gray-100`}
     >
       <div
         className={`relative`}
       >
-        <Link to="/" className="py-6 px-8 text-center">
-          <Typography
-            variant="h6"
-            color={sidenavType === "dark" ? "white" : "blue-gray"}
-          >
-            {brandName}
-          </Typography>
-        </Link>
+        <div className="py-6 px-8 text-center">
+          <div className="flex items-center justify-center">
+            <img 
+              className={`object-cover transition-all duration-200 ${collapsed ? 'opacity-0 h-1' : 'h-20 pr-4'}`} 
+              src={sidenavType === "dark" ? LogoLight : LogoDark} 
+            />
+            <div onClick={() => setCollapsed(prev => !prev)} style={{ cursor: 'pointer', position: 'absolute', right: 5 }}>
+              <Typography
+                variant="h6"
+                color={sidenavType === "dark" ? "white" : "blue-gray"}
+              >
+                {!collapsed ? (
+                  <ChevronLeftIcon strokeWidth={2.5} className="h-5 w-5" />
+                ) : (
+                  <ChevronRightIcon strokeWidth={2.5} className="h-5 w-5" />
+                )}
+                {/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg> */}
+                {/* {brandName} */}
+              </Typography>
+            </div>
+          </div>
+        </div>
         <IconButton
           variant="text"
           color="white"
@@ -46,18 +66,22 @@ export function Sidenav({ brandImg, brandName, routes }) {
           <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-white" />
         </IconButton>
       </div>
-      <div className="m-4">
+      <div className={collapsed ? 'm-1' : 'm-4'}>
         {routes.map(({ layout, title, pages }, key) => (
           <ul key={key} className="mb-4 flex flex-col gap-1">
             {title && (
               <li className="mx-3.5 mt-4 mb-2">
-                <Typography
-                  variant="small"
-                  color={sidenavType === "dark" ? "white" : "blue-gray"}
-                  className="font-black uppercase opacity-75"
-                >
-                  {title}
-                </Typography>
+                {collapsed ? (
+                  <div className='border-t-2' />
+                ) : (
+                  <Typography
+                    variant="small"
+                    color={sidenavType === "dark" ? "white" : "blue-gray"}
+                    className="font-black uppercase opacity-75"
+                  >
+                    {title}
+                  </Typography>
+                )}
               </li>
             )}
             {pages.map(({ icon, name, path }) => (
@@ -70,16 +94,16 @@ export function Sidenav({ brandImg, brandName, routes }) {
                         isActive
                           ? sidenavColor
                           : sidenavType === "dark"
-                          ? "white"
-                          : "blue-gray"
+                            ? "white"
+                            : "blue-gray"
                       }
-                      className="flex items-center gap-4 px-4 capitalize"
+                      className={`flex ${collapsed ? 'justify-center px-0' : ''} items-center`}
                       fullWidth
                     >
                       {icon}
                       <Typography
                         color="inherit"
-                        className="font-medium capitalize"
+                        className={`font-medium capitalize ${collapsed ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
                       >
                         {name}
                       </Typography>

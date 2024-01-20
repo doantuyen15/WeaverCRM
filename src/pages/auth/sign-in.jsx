@@ -6,7 +6,8 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
-
+import LogoDark from "../../assets/logo/we_logo_dark.png"
+import LogoLight from "../../assets/logo/we_logo_light.png"
 
 export function SignIn() {
   return (
@@ -21,8 +22,9 @@ export function SignIn() {
           </div>
         </Link>
         <div className="text-center">
-          <Typography variant="h2" className="font-bold mb-4">Sign In</Typography>
-          <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Welcome to CRM Weaver</Typography>
+          <img className="object-cover mx-auto mb-12" width={150} src={LogoDark} />
+          <Typography variant="h2" className="font-bold">Sign In</Typography>
+          {/* <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Welcome to CRM Weaver</Typography> */}
         </div>
         <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
           <div className="mb-1 flex flex-col gap-6">
