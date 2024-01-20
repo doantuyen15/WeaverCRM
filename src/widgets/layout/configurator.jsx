@@ -139,7 +139,7 @@ export function Configurator() {
             Sidenav Types
           </Typography>
           <Typography variant="small" color="gray">
-            Choose between 3 different sidenav types.
+            Choose between 2 different sidenav types.
           </Typography>
           <div className="mt-3 flex items-center gap-2">
             <Button
@@ -149,23 +149,27 @@ export function Configurator() {
               Dark
             </Button>
             <Button
-              variant={sidenavType === "hidden" ? "gradient" : "outlined"}
-              onClick={() => setCollapsedSidenav(dispatch, !collapsedSidenav)}
-            >
-              {!collapsedSidenav ? 'Hidden' : 'Show'}
-            </Button>
-            <Button
               variant={sidenavType === "white" ? "gradient" : "outlined"}
               onClick={() => setSidenavType(dispatch, "white")}
             >
               White
             </Button>
           </div>
+          <div className="flex items-center justify-between mt-3">
+            <Typography variant="small" color="gray">
+              Hide Sidenav
+            </Typography>
+            <Switch
+              id="hide-sidenav"
+              value={collapsedSidenav}
+              onChange={() => setCollapsedSidenav(dispatch, !collapsedSidenav)}
+            />
+          </div>
         </div>
         <div className="mb-12">
           <hr />
           <div className="flex items-center justify-between py-5">
-            <Typography variant="h6" color="blue-gray">
+            <Typography variant="h3" color="blue-gray">
               Navbar Fixed
             </Typography>
             <Switch

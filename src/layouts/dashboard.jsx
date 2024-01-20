@@ -30,7 +30,7 @@ export function Dashboard() {
           <ChevronRightIcon strokeWidth={2.5} className="h-5 w-5" />
         </IconButton>
       ) : null}
-      <div className={`p-4 ${collapsedSidenav ? 'xl:mx-8' : 'xl:ml-80'}`}>
+      <div className={`p-4 transition-all duration-500 ${collapsedSidenav ? 'xl:mx-8' : 'xl:ml-80'}`}>
         <DashboardNavbar />
         <Configurator />
         <IconButton
