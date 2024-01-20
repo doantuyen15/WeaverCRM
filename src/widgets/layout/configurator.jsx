@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
   Button,
@@ -10,10 +10,12 @@ import {
 import {
   useMaterialTailwindController,
   setOpenConfigurator,
+  setCollapsedSidenav,
   setSidenavColor,
   setSidenavType,
   setFixedNavbar,
 } from "./../../context";
+import useStorage from "../../utils/localStorageHook";
 
 function formatNumber(number, decPlaces) {
   decPlaces = Math.pow(10, decPlaces);
@@ -42,7 +44,7 @@ function formatNumber(number, decPlaces) {
 
 export function Configurator() {
   const [controller, dispatch] = useMaterialTailwindController();
-  const { openConfigurator, sidenavColor, sidenavType, fixedNavbar } =
+  const { openConfigurator, sidenavColor, sidenavType, fixedNavbar, collapsedSidenav } =
     controller;
   const [stars, setStars] = React.useState(0);
 
@@ -55,12 +57,38 @@ export function Configurator() {
     pink: "from-pink-400 to-pink-600",
   };
 
-  React.useEffect(() => {
-    const stars = fetch(
-      "https://api.github.com/repos/creativetimofficial/material-tailwind-dashboard-react"
-    )
-      .then((response) => response.json())
-      .then((data) => setStars(formatNumber(data.stargazers_count, 1)));
+  useEffect(() => {
+    const config = {
+      collapsedSidenav,
+      sidenavColor,
+      sidenavType,
+      fixedNavbar
+    }
+    useStorage('set', 'config', JSON.stringify(config))
+  }, [sidenavColor, sidenavType, fixedNavbar, collapsedSidenav])
+  
+
+  // React.useEffect(() => {
+  //   const stars = fetch(
+  //     "https://api.github.com/repos/creativetimofficial/material-tailwind-dashboard-react"
+  //   )
+  //     .then((response) => response.json())
+  //     .then((data) => setStars(formatNumber(data.stargazers_count, 1)));
+  // }, []);
+
+  const ref = useRef(null);
+
+  const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setOpenConfigurator(dispatch, false);
+      }
+  };
+
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutside, true);
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true);
+    };
   }, []);
 
   return (
@@ -68,6 +96,7 @@ export function Configurator() {
       className={`fixed top-0 right-0 z-50 h-screen w-96 bg-white px-2.5 shadow-lg transition-transform duration-300 ${
         openConfigurator ? "translate-x-0" : "translate-x-96"
       }`}
+      ref={ref}
     >
       <div className="flex items-start justify-between px-6 pt-8 pb-6">
         <div>
@@ -120,10 +149,10 @@ export function Configurator() {
               Dark
             </Button>
             <Button
-              variant={sidenavType === "transparent" ? "gradient" : "outlined"}
-              onClick={() => setSidenavType(dispatch, "transparent")}
+              variant={sidenavType === "hidden" ? "gradient" : "outlined"}
+              onClick={() => setCollapsedSidenav(dispatch, !collapsedSidenav)}
             >
-              Transparent
+              {!collapsedSidenav ? 'Hidden' : 'Show'}
             </Button>
             <Button
               variant={sidenavType === "white" ? "gradient" : "outlined"}

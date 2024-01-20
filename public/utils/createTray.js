@@ -1,6 +1,6 @@
 const { app, Tray, Menu, shell } = require("electron");
 const { showNotification } = require("./showNotification");
-const config = require("./config");
+const config = require("./configElectron");
 
 exports.createTray = () => {
 	const t = new Tray(config.icon);

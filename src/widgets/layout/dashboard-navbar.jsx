@@ -23,12 +23,12 @@ import {
 import {
   useMaterialTailwindController,
   setOpenConfigurator,
-  setOpenSidenav,
+  setCollapsedSidenav,
 } from "./../../context";
 
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
-  const { fixedNavbar, openSidenav } = controller;
+  const { fixedNavbar, collapsedSidenav } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
 
@@ -79,7 +79,7 @@ export function DashboardNavbar() {
             variant="text"
             color="blue-gray"
             className="grid xl:hidden"
-            onClick={() => setOpenSidenav(dispatch, !openSidenav)}
+            onClick={() => setCollapsedSidenav(dispatch, !collapsedSidenav)}
           >
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton>

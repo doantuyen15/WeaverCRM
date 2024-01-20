@@ -2,7 +2,7 @@ const { BrowserWindow } = require("electron");
 const { join } = require("path");
 const { autoUpdater } = require("electron-updater");
 const remote = require("@electron/remote/main");
-const config = require("./config");
+const config = require("./configElectron");
 
 exports.createMainWindow = async () => {
 	const window = new BrowserWindow({
@@ -11,6 +11,10 @@ exports.createMainWindow = async () => {
 			enableRemoteModule: true,
 			devTools: config.isDev,
 			contextIsolation: false,
+			preload: __dirname + '/preload.js',
+			enableremotemodule: true,
+            webSecurity: false,
+            allowRendererProcessReuse: true,
 		},
 		// frame: false,
 		icon: config.icon,
@@ -27,9 +31,9 @@ exports.createMainWindow = async () => {
 			: `file://${join(__dirname, "..", "../build/index.html")}`,
 	);
 
-	window.once("ready-to-show", () => {
-		autoUpdater.checkForUpdatesAndNotify();
-	});
+	// window.once("ready-to-show", () => {
+	// 	autoUpdater.checkForUpdatesAndNotify();
+	// });
 
 	window.on("close", (e) => {
 		if (!config.isQuiting) {

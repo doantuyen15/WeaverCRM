@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { Cog6ToothIcon } from "@heroicons/react/24/solid";
+import { Cog6ToothIcon, ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/24/solid";
 import { IconButton } from "@material-tailwind/react";
 import {
   Sidenav,
@@ -8,24 +8,35 @@ import {
   Footer,
 } from "./../widgets/layout";
 import { routes } from "../router";
-import { useMaterialTailwindController, setOpenConfigurator } from "./../context";
+import { useMaterialTailwindController, setOpenConfigurator, setCollapsedSidenav, setShowSidenav } from "./../context";
 
 export function Dashboard() {
   const [controller, dispatch] = useMaterialTailwindController();
-  const { sidenavType } = controller;
+  const { sidenavType, collapsedSidenav, showSidenav } = controller;
 
   return (
     <div className="min-h-screen bg-blue-gray-50/50">
       <Sidenav
         routes={routes}
       />
-      <div className="p-4 xl:ml-80">
+      {collapsedSidenav ? (
+        <IconButton
+          size="lg"
+          color="white"
+          className="fixed my-auto -left-4 top-1/2 z-40 rounded-full shadow-blue-gray-900/10"
+          ripple={false}
+          onMouseEnter={() => setShowSidenav(dispatch, true)}
+        >
+          <ChevronRightIcon strokeWidth={2.5} className="h-5 w-5" />
+        </IconButton>
+      ) : null}
+      <div className={`p-4 ${collapsedSidenav ? 'xl:mx-8' : 'xl:ml-80'}`}>
         <DashboardNavbar />
         <Configurator />
         <IconButton
           size="lg"
           color="white"
-          className="fixed bottom-8 right-8 z-40 rounded-full shadow-blue-gray-900/10"
+          className="fixed bottom-1 right-1 z-40 rounded-full shadow-blue-gray-900/10"
           ripple={false}
           onClick={() => setOpenConfigurator(dispatch, true)}
         >

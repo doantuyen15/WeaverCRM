@@ -1,6 +1,6 @@
 const { BrowserWindow } = require("electron");
 const { join } = require("path");
-const config = require("./config");
+const config = require("./configElectron");
 const remote = require("@electron/remote/main");
 
 exports.createPopupWindow = async () => {

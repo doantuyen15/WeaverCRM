@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import useStorage from "../utils/localStorageHook";
 
 export const MaterialTailwind = React.createContext(null);
 MaterialTailwind.displayName = "MaterialTailwindContext";
@@ -7,7 +8,7 @@ MaterialTailwind.displayName = "MaterialTailwindContext";
 export function reducer(state, action) {
   switch (action.type) {
     case "OPEN_SIDENAV": {
-      return { ...state, openSidenav: action.value };
+      return { ...state, collapsedSidenav: action.value };
     }
     case "SIDENAV_TYPE": {
       return { ...state, sidenavType: action.value };
@@ -24,6 +25,9 @@ export function reducer(state, action) {
     case "OPEN_CONFIGURATOR": {
       return { ...state, openConfigurator: action.value };
     }
+    case "SHOW_SIDENAV": {
+      return { ...state, showSidenav: action.value };
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -31,20 +35,27 @@ export function reducer(state, action) {
 }
 
 export function MaterialTailwindControllerProvider({ children }) {
-  const initialState = {
-    openSidenav: true,
+  const config = useStorage('get', 'config', {
+    collapsedSidenav: false,
     sidenavColor: "dark",
     sidenavType: "white",
-    transparentNavbar: true,
-    fixedNavbar: false,
+    fixedNavbar: false
+  })
+  
+  const initialState = {
+    collapsedSidenav: config.collapsedSidenav,
+    sidenavColor: config.sidenavColor,
+    sidenavType: config.sidenavType,
+    fixedNavbar: config.fixedNavbar,
     openConfigurator: false,
+    showSidenav: false,
   };
-
+  
   const [controller, dispatch] = React.useReducer(reducer, initialState);
   const value = React.useMemo(
     () => [controller, dispatch],
     [controller, dispatch]
-  );
+  );  
 
   return (
     <MaterialTailwind.Provider value={value}>
@@ -71,7 +82,7 @@ MaterialTailwindControllerProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export const setOpenSidenav = (dispatch, value) =>
+export const setCollapsedSidenav = (dispatch, value) =>
   dispatch({ type: "OPEN_SIDENAV", value });
 export const setSidenavType = (dispatch, value) =>
   dispatch({ type: "SIDENAV_TYPE", value });
@@ -83,3 +94,5 @@ export const setFixedNavbar = (dispatch, value) =>
   dispatch({ type: "FIXED_NAVBAR", value });
 export const setOpenConfigurator = (dispatch, value) =>
   dispatch({ type: "OPEN_CONFIGURATOR", value });
+  export const setShowSidenav = (dispatch, value) =>
+  dispatch({ type: "SHOW_SIDENAV", value });
