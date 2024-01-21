@@ -55,7 +55,21 @@ export const routes = [
 				icon: <TableCellsIcon {...icon} />,
 				name: "tables",
 				path: "/tables",
-				element: <Tables />,
+				// element: <Tables />,
+				subpath: [
+					{
+						icon: <TableCellsIcon {...icon} />,
+						name: "student",
+						path: "/student",
+						element: <Tables />,
+					},
+					{
+						icon: <TableCellsIcon {...icon} />,
+						name: "tuition",
+						path: "/tuition",
+						element: <Tables />,
+					}
+				]
 			},
 			{
 				icon: <InformationCircleIcon {...icon} />,

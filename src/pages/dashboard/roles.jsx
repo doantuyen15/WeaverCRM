@@ -30,8 +30,11 @@ import { Link } from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "./../../widgets/cards";
 import { platformSettingsData, conversationsData, projectsData } from "./../../data";
 import { authorsTableData, projectsTableData } from "./../../data";
+import React, { useState } from 'react'
 
 export function Roles() {
+    const [mod, setMod] = useState('table')
+
     return (
         <>
             <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('../../assets/background-image.png')] bg-cover	bg-center">
@@ -43,7 +46,7 @@ export function Roles() {
                         <div className="gird-cols-1 mb-12 grid gap-12 px-4 w-full">
                             <Tabs value="treemap">
                                 <TabsHeader className="w-96 mx-auto">
-                                    <Tab value="table">
+                                    <Tab value={"table"}>
                                         <TableCellsIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
                                         Table
                                     </Tab>
