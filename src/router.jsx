@@ -10,9 +10,12 @@ import {
 	InformationCircleIcon,
 	ServerStackIcon,
 	RectangleStackIcon,
+	UserGroupIcon,
 } from "@heroicons/react/24/solid";
 import { Home, Notifications, Profile, Tables } from "./pages/dashboard";
 import { SignIn, SignUp } from "./pages/auth";
+import Roles from "./pages/dashboard/roles";
+import { IoInformationCircleOutline } from "react-icons/io5";
 
 export const Router = () => {
 	return (
@@ -43,9 +46,10 @@ export const routes = [
 			},
 			{
 				icon: <UserCircleIcon {...icon} />,
-				name: "profile",
-				path: "/profile",
-				element: <Profile />,
+				name: "roles",
+				path: "/roles",
+				// element: <Profile />,
+				element: <Roles />
 			},
 			{
 				icon: <TableCellsIcon {...icon} />,
@@ -59,6 +63,12 @@ export const routes = [
 				path: "/notifications",
 				element: <Notifications />,
 			},
+			{
+				icon: <UserGroupIcon {...icon} />,
+				name: "profiles",
+				path: "/profiles",
+				element: <Profile />,
+			}
 		],
 	},
 	{

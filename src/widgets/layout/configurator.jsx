@@ -161,7 +161,7 @@ export function Configurator() {
             </Typography>
             <Switch
               id="hide-sidenav"
-              value={collapsedSidenav}
+              checked={collapsedSidenav}
               onChange={() => setCollapsedSidenav(dispatch, !collapsedSidenav)}
             />
           </div>
