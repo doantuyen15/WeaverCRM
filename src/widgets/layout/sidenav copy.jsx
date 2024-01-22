@@ -58,7 +58,7 @@ export function Sidenav({ brandName, routes }) {
       </div>
       <div className={collapsedSidenav ? 'm-1' : 'm-4'}>
         {routes.map(({ layout, title, pages }, key) => (
-          <ul key={key} className="mb-4 flex flex-col gap-1">
+          <div key={key} className="mb-4 flex flex-col gap-1">
             {title && (
               <div className="mx-3.5 mt-4 mb-2">
                 {collapsedSidenav ? (
@@ -75,16 +75,71 @@ export function Sidenav({ brandName, routes }) {
               </div>
             )}
             {pages.map(({ icon, name, path, subpath }) => (
-              <li key={name} onMouseEnter={() => setCurrentKey(name)}>
-                <NavLink to={`/${layout}${path}`}>
-                  {({ isActive }) => (
-                    subpath?.length >= 1 ? (
-                      <Menu
-                        // placement="right-start"
-                        allowHover={false}
+              <Menu
+                placement="right-start"
+                // open={currentKey === name}
+                allowHover={false}
+              // handler={currentKey}
+              // offset={15}
+              >
+                {subpath?.length >= 1 ? (
+                  <>
+                    <MenuHandler key={name} >
+                      <MenuItem
+                        // variant={isActive ? "gradient" : "text"}
+                        color={
+                            sidenavType === "dark"
+                              ? "white"
+                              : "blue-gray"
+                        }
+                        className={`flex ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
+                        fullWidth
                       >
+                        {icon}
+                        <Typography
+                          color="inherit"
+                          className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
+                        >
+                          {name}
+                        </Typography>
+                      </MenuItem>
+                    </MenuHandler>
+                    <MenuList className='mb-4 flex flex-col gap-1'>
+                      {subpath?.map(({ icon, name, path }) => (
+                        <MenuItem>
+                          <NavLink to={`/${layout}${path}`}>
+                            {({ isActive }) => (
+                              <Button
+                                variant={isActive ? "gradient" : "text"}
+                                color={
+                                  isActive
+                                    ? sidenavColor
+                                    : sidenavType === "dark"
+                                      ? "white"
+                                      : "blue-gray"
+                                }
+                                className={`flex ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
+                                fullWidth
+                              >
+                                {icon}
+                                <Typography
+                                  color="inherit"
+                                  className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
+                                >
+                                  {name}
+                                </Typography>
+                              </Button>
+                            )}
+                          </NavLink>
+                        </MenuItem>
+                      ))}
+                    </MenuList>
+                  </>
+                ) : (
+                  <NavLink to={`/${layout}${path}`}>
+                    {({ isActive }) => (
                         <MenuHandler key={name} >
-                          <Button
+                          <MenuItem
                             variant={isActive ? "gradient" : "text"}
                             color={
                               isActive
@@ -103,64 +158,15 @@ export function Sidenav({ brandName, routes }) {
                             >
                               {name}
                             </Typography>
-                          </Button>
+                          </MenuItem>
                         </MenuHandler>
-                        <MenuList className='mb-4 flex flex-col gap-1'>
-                          {subpath?.map(({ icon, name, path }) => (
-                            <NavLink to={`/${layout}${path}`}>
-                              {({ isActive }) => (
-                                <Button
-                                  variant={isActive ? "gradient" : "text"}
-                                  color={
-                                    isActive
-                                      ? sidenavColor
-                                      : sidenavType === "dark"
-                                        ? "white"
-                                        : "blue-gray"
-                                  }
-                                  className={`flex ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
-                                  fullWidth
-                                >
-                                  {icon}
-                                  <Typography
-                                    color="inherit"
-                                    className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
-                                  >
-                                    {name}
-                                  </Typography>
-                                </Button>
-                              )}
-                            </NavLink>
-                          ))}
-                        </MenuList>
-                      </Menu>
-                    ) : (
-                      <Button
-                        variant={isActive ? "gradient" : "text"}
-                        color={
-                          isActive
-                            ? sidenavColor
-                            : sidenavType === "dark"
-                              ? "white"
-                              : "blue-gray"
-                        }
-                        className={`flex ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
-                        fullWidth
-                      >
-                        {icon}
-                        <Typography
-                          color="inherit"
-                          className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
-                        >
-                          {name}
-                        </Typography>
-                      </Button>
-                    )
-                  )}
-                </NavLink>
-              </li>
+
+                    )}
+                  </NavLink>
+                )}
+              </Menu>
             ))}
-          </ul>
+          </div>
         ))}
       </div>
     </aside >
