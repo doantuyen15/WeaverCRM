@@ -46,8 +46,13 @@ export function Dashboard() {
           {routes.map(
             ({ layout, pages }) =>
               layout === "dashboard" &&
-              pages.map(({ path, element }) => (
-                <Route exact path={path} element={element} />
+              pages.map(({ path, element, subpath }) => (
+                subpath?.length > 0 ?
+                  subpath.map(({ path, element }) => (
+                    <Route exact path={path} element={element} />
+                  )) : (
+                    <Route exact path={path} element={element} />
+                  )
               ))
           )}
         </Routes>

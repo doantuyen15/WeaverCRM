@@ -1,21 +1,42 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from "prop-types";
-import { Link, NavLink } from "react-router-dom";
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import { ChevronDownIcon, ChevronRightIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 import {
-  Avatar,
-  Button,
   IconButton,
   Typography,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
+  List,
+  ListItem,
+  ListItemPrefix,
+  ListItemSuffix,
+  Chip,
+  Accordion,
+  AccordionHeader,
+  AccordionBody,
+  Button,
+  Alert,
+  Input,
+  Drawer,
+  Card,
 } from "@material-tailwind/react";
+import {
+  PresentationChartBarIcon,
+  ShoppingBagIcon,
+  UserCircleIcon,
+  Cog6ToothIcon,
+  InboxIcon,
+  PowerIcon,
+} from "@heroicons/react/24/solid";
+import {
+  ChevronRightIcon,
+  ChevronDownIcon,
+  CubeTransparentIcon,
+  MagnifyingGlassIcon,
+  Bars3Icon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { useMaterialTailwindController, setCollapsedSidenav, setShowSidenav } from "./../../context";
 import LogoDark from "../../assets/logo/we_logo_dark.png"
 import LogoLight from "../../assets/logo/we_logo_light.png"
+import { NavLink } from 'react-router-dom';
 
 export function Sidenav({ brandName, routes }) {
   const [controller, dispatch] = useMaterialTailwindController();
@@ -24,8 +45,14 @@ export function Sidenav({ brandName, routes }) {
     dark: "bg-gradient-to-br from-gray-800 to-gray-900",
     white: "bg-white shadow-sm",
   };
-  const [currentKey, setCurrentKey] = useState('')
-  console.log(currentKey);
+  const [open, setOpen] = React.useState(0);
+  const [openAlert, setOpenAlert] = React.useState(true);
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+
+  const handleOpen = (value) => {
+    setOpen(open === value ? 0 : value);
+  };
+
   return (
     <aside
       className={`${sidenavTypes[sidenavType]} 
@@ -74,67 +101,73 @@ export function Sidenav({ brandName, routes }) {
                 )}
               </div>
             )}
-            {pages.map(({ icon, name, path, subpath }) => (
-              <li key={name} onMouseEnter={() => setCurrentKey(name)}>
-                <NavLink to={`/${layout}${path}`}>
-                  {({ isActive }) => (
-                    subpath?.length >= 1 ? (
-                      <Menu
-                        // placement="right-start"
-                        allowHover={false}
+            {pages.map(({ icon, name, path, subpath }, key) => (
+              <li key={name}>
+                {subpath?.length >= 1 ? (
+                  <Accordion open={open === key}>
+                    <ListItem className="p-0" selected={open === key}>
+                      <Button
+                        onClick={() => handleOpen(key)}
+                        variant={"text"}
+                        color={
+                          sidenavType === "dark"
+                            ? "white"
+                            : "blue-gray"
+                        }
+                        className={`flex relative ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
+                        fullWidth
                       >
-                        <MenuHandler key={name} >
-                          <Button
-                            variant={isActive ? "gradient" : "text"}
-                            color={
-                              isActive
-                                ? sidenavColor
-                                : sidenavType === "dark"
-                                  ? "white"
-                                  : "blue-gray"
-                            }
-                            className={`flex ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
-                            fullWidth
-                          >
-                            {icon}
-                            <Typography
-                              color="inherit"
-                              className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
-                            >
-                              {name}
-                            </Typography>
-                          </Button>
-                        </MenuHandler>
-                        <MenuList className='mb-4 flex flex-col gap-1'>
-                          {subpath?.map(({ icon, name, path }) => (
-                            <NavLink to={`/${layout}${path}`}>
-                              {({ isActive }) => (
-                                <Button
-                                  variant={isActive ? "gradient" : "text"}
-                                  color={
-                                    isActive
-                                      ? sidenavColor
-                                      : sidenavType === "dark"
-                                        ? "white"
-                                        : "blue-gray"
-                                  }
-                                  className={`flex ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
-                                  fullWidth
-                                >
+                        {icon}
+                        <Typography
+                          color="inherit"
+                          className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
+                        >
+                          {name}
+                        </Typography>
+                        {!collapsedSidenav &&
+                          <ChevronRightIcon
+                            strokeWidth={2.5}
+                            className={`absolute right-4 h-4 w-4 transition-transform ${open === key ? "rotate-90" : ""}`}
+                          />
+                        }
+                      </Button>
+                    </ListItem>
+                    <AccordionBody className="py-1">
+                      <List className="p-0 min-w-0">
+                        {subpath?.map(({ icon, name, path }) => (
+                          <NavLink to={`/${layout}${path}`}>
+                            {({ isActive }) => (
+                              <Button
+                                variant={isActive ? "gradient" : "text"}
+                                color={
+                                  isActive
+                                    ? sidenavColor
+                                    : sidenavType === "dark"
+                                      ? "white"
+                                      : "blue-gray"
+                                }
+                                className={`flex ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
+                                fullWidth
+                              >
+                                <div className={collapsedSidenav ? 'mx-auto' : 'ml-3'}>
                                   {icon}
-                                  <Typography
-                                    color="inherit"
-                                    className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
-                                  >
-                                    {name}
-                                  </Typography>
-                                </Button>
-                              )}
-                            </NavLink>
-                          ))}
-                        </MenuList>
-                      </Menu>
-                    ) : (
+                                </div>
+                                <Typography
+                                  color="inherit"
+                                  className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
+                                >
+                                  {name}
+                                </Typography>
+                              </Button>
+                            )}
+                          </NavLink>
+                        ))}
+                      </List>
+                    </AccordionBody>
+                  </Accordion>
+                ) : (
+                  <NavLink to={`/${layout}${path}`}>
+                    {({ isActive }) => (
                       <Button
                         variant={isActive ? "gradient" : "text"}
                         color={
@@ -155,9 +188,9 @@ export function Sidenav({ brandName, routes }) {
                           {name}
                         </Typography>
                       </Button>
-                    )
-                  )}
-                </NavLink>
+                    )}
+                  </NavLink>
+                )}
               </li>
             ))}
           </ul>
