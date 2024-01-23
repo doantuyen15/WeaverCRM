@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import {
-    MagnifyingGlassIcon,
-    ChevronUpDownIcon,
+    MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
-import { PencilIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, UserPlusIcon, ArrowUpTrayIcon } from "@heroicons/react/24/solid";
 import {
     Card,
     CardHeader,
@@ -22,9 +21,17 @@ import {
     Menu,
     MenuHandler,
     MenuList,
-    MenuItem
+    MenuItem,
+    Select,
+    Option,
+    List,
+    ListItem
 } from "@material-tailwind/react";
 import { ModalAddStudent } from "../../widgets/modal/add-student";
+import orderBy from 'lodash/orderBy'
+import StudentInfo from "../../data/entities/studentInfo";
+import { ModalEditStudent } from "../../widgets/modal/edit-student";
+
 
 const TABS = [
     {
@@ -41,77 +48,198 @@ const TABS = [
     },
 ];
 
-const TABLE_HEAD = ["Member", "Function", "Status", "Employed", ""];
+const TABLE_HEAD = [
+    "Tình trạng đăng ký", 
+    "Số điện thoại", 
+    "Họ", 
+    "Tên", 
+    "Ngày sinh", 
+    "Số điện thoại phụ",
+    "Địa chỉ",
+    "Email",
+    "Người giới thiệu",
+    "Người phụ trách tư vấn/hướng dẫn học sinh",
+    ""
+];
 
 const TABLE_ROWS = [
     {
-        img: "https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/team-3.jpg",
-        name: "John Michael",
-        email: "john@creative-tim.com",
+        firstname: "Nguyễn Văn",
+        lastname: "Test1",
+        email: "atesst.com",
         job: "Manager",
         org: "Organization",
-        online: true,
+        online: 0,
         date: "23/04/18",
     },
     {
-        img: "https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/team-2.jpg",
-        name: "Alexa Liras",
-        email: "alexa@creative-tim.com",
-        job: "Programator",
-        org: "Developer",
-        online: false,
-        date: "23/04/18",
-    },
-    {
-        img: "https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/team-1.jpg",
-        name: "Laurent Perrier",
-        email: "laurent@creative-tim.com",
-        job: "Executive",
-        org: "Projects",
-        online: false,
-        date: "19/09/17",
-    },
-    {
-        img: "https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/team-4.jpg",
-        name: "Michael Levi",
-        email: "michael@creative-tim.com",
-        job: "Programator",
-        org: "Developer",
-        online: true,
-        date: "24/12/08",
-    },
-    {
-        img: "https://demos.creative-tim.com/test/corporate-ui-dashboard/assets/img/team-5.jpg",
-        name: "Richard Gran",
-        email: "richard@creative-tim.com",
+        firstname: "Nguyễn Văn",
+        lastname: "Test1",
+        email: "test1.com",
         job: "Manager",
-        org: "Executive",
-        online: false,
-        date: "04/10/21",
+        org: "Organization",
+        online: 1,
+        date: "23/04/18",
     },
+    {
+        firstname: "Nguyễn Văn",
+        lastname: "Test1",
+        email: "atest2.com",
+        job: "Manager",
+        org: "Organization",
+        online: 2,
+        date: "23/04/18",
+    },
+    {
+        firstname: "Nguyễn Văn",
+        lastname: "Test1",
+        email: "test1.com",
+        job: "Manager",
+        org: "Organization",
+        online: 1,
+        date: "23/04/18",
+    },
+    {
+        firstname: "Nguyễn Văn",
+        lastname: "Test1",
+        email: "atest2.com",
+        job: "Manager",
+        org: "Organization",
+        online: 2,
+        date: "23/04/18",
+    },
+    {
+        firstname: "Nguyễn Văn",
+        lastname: "Test1",
+        email: "test1.com",
+        job: "Manager",
+        org: "Organization",
+        online: 1,
+        date: "23/04/18",
+    },
+    {
+        firstname: "Nguyễn Văn",
+        lastname: "Test1",
+        email: "atest2.com",
+        job: "Manager",
+        org: "Organization",
+        online: 2,
+        date: "23/04/18",
+    }
+    ,    {
+        firstname: "Nguyễn Văn",
+        lastname: "Test1",
+        email: "test1.com",
+        job: "Manager",
+        org: "Organization",
+        online: 1,
+        date: "23/04/18",
+    },
+    {
+        firstname: "Nguyễn Văn",
+        lastname: "Test1",
+        email: "atest2.com",
+        job: "Manager",
+        org: "Organization",
+        online: 2,
+        date: "23/04/18",
+    },
+    {
+        firstname: "Nguyễn Văn",
+        lastname: "Test1",
+        email: "test1.com",
+        job: "Manager",
+        org: "Organization",
+        online: 1,
+        date: "23/04/18",
+    },
+    {
+        firstname: "Nguyễn Văn",
+        lastname: "Test1",
+        email: "atest2.com",
+        job: "Manager",
+        org: "Organization",
+        online: 2,
+        date: "23/04/18",
+    }
 ];
 
+const ListStatus = [
+    {
+        type: 0,
+        status: 'Đã đăng ký',
+        color: 'green'
+    },
+    {
+        type: 1,
+        status: 'Chưa đăng ký',
+        color: 'red'
+    },
+    {
+        type: 2,
+        status: 'Đã nghỉ',
+        color: ''
+    }
+]
+
 export default function StudentTable() {
-    const [open, setOpen] = React.useState(false);
-    const handleOpen = () => setOpen((cur) => !cur);
+    const [openModalAdd, setOpenModalAdd] = React.useState(false);
+    const [openModalEdit, setOpenModalEdit] = React.useState(false);
+    const handleOpenAddStudent = () => setOpenModalAdd((cur) => !cur);
+    const handleOpenEditStudent = () => setOpenModalEdit((cur) => !cur);
+    const [table, setTable] = useState(TABLE_ROWS)
+    const [keySort, setKeySort] = useState('')
+    const [isAsc, setIsAsc] = useState(true)
+    const [, updateState] = React.useState();
+    const forceUpdate = React.useCallback(() => updateState({}), []);
+    const [objectEdit, setObjectEdit] = useState([])
+
+    const handleSearch = (searchValue) => {
+        const sorted = TABLE_ROWS.filter(item => item.name.toLowerCase().includes(searchValue.toLowerCase()));
+        setTable([...sorted])
+    }
+
+    const handleSort = (key) => {
+        let sorted
+        if (key === 'Member') {
+            sorted = orderBy(TABLE_ROWS, ['name'], [isAsc ? 'asc' : 'desc'])
+        } else return
+        setTable([...sorted])
+        setKeySort(key)
+        setIsAsc(prev => !prev)
+    }
+
+    const handleConfirmEdit = () => {
+        console.log();
+
+    }
+
+    const handleUpdateInfo = ({ field, index, value }) => {
+        const update = table[index] || new StudentInfo()
+        update[field] = value
+        const tableRef = [...table]
+        tableRef[index] = update
+        setObjectEdit(prev => [...prev, update])
+        setTable(tableRef)
+    }
 
     return (
         <Card className="h-full w-full">
-            <CardHeader floated={false} shadow={false} className="rounded-none">
+            <CardHeader floated={false} shadow={false} className="rounded-none pb-6">
                 <div className="mb-8 flex items-center justify-between gap-8">
                     <div>
                         <Typography variant="h5" color="blue-gray">
-                            Members list
+                            Students list
                         </Typography>
                         <Typography color="gray" className="mt-1 font-normal">
-                            See information about all members
+                            See information about all students
                         </Typography>
                     </div>
                     <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                        <Button variant="outlined" size="sm">
-                            view all
+                        <Button className="flex items-center gap-3" size="sm" onClick={handleOpenEditStudent} disabled={!objectEdit.length}>
+                            <ArrowUpTrayIcon strokeWidth={2} className="h-4 w-4" /> Confirm & Save
                         </Button>
-                        <Button className="flex items-center gap-3" size="sm" onClick={handleOpen}>
+                        <Button className="flex items-center gap-3" size="sm" onClick={handleOpenAddStudent}>
                             <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add member
                         </Button>
                     </div>
@@ -130,18 +258,20 @@ export default function StudentTable() {
                         <Input
                             label="Search"
                             icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                            onChange={(e) => handleSearch(e.target.value)}
                         />
                     </div>
                 </div>
             </CardHeader>
-            <CardBody className="overflow-scroll px-0">
-                <table className="mt-4 w-full min-w-max table-auto text-left">
+            <CardBody className="p-0 px-0 overflow-auto max-h-[60vh]">
+                <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
                     <thead>
                         <tr>
                             {TABLE_HEAD.map((head, index) => (
                                 <th
+                                    onClick={() => handleSort(head)}
                                     key={head}
-                                    className="cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50/50 p-4 transition-colors hover:bg-blue-gray-50"
+                                    className="z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors hover:bg-blue-gray-200"
                                 >
                                     <Typography
                                         variant="small"
@@ -150,7 +280,13 @@ export default function StudentTable() {
                                     >
                                         {head}{" "}
                                         {index !== TABLE_HEAD.length - 1 && (
-                                            <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
+                                            keySort !== head ? (
+                                                <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
+                                            ) : keySort === head && isAsc ? (
+                                                <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
+                                            ) : (
+                                                <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
+                                            )
                                         )}
                                     </Typography>
                                 </th>
@@ -158,34 +294,54 @@ export default function StudentTable() {
                         </tr>
                     </thead>
                     <tbody>
-                        {TABLE_ROWS.map(
-                            ({ img, name, email, job, org, online, date }, index) => {
-                                const isLast = index === TABLE_ROWS.length - 1;
+                        {table.map(
+                            ({ firstname,
+                                lastname,
+                                email,
+                                job,
+                                org,
+                                online,
+                                date }, index) => {
+                                const isLast = index === table.length - 1;
                                 const classes = isLast
                                     ? "p-4"
                                     : "p-4 border-b border-blue-gray-50";
 
                                 return (
-                                    <tr key={name}>
+                                    <tr key={index} className="even:bg-blue-gray-50/50">
                                         <td className={classes}>
-                                            <div className="flex items-center gap-3">
-                                                <Avatar src={img} alt={name} size="sm" />
-                                                <div className="flex flex-col">
-                                                    <Typography
-                                                        variant="small"
-                                                        color="blue-gray"
-                                                        className="font-normal"
-                                                    >
-                                                        {name}
-                                                    </Typography>
-                                                    <Typography
-                                                        variant="small"
-                                                        color="blue-gray"
-                                                        className="font-normal opacity-70"
-                                                    >
-                                                        {email}
-                                                    </Typography>
-                                                </div>
+                                            <div className="w-max">
+                                                <Menu placement="bottom-start">
+                                                    <MenuHandler>
+                                                        <div className="flex">
+                                                            <Chip
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                value={
+                                                                    <div className="flex items-center justify-between">
+                                                                        {ListStatus[online].status}
+                                                                        <ChevronDownIcon strokeWidth={2} className="w-2.5 h-2.5" />
+                                                                    </div>
+                                                                }
+                                                                className="min-w-32"
+                                                                color={ListStatus[online].color}
+                                                            />
+                                                        </div>
+                                                    </MenuHandler>
+                                                    <MenuList className="min-w-0 p-1">
+                                                        {ListStatus.map(({ type, status, color }) => (
+                                                            <MenuItem className="p-1" onClick={() => type !== online && handleUpdateInfo({ field: 'online', index: index, value: type })}>
+                                                                <Chip
+                                                                    className="w-full text-center"
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    value={status}
+                                                                    color={color}
+                                                                />
+                                                            </MenuItem>
+                                                        ))}
+                                                    </MenuList>
+                                                </Menu>
                                             </div>
                                         </td>
                                         <td className={classes}>
@@ -207,14 +363,13 @@ export default function StudentTable() {
                                             </div>
                                         </td>
                                         <td className={classes}>
-                                            <div className="w-max">
-                                                <Chip
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    value={online ? "online" : "offline"}
-                                                    color={online ? "green" : "blue-gray"}
-                                                />
-                                            </div>
+                                            <Typography
+                                                variant="small"
+                                                color="blue-gray"
+                                                className="font-normal"
+                                            >
+                                                {date}
+                                            </Typography>
                                         </td>
                                         <td className={classes}>
                                             <Typography
@@ -225,7 +380,7 @@ export default function StudentTable() {
                                                 {date}
                                             </Typography>
                                         </td>
-                                        <td className={classes + 'text'}>
+                                        <td className={classes}>
                                             <Menu placement="left-start">
                                                 <MenuHandler>
                                                     <IconButton variant="text">
@@ -245,7 +400,7 @@ export default function StudentTable() {
                     </tbody>
                 </table>
             </CardBody>
-            <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
+            {/* <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
                 <Typography variant="small" color="blue-gray" className="font-normal">
                     Page 1 of 10
                 </Typography>
@@ -257,8 +412,9 @@ export default function StudentTable() {
                         Next
                     </Button>
                 </div>
-            </CardFooter>
-            <ModalAddStudent open={open} handleOpen={handleOpen} />
+            </CardFooter> */}
+            <ModalAddStudent open={openModalAdd} handleOpen={handleOpenAddStudent} />
+            <ModalEditStudent open={openModalEdit} handleOpen={handleOpenEditStudent} objectEdit={objectEdit} />
         </Card>
     );
 }

@@ -65,13 +65,13 @@ export const routes = [
 					{
 						icon: <UserGroupIcon {...subMenu} />,
 						name: "student",
-						path: "/student",
+						path: "/tables/student",
 						element: <StudentTable />,
 					},
 					{
 						icon: <BanknotesIcon {...subMenu} />,
 						name: "tuition",
-						path: "/tuition",
+						path: "/tables/tuition",
 						element: <Tables />,
 					}
 				]

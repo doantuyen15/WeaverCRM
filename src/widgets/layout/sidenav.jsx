@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from "prop-types";
 import {
   IconButton,
@@ -36,7 +36,7 @@ import {
 import { useMaterialTailwindController, setCollapsedSidenav, setShowSidenav } from "./../../context";
 import LogoDark from "../../assets/logo/we_logo_dark.png"
 import LogoLight from "../../assets/logo/we_logo_light.png"
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
 export function Sidenav({ brandName, routes }) {
   const [controller, dispatch] = useMaterialTailwindController();
@@ -45,13 +45,18 @@ export function Sidenav({ brandName, routes }) {
     dark: "bg-gradient-to-br from-gray-800 to-gray-900",
     white: "bg-white shadow-sm",
   };
-  const [open, setOpen] = React.useState(0);
+  const [open, setOpen] = React.useState('');
   const [openAlert, setOpenAlert] = React.useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
-
+  const location = useLocation()
   const handleOpen = (value) => {
-    setOpen(open === value ? 0 : value);
+    setOpen(open === value ? '/' : value);
   };
+
+  useEffect(() => {
+    setOpen(location?.pathname)
+  }, [])
+  
 
   return (
     <aside
@@ -104,10 +109,10 @@ export function Sidenav({ brandName, routes }) {
             {pages.map(({ icon, name, path, subpath }, key) => (
               <li key={name}>
                 {subpath?.length >= 1 ? (
-                  <Accordion open={open === key}>
-                    <ListItem className="p-0" selected={open === key}>
+                  <Accordion open={open?.includes(name)}>
+                    <ListItem className="p-0" selected={open === `/${layout}${path}`}>
                       <Button
-                        onClick={() => handleOpen(key)}
+                        onClick={() => handleOpen(`/${layout}${path}`)}
                         variant={"text"}
                         color={
                           sidenavType === "dark"
@@ -127,7 +132,7 @@ export function Sidenav({ brandName, routes }) {
                         {!collapsedSidenav &&
                           <ChevronRightIcon
                             strokeWidth={2.5}
-                            className={`absolute right-4 h-4 w-4 transition-transform ${open === key ? "rotate-90" : ""}`}
+                            className={`absolute right-4 h-4 w-4 transition-transform ${open?.includes(path) ? "rotate-90" : ""}`}
                           />
                         }
                       </Button>
