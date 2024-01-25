@@ -12,7 +12,7 @@ import { useMaterialTailwindController, setOpenConfigurator, setCollapsedSidenav
 
 export function Dashboard() {
   const [controller, dispatch] = useMaterialTailwindController();
-  const { sidenavType, collapsedSidenav, showSidenav } = controller;
+  const { sidenavType, collapsedSidenav, showSidenav, userInfo } = controller;
 
   return (
     <div className="min-h-screen bg-blue-gray-50/50">
@@ -46,13 +46,14 @@ export function Dashboard() {
           {routes.map(
             ({ layout, pages }) =>
               layout === "dashboard" &&
-              pages.map(({ path, element, subpath }) => (
-                subpath?.length > 0 ?
+              pages.map(({ path, element, subpath, roles }) => (
+                roles.includes(userInfo['user_info']['role']) &&
+                (subpath?.length > 0 ?
                   subpath.map(({ path, element }) => (
                     <Route exact path={path} element={element} />
                   )) : (
                     <Route exact path={path} element={element} />
-                  )
+                  ))
               ))
           )}
         </Routes>

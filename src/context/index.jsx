@@ -28,6 +28,9 @@ export function reducer(state, action) {
     case "SHOW_SIDENAV": {
       return { ...state, showSidenav: action.value };
     }
+    case "USER_ROLE": {
+      return { ...state, userInfo: action.value };
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -39,7 +42,15 @@ export function MaterialTailwindControllerProvider({ children }) {
     collapsedSidenav: false,
     sidenavColor: "dark",
     sidenavType: "white",
-    fixedNavbar: false
+    fixedNavbar: false,
+  })
+
+  const userInfo = useStorage('get', 'userInfo', {
+    user_info: {
+      username: '',
+      role: '8'
+    },
+    token: '',
   })
   
   const initialState = {
@@ -49,6 +60,7 @@ export function MaterialTailwindControllerProvider({ children }) {
     fixedNavbar: config.fixedNavbar,
     openConfigurator: false,
     showSidenav: false,
+    userInfo: userInfo
   };
   
   const [controller, dispatch] = React.useReducer(reducer, initialState);
@@ -94,5 +106,7 @@ export const setFixedNavbar = (dispatch, value) =>
   dispatch({ type: "FIXED_NAVBAR", value });
 export const setOpenConfigurator = (dispatch, value) =>
   dispatch({ type: "OPEN_CONFIGURATOR", value });
-  export const setShowSidenav = (dispatch, value) =>
+export const setShowSidenav = (dispatch, value) =>
   dispatch({ type: "SHOW_SIDENAV", value });
+export const setUserInfo = (dispatch, value) =>
+  dispatch({ type: "USER_ROLE", value });

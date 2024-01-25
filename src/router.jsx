@@ -1,4 +1,3 @@
-import { FC } from "react";
 import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { PopupPage } from "./pages/popup";
 import Dashboard from "./layouts/dashboard";
@@ -49,17 +48,20 @@ export const routes = [
 				name: "dashboard",
 				path: "/home",
 				element: <Home />,
+				roles: ["1", "8"]
 			},
 			{
 				icon: <UserCircleIcon {...menu} />,
 				name: "roles",
 				path: "/roles",
-				element: <Roles />
+				element: <Roles />,
+				roles: ["1"]
 			},
 			{
 				icon: <TableCellsIcon {...menu} />,
 				name: "tables",
 				path: "/tables",
+				roles: ["1"],
 				// element: <Tables />,
 				subpath: [
 					{
@@ -81,12 +83,14 @@ export const routes = [
 				name: "notifications",
 				path: "/notifications",
 				element: <Notifications />,
+				roles: ["1"]
 			},
 			{
 				icon: <UserGroupIcon {...menu} />,
 				name: "profiles",
 				path: "/profiles",
 				element: <Profile />,
+				roles: ["1"]
 			}
 		],
 	},
@@ -99,12 +103,14 @@ export const routes = [
 				name: "sign in",
 				path: "/sign-in",
 				element: <SignIn />,
+				roles: ["1", "8"]
 			},
 			{
 				icon: <RectangleStackIcon {...menu} />,
 				name: "sign up",
 				path: "/sign-up",
 				element: <SignUp />,
+				roles: ["1", "8"]
 			},
 		],
 	},

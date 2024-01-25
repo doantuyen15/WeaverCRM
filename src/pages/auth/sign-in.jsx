@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react'
 import {
   Card,
   Input,
@@ -8,8 +9,54 @@ import {
 import { Link } from "react-router-dom";
 import LogoDark from "../../assets/logo/we_logo_dark.png"
 import LogoLight from "../../assets/logo/we_logo_light.png"
+import encryptString from "../../utils/encode/DataCryption";
+import useFetch from "../../utils/api/request";
+import { setUserInfo, useMaterialTailwindController } from '../../context';
+import { useNavigate } from "react-router-dom";
+import useStorage from '../../utils/localStorageHook';
 
 export function SignIn() {
+  const [loading, setLoading] = useState(false)
+  const [controller, dispatch] = useMaterialTailwindController();
+  const [userInfoRes, setUserInfoRes] = useState({})
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userInfoRes.user_info) {
+      console.log(userInfoRes);
+      setUserInfo(dispatch, userInfoRes)
+      navigate('/home')
+    }
+    if (userInfoRes.token) {
+      useStorage('set', 'userInfo', userInfoRes)
+    }
+  }, [userInfoRes])
+
+  const handleLogin = (e) => {
+    setLoading(true)
+    const user = e.target[0].value
+    const password = e.target[1].value
+    e.preventDefault()
+    const requestInfo = {
+      method: 'post',
+      body: [
+        user,
+        encryptString(password)
+      ],
+      service: 'login',
+      callback: (data) => {
+        console.log(data[0]?.user_info?.role);
+        setLoading(false)
+        setUserInfoRes(data[0])
+      },
+      handleError: (error) => {
+        console.log('error', error)
+        setLoading(false)
+      }
+    }
+    useFetch(requestInfo)
+  }
+
   return (
     <section className="m-8 flex justify-center gap-4">
       <div className="lg:w-1/2 mt-24">
@@ -26,14 +73,15 @@ export function SignIn() {
           <Typography variant="h2" className="font-bold">Sign In</Typography>
           {/* <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Welcome to CRM Weaver</Typography> */}
         </div>
-        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
+        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2" onSubmit={handleLogin}>
           <div className="mb-1 flex flex-col gap-6">
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
               Account
             </Typography>
             <Input
+              name="username"
               size="lg"
-              placeholder="name@mail.com"
+              placeholder="Username"
               className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
               labelProps={{
                 className: "before:content-none after:content-none",
@@ -43,6 +91,7 @@ export function SignIn() {
               Password
             </Typography>
             <Input
+              name="password"
               type="password"
               size="lg"
               placeholder="********"
@@ -70,7 +119,7 @@ export function SignIn() {
             }
             containerProps={{ className: "-ml-2.5" }}
           /> */}
-          <Button className="mt-6" fullWidth>
+          <Button type="submit" className="mt-6" fullWidth loading={loading}>
             Sign In
           </Button>
 

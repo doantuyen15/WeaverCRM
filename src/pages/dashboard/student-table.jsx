@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
-import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, UserPlusIcon, ArrowUpTrayIcon } from "@heroicons/react/24/solid";
+import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, UserPlusIcon, ArrowUpTrayIcon, BackwardIcon, ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
 import {
     Card,
     CardHeader,
@@ -28,10 +28,11 @@ import {
     ListItem
 } from "@material-tailwind/react";
 import { ModalAddStudent } from "../../widgets/modal/add-student";
-import orderBy from 'lodash/orderBy'
+import {orderBy} from 'lodash'
 import StudentInfo from "../../data/entities/studentInfo";
 import { ModalEditStudent } from "../../widgets/modal/edit-student";
-
+import useFetch from "../../utils/api/request";
+import { useMaterialTailwindController } from "../../context";
 
 const TABS = [
     {
@@ -51,15 +52,13 @@ const TABS = [
 const TABLE_HEAD = [
     "Tình trạng đăng ký", 
     "Số điện thoại", 
-    "Họ", 
-    "Tên", 
+    "Họ & tên", 
     "Ngày sinh", 
     "Số điện thoại phụ",
     "Địa chỉ",
     "Email",
     "Người giới thiệu",
-    "Người phụ trách tư vấn/hướng dẫn học sinh",
-    ""
+    "Người phụ trách tư vấn/hướng dẫn học sinh"
 ];
 
 const TABLE_ROWS = [
@@ -182,30 +181,90 @@ const ListStatus = [
     }
 ]
 
+const header = [
+    'status_res',
+    'phone',
+    'full_name',
+    'dob',
+    'parent_phone',
+    'address',
+    'email',
+    'referrer',
+    'advisor'
+]
+
 export default function StudentTable() {
+    const [controller] = useMaterialTailwindController();
+    const {userInfo} = controller;
     const [openModalAdd, setOpenModalAdd] = React.useState(false);
     const [openModalEdit, setOpenModalEdit] = React.useState(false);
-    const handleOpenAddStudent = () => setOpenModalAdd((cur) => !cur);
+    // const handleOpenAddStudent = () => setOpenModalAdd((cur) => !cur);
     const handleOpenEditStudent = () => setOpenModalEdit((cur) => !cur);
-    const [table, setTable] = useState(TABLE_ROWS)
+    const [table, setTable] = useState([])
     const [keySort, setKeySort] = useState('')
     const [isAsc, setIsAsc] = useState(true)
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
     const [objectEdit, setObjectEdit] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [onAdd, setOnAdd] = useState(false)
+    const focusRef = useRef(null)
+    const tableRef = useRef([])
 
-    const handleSearch = (searchValue) => {
-        const sorted = TABLE_ROWS.filter(item => item.name.toLowerCase().includes(searchValue.toLowerCase()));
-        setTable([...sorted])
+    useEffect(() => {
+        getStudentList()
+    }, [])
+
+    const getStudentList = () => {
+        setLoading(true)
+        const requestInfo = {
+            headers: {
+                "authorization": `Bearer ${userInfo.token}`,
+            },
+            method: 'get',
+            service: 'students',
+            callback: (data) => {
+                setLoading(false)
+                setTable(JSON.parse(data))
+                tableRef.current = JSON.parse(data)
+            },
+            handleError: (error) => {
+                console.log('error', error)
+                setLoading(false)
+            }
+        }
+        useFetch(requestInfo)
+    }
+    
+    const handleAddStudent = () => {
+        setOnAdd(true)
+        tableRef.current = [...tableRef.current, {id: tableRef.current.length}]
+        setTable(tableRef.current)
+        setTimeout(() => {
+            focusRef.current?.focus()
+        }, 100);
     }
 
-    const handleSort = (key) => {
+    const handleCancelAdd = (removeIndex) => {
+        console.log('removeIndex', removeIndex, tableRef.current);
+        tableRef.current = tableRef.current.filter(item => item.id !== removeIndex)
+        console.log('removeIndex', removeIndex, tableRef.current);
+        setTable(tableRef.current)
+    }
+
+    const handleSearch = (searchValue) => {
+        var search = tableRef.current.filter(item => item.full_name.toLowerCase().includes(searchValue.toLowerCase()));
+        setTable(search)
+    }
+
+    const handleSort = (indexCol) => {
         let sorted
-        if (key === 'Member') {
-            sorted = orderBy(TABLE_ROWS, ['name'], [isAsc ? 'asc' : 'desc'])
-        } else return
+        // if (key === 'Member') {
+        //     sorted = orderBy(TABLE_ROWS, ['name'], [isAsc ? 'asc' : 'desc'])
+        // } else return
+        sorted = orderBy(tableRef.current, [header[indexCol]], [isAsc ? 'asc' : 'desc'])
         setTable([...sorted])
-        setKeySort(key)
+        setKeySort(indexCol)
         setIsAsc(prev => !prev)
     }
 
@@ -239,7 +298,7 @@ export default function StudentTable() {
                         <Button className="flex items-center gap-3" size="sm" onClick={handleOpenEditStudent} disabled={!objectEdit.length}>
                             <ArrowUpTrayIcon strokeWidth={2} className="h-4 w-4" /> Confirm & Save
                         </Button>
-                        <Button className="flex items-center gap-3" size="sm" onClick={handleOpenAddStudent}>
+                        <Button className="flex items-center gap-3" size="sm" onClick={handleAddStudent}>
                             <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add member
                         </Button>
                     </div>
@@ -269,7 +328,7 @@ export default function StudentTable() {
                         <tr>
                             {TABLE_HEAD.map((head, index) => (
                                 <th
-                                    onClick={() => handleSort(head)}
+                                    onClick={() => handleSort(index)}
                                     key={head}
                                     className="z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors hover:bg-blue-gray-200"
                                 >
@@ -280,9 +339,9 @@ export default function StudentTable() {
                                     >
                                         {head}{" "}
                                         {index !== TABLE_HEAD.length - 1 && (
-                                            keySort !== head ? (
+                                            keySort !== index ? (
                                                 <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
-                                            ) : keySort === head && isAsc ? (
+                                            ) : keySort === index && isAsc ? (
                                                 <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
                                             ) : (
                                                 <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
@@ -291,21 +350,43 @@ export default function StudentTable() {
                                     </Typography>
                                 </th>
                             ))}
+                            <th
+                                className="z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors hover:bg-blue-gray-200"
+                            />
                         </tr>
                     </thead>
                     <tbody>
-                        {table.map(
-                            ({ firstname,
-                                lastname,
-                                email,
-                                job,
-                                org,
-                                online,
-                                date }, index) => {
+                        {table?.map(
+                            (item, index) => {
                                 const isLast = index === table.length - 1;
                                 const classes = isLast
                                     ? "p-4"
                                     : "p-4 border-b border-blue-gray-50";
+                                if (!item.id_student) return (
+                                    <tr key={index} className="even:bg-blue-gray-50/50">
+                                        {TABLE_HEAD.map((item, key) => (
+                                            <td className={classes}>
+                                                <Input
+                                                    key={`${index}_${key}`}
+                                                    variant="static"
+                                                    inputRef={key === 0 ? focusRef : null}
+                                                    type="text"
+                                                    size="sm"
+                                                    placeholder={item}
+                                                    className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                    labelProps={{
+                                                        className: "before:content-none after:content-none",
+                                                    }}
+                                                />
+                                            </td>
+                                        ))}
+                                        <td className={classes}>
+                                            <IconButton variant="text" onClick={() => handleCancelAdd(index)} >
+                                                <ArrowUturnLeftIcon className="h-4 w-4" />
+                                            </IconButton>
+                                        </td>
+                                    </tr>
+                                )
 
                                 return (
                                     <tr key={index} className="even:bg-blue-gray-50/50">
@@ -318,19 +399,19 @@ export default function StudentTable() {
                                                                 variant="ghost"
                                                                 size="sm"
                                                                 value={
-                                                                    <div className="flex items-center justify-between">
-                                                                        {ListStatus[online].status}
-                                                                        <ChevronDownIcon strokeWidth={2} className="w-2.5 h-2.5" />
+                                                                    <div className="flex items-center justify-center">
+                                                                        {ListStatus[Number(item.status_res)].status}
+                                                                        {/* <ChevronDownIcon strokeWidth={2} className="w-2.5 h-2.5" /> */}
                                                                     </div>
                                                                 }
                                                                 className="min-w-32"
-                                                                color={ListStatus[online].color}
+                                                                color={ListStatus[Number(item.status_res)].color}
                                                             />
                                                         </div>
                                                     </MenuHandler>
                                                     <MenuList className="min-w-0 p-1">
                                                         {ListStatus.map(({ type, status, color }) => (
-                                                            <MenuItem className="p-1" onClick={() => type !== online && handleUpdateInfo({ field: 'online', index: index, value: type })}>
+                                                            <MenuItem className="p-1" onClick={() => type !== Number(item.status_res) && handleUpdateInfo({ field: 'online', index: index, value: type })}>
                                                                 <Chip
                                                                     className="w-full text-center"
                                                                     variant="ghost"
@@ -351,15 +432,15 @@ export default function StudentTable() {
                                                     color="blue-gray"
                                                     className="font-normal"
                                                 >
-                                                    {job}
+                                                    {item.phone}
                                                 </Typography>
-                                                <Typography
+                                                {/* <Typography
                                                     variant="small"
                                                     color="blue-gray"
                                                     className="font-normal opacity-70"
                                                 >
-                                                    {org}
-                                                </Typography>
+                                                    {item.full_name}
+                                                </Typography> */}
                                             </div>
                                         </td>
                                         <td className={classes}>
@@ -368,7 +449,7 @@ export default function StudentTable() {
                                                 color="blue-gray"
                                                 className="font-normal"
                                             >
-                                                {date}
+                                                {item.full_name}
                                             </Typography>
                                         </td>
                                         <td className={classes}>
@@ -377,7 +458,52 @@ export default function StudentTable() {
                                                 color="blue-gray"
                                                 className="font-normal"
                                             >
-                                                {date}
+                                                {item.dob}
+                                            </Typography>
+                                        </td>
+                                        <td className={classes}>
+                                            <Typography
+                                                variant="small"
+                                                color="blue-gray"
+                                                className="font-normal"
+                                            >
+                                                {item.parent_phone}
+                                            </Typography>
+                                        </td>
+                                        <td className={classes}>
+                                            <Typography
+                                                variant="small"
+                                                color="blue-gray"
+                                                className="font-normal"
+                                            >
+                                                {item.address}
+                                            </Typography>
+                                        </td>
+                                        <td className={classes}>
+                                            <Typography
+                                                variant="small"
+                                                color="blue-gray"
+                                                className="font-normal"
+                                            >
+                                                {item.email}
+                                            </Typography>
+                                        </td>
+                                        <td className={classes}>
+                                            <Typography
+                                                variant="small"
+                                                color="blue-gray"
+                                                className="font-normal"
+                                            >
+                                                {item.referrer}
+                                            </Typography>
+                                        </td>
+                                        <td className={classes}>
+                                            <Typography
+                                                variant="small"
+                                                color="blue-gray"
+                                                className="font-normal"
+                                            >
+                                                {item.advisor}
                                             </Typography>
                                         </td>
                                         <td className={classes}>
@@ -413,7 +539,7 @@ export default function StudentTable() {
                     </Button>
                 </div>
             </CardFooter> */}
-            <ModalAddStudent open={openModalAdd} handleOpen={handleOpenAddStudent} />
+            <ModalAddStudent open={openModalAdd} handleOpen={handleAddStudent} />
             <ModalEditStudent open={openModalEdit} handleOpen={handleOpenEditStudent} objectEdit={objectEdit} />
         </Card>
     );

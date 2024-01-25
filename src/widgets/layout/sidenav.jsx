@@ -40,7 +40,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 
 export function Sidenav({ brandName, routes }) {
   const [controller, dispatch] = useMaterialTailwindController();
-  const { sidenavColor, sidenavType, collapsedSidenav, showSidenav } = controller;
+  const { sidenavColor, sidenavType, collapsedSidenav, showSidenav, userInfo } = controller;
   const sidenavTypes = {
     dark: "bg-gradient-to-br from-gray-800 to-gray-900",
     white: "bg-white shadow-sm",
@@ -56,7 +56,7 @@ export function Sidenav({ brandName, routes }) {
   useEffect(() => {
     setOpen(location?.pathname)
   }, [])
-  
+
 
   return (
     <aside
@@ -106,97 +106,99 @@ export function Sidenav({ brandName, routes }) {
                 )}
               </div>
             )}
-            {pages.map(({ icon, name, path, subpath }, key) => (
-              <li key={name}>
-                {subpath?.length >= 1 ? (
-                  <Accordion open={open?.includes(name)}>
-                    <ListItem className="p-0" selected={open === `/${layout}${path}`}>
-                      <Button
-                        onClick={() => handleOpen(`/${layout}${path}`)}
-                        variant={"text"}
-                        color={
-                          sidenavType === "dark"
-                            ? "white"
-                            : "blue-gray"
-                        }
-                        className={`flex relative ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
-                        fullWidth
-                      >
-                        {icon}
-                        <Typography
-                          color="inherit"
-                          className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
-                        >
-                          {name}
-                        </Typography>
-                        {!collapsedSidenav &&
-                          <ChevronRightIcon
-                            strokeWidth={2.5}
-                            className={`absolute right-4 h-4 w-4 transition-transform ${open?.includes(path) ? "rotate-90" : ""}`}
-                          />
-                        }
-                      </Button>
-                    </ListItem>
-                    <AccordionBody className="py-1">
-                      <List className="p-0 min-w-0">
-                        {subpath?.map(({ icon, name, path }) => (
-                          <NavLink to={`/${layout}${path}`}>
-                            {({ isActive }) => (
-                              <Button
-                                variant={isActive ? "gradient" : "text"}
-                                color={
-                                  isActive
-                                    ? sidenavColor
-                                    : sidenavType === "dark"
-                                      ? "white"
-                                      : "blue-gray"
-                                }
-                                className={`flex ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
-                                fullWidth
-                              >
-                                <div className={collapsedSidenav ? 'mx-auto' : 'ml-3'}>
-                                  {icon}
-                                </div>
-                                <Typography
-                                  color="inherit"
-                                  className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
-                                >
-                                  {name}
-                                </Typography>
-                              </Button>
-                            )}
-                          </NavLink>
-                        ))}
-                      </List>
-                    </AccordionBody>
-                  </Accordion>
-                ) : (
-                  <NavLink to={`/${layout}${path}`}>
-                    {({ isActive }) => (
-                      <Button
-                        variant={isActive ? "gradient" : "text"}
-                        color={
-                          isActive
-                            ? sidenavColor
-                            : sidenavType === "dark"
+            {pages.map(({ icon, name, path, subpath, roles }, key) => (
+              roles?.includes(userInfo['user_info']['role']) && (
+                <li key={name}>
+                  {subpath?.length >= 1 ? (
+                    <Accordion open={open?.includes(name)}>
+                      <ListItem className="p-0" selected={open === `/${layout}${path}`}>
+                        <Button
+                          onClick={() => handleOpen(`/${layout}${path}`)}
+                          variant={"text"}
+                          color={
+                            sidenavType === "dark"
                               ? "white"
                               : "blue-gray"
-                        }
-                        className={`flex ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
-                        fullWidth
-                      >
-                        {icon}
-                        <Typography
-                          color="inherit"
-                          className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
+                          }
+                          className={`flex relative ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
+                          fullWidth
                         >
-                          {name}
-                        </Typography>
-                      </Button>
-                    )}
-                  </NavLink>
-                )}
-              </li>
+                          {icon}
+                          <Typography
+                            color="inherit"
+                            className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
+                          >
+                            {name}
+                          </Typography>
+                          {!collapsedSidenav &&
+                            <ChevronRightIcon
+                              strokeWidth={2.5}
+                              className={`absolute right-4 h-4 w-4 transition-transform ${open?.includes(path) ? "rotate-90" : ""}`}
+                            />
+                          }
+                        </Button>
+                      </ListItem>
+                      <AccordionBody className="py-1">
+                        <List className="p-0 min-w-0">
+                          {subpath?.map(({ icon, name, path }) => (
+                            <NavLink to={`/${layout}${path}`}>
+                              {({ isActive }) => (
+                                <Button
+                                  variant={isActive ? "gradient" : "text"}
+                                  color={
+                                    isActive
+                                      ? sidenavColor
+                                      : sidenavType === "dark"
+                                        ? "white"
+                                        : "blue-gray"
+                                  }
+                                  className={`flex ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
+                                  fullWidth
+                                >
+                                  <div className={collapsedSidenav ? 'mx-auto' : 'ml-3'}>
+                                    {icon}
+                                  </div>
+                                  <Typography
+                                    color="inherit"
+                                    className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
+                                  >
+                                    {name}
+                                  </Typography>
+                                </Button>
+                              )}
+                            </NavLink>
+                          ))}
+                        </List>
+                      </AccordionBody>
+                    </Accordion>
+                  ) : (
+                    <NavLink to={`/${layout}${path}`}>
+                      {({ isActive }) => (
+                        <Button
+                          variant={isActive ? "gradient" : "text"}
+                          color={
+                            isActive
+                              ? sidenavColor
+                              : sidenavType === "dark"
+                                ? "white"
+                                : "blue-gray"
+                          }
+                          className={`flex ${collapsedSidenav ? 'justify-center px-0' : ''} items-center`}
+                          fullWidth
+                        >
+                          {icon}
+                          <Typography
+                            color="inherit"
+                            className={`font-medium capitalize ${collapsedSidenav ? "opacity-0 hidden" : "opacity-75 ml-2"}`}
+                          >
+                            {name}
+                          </Typography>
+                        </Button>
+                      )}
+                    </NavLink>
+                  )}
+                </li>
+              )
             ))}
           </ul>
         ))}
