@@ -11,8 +11,9 @@ import {
 	RectangleStackIcon,
 	UserGroupIcon,
 	BanknotesIcon,
+	DocumentCheckIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Notifications, Profile, Tables } from "./pages/dashboard";
+import { Approval, Home, Notifications, Profile, Tables } from "./pages/dashboard";
 import { SignIn, SignUp } from "./pages/auth";
 import Roles from "./pages/dashboard/roles";
 import { IoInformationCircleOutline } from "react-icons/io5";
@@ -49,6 +50,13 @@ export const routes = [
 				path: "/home",
 				element: <Home />,
 				roles: ["1", "8"]
+			},
+			{
+				icon: <DocumentCheckIcon {...menu} />,
+				name: "approval",
+				path: "/approval",
+				element: <Approval />,
+				roles: ["1"]
 			},
 			{
 				icon: <UserCircleIcon {...menu} />,

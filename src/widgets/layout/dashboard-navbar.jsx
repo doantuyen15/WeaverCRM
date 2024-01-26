@@ -21,13 +21,13 @@ import {
   Bars3Icon,
 } from "@heroicons/react/24/solid";
 import {
-  useMaterialTailwindController,
+  useController,
   setOpenConfigurator,
   setCollapsedSidenav,
 } from "./../../context";
 
 export function DashboardNavbar() {
-  const [controller, dispatch] = useMaterialTailwindController();
+  const [controller, dispatch] = useController();
   const { fixedNavbar, collapsedSidenav, userInfo } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");

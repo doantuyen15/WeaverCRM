@@ -8,10 +8,10 @@ import {
   Footer,
 } from "./../widgets/layout";
 import { routes } from "../router";
-import { useMaterialTailwindController, setOpenConfigurator, setCollapsedSidenav, setShowSidenav } from "./../context";
+import { useController, setOpenConfigurator, setCollapsedSidenav, setShowSidenav } from "./../context";
 
 export function Dashboard() {
-  const [controller, dispatch] = useMaterialTailwindController();
+  const [controller, dispatch] = useController();
   const { sidenavType, collapsedSidenav, showSidenav, userInfo } = controller;
 
   return (

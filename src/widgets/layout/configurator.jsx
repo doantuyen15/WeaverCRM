@@ -8,7 +8,7 @@ import {
   Chip,
 } from "@material-tailwind/react";
 import {
-  useMaterialTailwindController,
+  useController,
   setOpenConfigurator,
   setCollapsedSidenav,
   setSidenavColor,
@@ -43,7 +43,7 @@ function formatNumber(number, decPlaces) {
 }
 
 export function Configurator() {
-  const [controller, dispatch] = useMaterialTailwindController();
+  const [controller, dispatch] = useController();
   const { openConfigurator, sidenavColor, sidenavType, fixedNavbar, collapsedSidenav } =
     controller;
   const [stars, setStars] = React.useState(0);

@@ -31,7 +31,7 @@ import Amethyst from "../../assets/amethyst.png";
 export function Home() {
   return (
     <div className="mt-12">
-      {/* <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
         {statisticsCardsData.map(({ icon, title, footer, ...rest }) => (
           <StatisticsCard
             key={title}
@@ -48,8 +48,8 @@ export function Home() {
             }
           />
         ))}
-      </div> */}
-      {/* <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
+      </div>
+      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
         {statisticsChartsData.map((props) => (
           <StatisticsChart
             key={props.title}
@@ -65,7 +65,7 @@ export function Home() {
             }
           />
         ))}
-      </div> */}
+      </div>
       <div className="mb-4 grid grid-cols-1 gap-6">
         <Card className="overflow-hidden border border-blue-gray-100 shadow-sm">
           <CardHeader
@@ -194,7 +194,7 @@ export function Home() {
             </table>
           </CardBody>
         </Card>
-        {/* <Card className="border border-blue-gray-100 shadow-sm">
+        <Card className="border border-blue-gray-100 shadow-sm">
           <CardHeader
             floated={false}
             shadow={false}
@@ -250,7 +250,7 @@ export function Home() {
               )
             )}
           </CardBody>
-        </Card> */}
+        </Card>
       </div>
     </div>
   );

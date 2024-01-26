@@ -33,13 +33,13 @@ import {
   Bars3Icon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { useMaterialTailwindController, setCollapsedSidenav, setShowSidenav } from "./../../context";
+import { useController, setCollapsedSidenav, setShowSidenav } from "./../../context";
 import LogoDark from "../../assets/logo/we_logo_dark.png"
 import LogoLight from "../../assets/logo/we_logo_light.png"
 import { NavLink, useLocation } from 'react-router-dom';
 
 export function Sidenav({ brandName, routes }) {
-  const [controller, dispatch] = useMaterialTailwindController();
+  const [controller, dispatch] = useController();
   const { sidenavColor, sidenavType, collapsedSidenav, showSidenav, userInfo } = controller;
   const sidenavTypes = {
     dark: "bg-gradient-to-br from-gray-800 to-gray-900",

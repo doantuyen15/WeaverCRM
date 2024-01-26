@@ -11,13 +11,13 @@ import LogoDark from "../../assets/logo/we_logo_dark.png"
 import LogoLight from "../../assets/logo/we_logo_light.png"
 import encryptString from "../../utils/encode/DataCryption";
 import useFetch from "../../utils/api/request";
-import { setUserInfo, useMaterialTailwindController } from '../../context';
+import { setUserInfo, useController } from '../../context';
 import { useNavigate } from "react-router-dom";
 import useStorage from '../../utils/localStorageHook';
 
 export function SignIn() {
   const [loading, setLoading] = useState(false)
-  const [controller, dispatch] = useMaterialTailwindController();
+  const [controller, dispatch] = useController();
   const [userInfoRes, setUserInfoRes] = useState({})
   const navigate = useNavigate();
 

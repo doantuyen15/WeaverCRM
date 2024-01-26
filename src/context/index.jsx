@@ -52,7 +52,7 @@ export function MaterialTailwindControllerProvider({ children }) {
     },
     token: '',
   })
-  
+
   const initialState = {
     collapsedSidenav: config.collapsedSidenav,
     sidenavColor: config.sidenavColor,
@@ -62,12 +62,12 @@ export function MaterialTailwindControllerProvider({ children }) {
     showSidenav: false,
     userInfo: userInfo
   };
-  
+
   const [controller, dispatch] = React.useReducer(reducer, initialState);
   const value = React.useMemo(
     () => [controller, dispatch],
     [controller, dispatch]
-  );  
+  );
 
   return (
     <MaterialTailwind.Provider value={value}>
@@ -76,12 +76,12 @@ export function MaterialTailwindControllerProvider({ children }) {
   );
 }
 
-export function useMaterialTailwindController() {
+export function useController() {
   const context = React.useContext(MaterialTailwind);
 
   if (!context) {
     throw new Error(
-      "useMaterialTailwindController should be used inside the MaterialTailwindControllerProvider."
+      "useController should be used inside the MaterialTailwindControllerProvider."
     );
   }
 
