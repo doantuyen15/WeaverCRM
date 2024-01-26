@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
     MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
-import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, UserPlusIcon, ArrowUpTrayIcon, BackwardIcon, ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
+import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, UserPlusIcon, ArrowUpTrayIcon, BackwardIcon, ArrowUturnLeftIcon, ArrowUturnDownIcon } from "@heroicons/react/24/solid";
 import {
     Card,
     CardHeader,
@@ -28,7 +28,7 @@ import {
     ListItem,
     Textarea
 } from "@material-tailwind/react";
-import { ModalAddStudent } from "../../widgets/modal/add-student";
+import { ModalConfirmUpdate } from "../../widgets/modal/confirm-update";
 import { orderBy } from 'lodash'
 import StudentInfo from "../../data/entities/studentInfo";
 import { ModalEditStudent } from "../../widgets/modal/edit-student";
@@ -186,20 +186,21 @@ const header = [
 export default function StudentTable() {
     const [controller] = useController();
     const { userInfo } = controller;
-    const [openModalAdd, setOpenModalAdd] = React.useState(false);
+    const [openModalConfirm, setOpenModalConfirm] = React.useState(false);
     const [openModalEdit, setOpenModalEdit] = React.useState(false);
-    // const handleOpenAddStudent = () => setOpenModalAdd((cur) => !cur);
-    const handleOpenEditStudent = () => setOpenModalEdit((cur) => !cur);
     const [table, setTable] = useState([])
     const [keySort, setKeySort] = useState('')
     const [isAsc, setIsAsc] = useState(true)
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
+    const [objectNew, setObjectNew] = useState([])
     const [objectEdit, setObjectEdit] = useState([])
     const [loading, setLoading] = useState(false)
     const [onAdd, setOnAdd] = useState(false)
     const focusRef = useRef(null)
     const tableRef = useRef([])
+    const [editMode, setEditMode] = useState(false)
+    const [editKey, setEditKey] = useState([])
 
     useEffect(() => {
         getStudentList()
@@ -228,7 +229,7 @@ export default function StudentTable() {
 
     const handleAddStudent = () => {
         setOnAdd(true)
-        setObjectEdit(prev => [...prev, {
+        setObjectNew(prev => [...prev, {
             status_res: 0,
             phone: '',
             full_name: '',
@@ -239,18 +240,10 @@ export default function StudentTable() {
             referrer: '',
             advisor: ''
         }])
-        // tableRef.current = [...tableRef.current, { id: tableRef.current.length }]
-        // setTable(tableRef.current)
-        setTimeout(() => {
-            focusRef.current?.focus()
-        }, 100);
     }
 
     const handleCancelAdd = (removeIndex) => {
-        console.log('removeIndex', removeIndex, tableRef.current);
-        tableRef.current = tableRef.current.filter(item => item.id !== removeIndex)
-        console.log('removeIndex', removeIndex, tableRef.current);
-        setTable(tableRef.current)
+        setObjectNew(objectNew.filter((item, index) => index !== removeIndex))
     }
 
     const handleSearch = (searchValue) => {
@@ -260,33 +253,52 @@ export default function StudentTable() {
 
     const handleSort = (indexCol) => {
         let sorted
-        // if (key === 'Member') {
-        //     sorted = orderBy(TABLE_ROWS, ['name'], [isAsc ? 'asc' : 'desc'])
-        // } else return
         sorted = orderBy(tableRef.current, [header[indexCol]], [isAsc ? 'asc' : 'desc'])
         setTable([...sorted])
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
     }
 
-    const handleConfirmEdit = () => {
-        console.log();
-
-    }
-
-    const handleUpdateInfo = ({ field, index, value }) => {
-        const update = table[index] || new StudentInfo()
-        update[field] = value
-        const tableRef = [...table]
-        tableRef[index] = update
-        setObjectEdit(prev => [...prev, update])
-        setTable(tableRef)
-    }
-
-    const updateObjectEdit = (index, key, value) => {
-        console.log('updateObjectEdit', index, key, value);
-        objectEdit[index][key] = value
+    const updateObjectEdit = (key, value) => {
+        objectEdit.at(-1)[key] = value
         setObjectEdit([...objectEdit])
+    }
+
+    const updateObjectNew = (index, key, value) => {
+        objectNew[index][key] = value
+        setObjectNew([...objectNew])
+    }
+
+    const handleConfirm = () => {
+        setOpenModalConfirm(true)
+    }
+
+    const handleConfirmCallback = (ok) => {
+        if (ok) {
+            sendRequestAddStudent()
+        } else {
+            setOpenModalConfirm(false)
+        }
+    }
+
+    const handleEdit = (item, index) => {
+        objectEdit.push(item)
+        setObjectEdit([...objectEdit])
+        editKey.push(index)
+        setEditKey([...editKey])
+        setEditMode(true)
+    }
+
+    const handleCancelEdit = (index) => {
+        setEditKey(editKey.filter(item => item !== index))
+        forceUpdate()
+        setEditMode(false)
+    }
+
+    const sendRequestAddStudent = () => {
+        const requestInfo = {
+
+        }
     }
 
     return (
@@ -302,8 +314,8 @@ export default function StudentTable() {
                         </Typography>
                     </div>
                     <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                        <Button className="flex items-center gap-3" size="sm" onClick={handleOpenEditStudent} disabled={!objectEdit.length}>
-                            <ArrowUpTrayIcon strokeWidth={2} className="h-4 w-4" /> Confirm & Save
+                        <Button className="flex items-center gap-3" size="sm" onClick={handleConfirm} disabled={objectNew.length < 1 && objectEdit.length < 1}>
+                            <ArrowUpTrayIcon strokeWidth={2} className="h-4 w-4" /> Confirm & Request
                         </Button>
                         <Button className="flex items-center gap-3" size="sm" onClick={handleAddStudent}>
                             <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add student
@@ -329,7 +341,7 @@ export default function StudentTable() {
                     </div>
                 </div>
             </CardHeader>
-            <CardBody className="p-0 px-0 overflow-auto max-h-[60vh]">
+            <CardBody className="p-0 px-0 overflow-auto max-h-[70vh]">
                 <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
                     <thead>
                         <tr>
@@ -367,172 +379,341 @@ export default function StudentTable() {
                             (item, index) => {
                                 const isLast = index === table.length - 1;
                                 const classes = isLast
-                                    ? "p-4"
-                                    : "p-4 border-b border-blue-gray-50";
+                                    ? "p-2"
+                                    : "p-2 border-b border-blue-gray-50";
                                 return (
-                                    <tr key={index} className="even:bg-blue-gray-50/50">
-                                        <td className={classes}>
-                                            <div className="w-max">
-                                                <Menu placement="bottom-start">
-                                                    <MenuHandler>
-                                                        <div className="flex">
-                                                            <Chip
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                value={
-                                                                    <div className="flex items-center justify-center">
-                                                                        {ListStatus[Number(item.status_res)].status}
-                                                                        {/* <ChevronDownIcon strokeWidth={2} className="w-2.5 h-2.5" /> */}
-                                                                    </div>
-                                                                }
-                                                                className="min-w-32"
-                                                                color={ListStatus[Number(item.status_res)].color}
-                                                            />
-                                                        </div>
-                                                    </MenuHandler>
-                                                    <MenuList className="min-w-0 p-1">
-                                                        {ListStatus.map(({ type, status, color }) => (
-                                                            <MenuItem className="p-1" onClick={() => type !== Number(item.status_res) && handleUpdateInfo({ field: 'online', index: index, value: type })}>
+                                    editKey.includes(index) ? (
+                                        <tr key={index} className="even:bg-blue-gray-50/50">
+                                            <td className={classes}>
+                                                <div className="w-max">
+                                                    <Menu placement="bottom-start">
+                                                        <MenuHandler>
+                                                            <div className="flex">
                                                                 <Chip
-                                                                    className="w-full text-center"
                                                                     variant="ghost"
                                                                     size="sm"
-                                                                    value={status}
-                                                                    color={color}
+                                                                    value={
+                                                                        <div className="flex items-center justify-center">
+                                                                            {ListStatus[Number(item.status_res)].status}
+                                                                            <ChevronDownIcon strokeWidth={2} className="w-2.5 h-2.5 ml-2" />
+                                                                        </div>
+                                                                    }
+                                                                    className="min-w-32"
+                                                                    color={ListStatus[Number(item.status_res)].color}
                                                                 />
-                                                            </MenuItem>
-                                                        ))}
-                                                    </MenuList>
-                                                </Menu>
-                                            </div>
-                                        </td>
-                                        <td className={classes}>
-                                            <div className="flex flex-col">
+                                                            </div>
+                                                        </MenuHandler>
+                                                        <MenuList className="min-w-0 p-1">
+                                                            {ListStatus.map(({ type, status, color }) => (
+                                                                <MenuItem className="p-1" onClick={() => updateObjectEdit(header[0], type)} >
+                                                                    <Chip
+                                                                        className="w-full text-center"
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        value={status}
+                                                                        color={color}
+                                                                    />
+                                                                </MenuItem>
+                                                            ))}
+                                                        </MenuList>
+                                                    </Menu>
+                                                </div>
+                                            </td>
+                                            <td className={classes}>
+                                                <Input
+                                                    autoFocus
+                                                    variant="static"
+                                                    type="text"
+                                                    placeholder={TABLE_HEAD[1]}
+                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                    containerProps={{
+                                                        className: 'min-w-[1px]'
+                                                    }}
+                                                    labelProps={{
+                                                        className: "before:content-none after:content-none",
+                                                    }}
+                                                    value={item[header[1]]}
+                                                    onChange={(e) => {
+                                                        updateObjectEdit(header[1], e.target.value)
+                                                    }}
+                                                    error={item[header[1]].length !== 10}
+                                                />
+                                            </td>
+                                            <td className={classes}>
+                                                <Input
+                                                    variant="static"
+                                                    type="text"
+                                                    size="sm"
+                                                    placeholder={TABLE_HEAD[2]}
+                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                    containerProps={{
+                                                        className: 'min-w-[1px]'
+                                                    }}
+                                                    labelProps={{
+                                                        className: "before:content-none after:content-none",
+                                                    }}
+                                                    value={item[header[2]]}
+                                                    onChange={(e) => {
+                                                        updateObjectEdit(header[2], e.target.value)
+                                                    }}
+                                                />
+                                            </td>
+                                            <td className={classes}>
+                                                <Input
+                                                    variant="static"
+                                                    type="text"
+                                                    size="sm"
+                                                    placeholder={TABLE_HEAD[3]}
+                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                    containerProps={{
+                                                        className: 'min-w-[1px]'
+                                                    }}
+                                                    labelProps={{
+                                                        className: "before:content-none after:content-none",
+                                                    }}
+                                                    value={item[header[3]]}
+                                                    onChange={(e) => {
+                                                        updateObjectEdit(header[3], e.target.value)
+                                                    }}
+                                                />
+                                                {/* <DayPickerInput selected={''} onChange={(date) => updateObjectEdit(header[3], date)} /> */}
+                                            </td>
+                                            <td className={classes}>
+                                                <Input
+                                                    variant="static"
+                                                    type="text"
+                                                    size="sm"
+                                                    placeholder={TABLE_HEAD[4]}
+                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                    containerProps={{
+                                                        className: 'min-w-[1px]'
+                                                    }}
+                                                    labelProps={{
+                                                        className: "before:content-none after:content-none",
+                                                    }}
+                                                    value={item[header[4]]}
+                                                    onChange={(e) => {
+                                                        updateObjectEdit(header[4], e.target.value)
+                                                    }}
+                                                />
+                                            </td>
+                                            <td className={classes}>
+                                                <Input
+                                                    variant="static"
+                                                    type="text"
+                                                    size="sm"
+                                                    placeholder={TABLE_HEAD[5]}
+                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                    containerProps={{
+                                                        className: 'min-w-[1px]'
+                                                    }}
+                                                    labelProps={{
+                                                        className: "before:content-none after:content-none",
+                                                    }}
+                                                    value={item[header[5]]}
+                                                    onChange={(e) => {
+                                                        updateObjectEdit(header[5], e.target.value)
+                                                    }}
+                                                />
+                                            </td>
+                                            <td className={classes}>
+                                                <Input
+                                                    variant="static"
+                                                    type="text"
+                                                    size="sm"
+                                                    placeholder={TABLE_HEAD[6]}
+                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                    containerProps={{
+                                                        className: 'min-w-[1px]'
+                                                    }}
+                                                    labelProps={{
+                                                        className: "before:content-none after:content-none",
+                                                    }}
+                                                    value={item[header[6]]}
+                                                    onChange={(e) => {
+                                                        updateObjectEdit(header[6], e.target.value)
+                                                    }}
+                                                />
+                                            </td>
+                                            <td className={classes}>
+                                                <Input
+                                                    variant="static"
+                                                    type="text"
+                                                    size="sm"
+                                                    placeholder={TABLE_HEAD[7]}
+                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                    containerProps={{
+                                                        className: 'min-w-[1px]'
+                                                    }}
+                                                    labelProps={{
+                                                        className: "before:content-none after:content-none",
+                                                    }}
+                                                    value={item[header[7]]}
+                                                    onChange={(e) => {
+                                                        updateObjectEdit(header[7], e.target.value)
+                                                    }}
+                                                />
+                                            </td>
+                                            <td className={classes}>
+                                                <Input
+                                                    variant="static"
+                                                    type="text"
+                                                    size="sm"
+                                                    placeholder={TABLE_HEAD[8]}
+                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                    containerProps={{
+                                                        className: 'min-w-[1px]'
+                                                    }}
+                                                    labelProps={{
+                                                        className: "before:content-none after:content-none",
+                                                    }}
+                                                    value={item[header[8]]}
+                                                    onChange={(e) => {
+                                                        updateObjectEdit(header[8], e.target.value)
+                                                    }}
+                                                />
+                                            </td>
+                                            <td className={classes} onClick={() => handleCancelEdit(index)}>
+                                                <IconButton variant="text">
+                                                    <ArrowUturnLeftIcon className="h-4 w-4" />
+                                                </IconButton>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        <tr key={index} className="even:bg-blue-gray-50/50">
+                                            <td className={classes}>
+                                                <div className="w-max">
+                                                    <Menu placement="bottom-start">
+                                                        <MenuHandler>
+                                                            <div className="flex">
+                                                                <Chip
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    value={
+                                                                        <div className="flex items-center justify-center">
+                                                                            {ListStatus[Number(item.status_res)].status}
+                                                                            {/* <ChevronDownIcon strokeWidth={2} className="w-2.5 h-2.5" /> */}
+                                                                        </div>
+                                                                    }
+                                                                    className="min-w-32"
+                                                                    color={ListStatus[Number(item.status_res)].color}
+                                                                />
+                                                            </div>
+                                                        </MenuHandler>
+                                                        <MenuList className="min-w-0 p-1">
+                                                            {ListStatus.map(({ type, status, color }) => (
+                                                                <MenuItem className="p-1" >
+                                                                    <Chip
+                                                                        className="w-full text-center"
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        value={status}
+                                                                        color={color}
+                                                                    />
+                                                                </MenuItem>
+                                                            ))}
+                                                        </MenuList>
+                                                    </Menu>
+                                                </div>
+                                            </td>
+                                            <td className={classes}>
+                                                <div className="flex flex-col">
+                                                    <Typography
+                                                        variant="small"
+                                                        color="blue-gray"
+                                                        className="font-normal"
+                                                    >
+                                                        {formatPhone(item.phone)}
+                                                    </Typography>
+                                                </div>
+                                            </td>
+                                            <td className={classes}>
                                                 <Typography
                                                     variant="small"
                                                     color="blue-gray"
                                                     className="font-normal"
                                                 >
-                                                    {formatPhone(item.phone)}
+                                                    {item.full_name}
                                                 </Typography>
-                                                {/* <Typography
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography
                                                     variant="small"
                                                     color="blue-gray"
-                                                    className="font-normal opacity-70"
+                                                    className="font-normal"
                                                 >
-                                                    {item.full_name}
-                                                </Typography> */}
-                                            </div>
-                                        </td>
-                                        <td className={classes}>
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-normal"
-                                            >
-                                                {item.full_name}
-                                            </Typography>
-                                        </td>
-                                        <td className={classes}>
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-normal"
-                                            >
-                                                {formatDate(item.dob)}
-                                            </Typography>
-                                        </td>
-                                        <td className={classes}>
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-normal"
-                                            >
-                                                {formatPhone(item.parent_phone)}
-                                            </Typography>
-                                        </td>
-                                        <td className={classes}>
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-normal"
-                                            >
-                                                {item.address}
-                                            </Typography>
-                                        </td>
-                                        <td className={classes}>
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-normal"
-                                            >
-                                                {item.email}
-                                            </Typography>
-                                        </td>
-                                        <td className={classes}>
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-normal"
-                                            >
-                                                {item.referrer}
-                                            </Typography>
-                                        </td>
-                                        <td className={classes}>
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-normal"
-                                            >
-                                                {item.advisor}
-                                            </Typography>
-                                        </td>
-                                        <td className={classes}>
-                                            <Menu placement="left-start">
-                                                <MenuHandler>
-                                                    <IconButton variant="text">
-                                                        <PencilIcon className="h-4 w-4" />
-                                                    </IconButton>
-                                                </MenuHandler>
-                                                <MenuList>
-                                                    <MenuItem>Edit</MenuItem>
-                                                    <MenuItem>Remove</MenuItem>
-                                                </MenuList>
-                                            </Menu>
-                                        </td>
-                                    </tr>
+                                                    {formatDate(item.dob)}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {formatPhone(item.parent_phone)}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {item.address}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {item.email}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {item.referrer}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {item.advisor}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Menu placement="left-start">
+                                                    <MenuHandler>
+                                                        <IconButton variant="text">
+                                                            <PencilIcon className="h-4 w-4" />
+                                                        </IconButton>
+                                                    </MenuHandler>
+                                                    <MenuList>
+                                                        <MenuItem onClick={() => handleEdit(item, index)}>Edit</MenuItem>
+                                                        <MenuItem>Remove</MenuItem>
+                                                    </MenuList>
+                                                </Menu>
+                                            </td>
+                                        </tr>
+                                    )
                                 );
                             },
                         )}
-                        {objectEdit?.length > 0 && objectEdit.map(
+                        {objectNew?.length > 0 && objectNew.map(
                             (item, index) => {
-                                const isLast = index === table.length - 1;
-                                const classes = "p-4" + (isLast ? " border-b border-blue-gray-50" : "");
+                                const isLast = index === objectNew.length - 1;
+                                const classes = "p-2" + (isLast ? " border-b border-blue-gray-50" : "");
                                 return (
                                     <tr key={index} className="even:bg-blue-gray-50/50">
-                                        {/* <tr key={index} className="even:bg-blue-gray-50/50">
-                                            {TABLE_HEAD.map((item, key) => (
-                                                <td className={classes}>
-                                                    <Input
-                                                        key={`${index}_${key}`}
-                                                        variant="static"
-                                                        inputRef={key === 0 ? focusRef : null}
-                                                        type="text"
-                                                        size="sm"
-                                                        placeholder={item}
-                                                        className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                                        labelProps={{
-                                                            className: "before:content-none after:content-none",
-                                                        }}
-                                                    />
-                                                </td>
-                                            ))}
-                                            <td className={classes}>
-                                                <IconButton variant="text" onClick={() => handleCancelAdd(index)} >
-                                                    <ArrowUturnLeftIcon className="h-4 w-4" />
-                                                </IconButton>
-                                            </td>
-                                        </tr> */}
                                         <td className={classes}>
                                             <div className="w-max">
                                                 <Menu placement="bottom-start">
@@ -554,7 +735,7 @@ export default function StudentTable() {
                                                     </MenuHandler>
                                                     <MenuList className="min-w-0 p-1">
                                                         {ListStatus.map(({ type, status, color }) => (
-                                                            <MenuItem className="p-1" onClick={() => type !== Number(item.status_res) && handleUpdateInfo({ field: 'online', index: index, value: type })}>
+                                                            <MenuItem className="p-1" onClick={() => updateObjectNew(index, header[0], type)}>
                                                                 <Chip
                                                                     className="w-full text-center"
                                                                     variant="ghost"
@@ -570,11 +751,11 @@ export default function StudentTable() {
                                         </td>
                                         <td className={classes}>
                                             <Input
+                                                autoFocus
                                                 variant="static"
                                                 type="text"
-                                                size="sm"
                                                 placeholder={TABLE_HEAD[1]}
-                                                className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
                                                 containerProps={{
                                                     className: 'min-w-[1px]'
                                                 }}
@@ -583,7 +764,7 @@ export default function StudentTable() {
                                                 }}
                                                 value={item[header[1]]}
                                                 onChange={(e) => {
-                                                    updateObjectEdit(index, header[1], e.target.value)
+                                                    updateObjectNew(index, header[1], e.target.value)
                                                 }}
                                                 error={item[header[1]].length !== 10}
                                             />
@@ -594,7 +775,7 @@ export default function StudentTable() {
                                                 type="text"
                                                 size="sm"
                                                 placeholder={TABLE_HEAD[2]}
-                                                className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
                                                 containerProps={{
                                                     className: 'min-w-[1px]'
                                                 }}
@@ -603,17 +784,17 @@ export default function StudentTable() {
                                                 }}
                                                 value={item[header[2]]}
                                                 onChange={(e) => {
-                                                    updateObjectEdit(index, header[2], e.target.value)
+                                                    updateObjectNew(index, header[2], e.target.value)
                                                 }}
                                             />
                                         </td>
                                         <td className={classes}>
-                                            {/* <Input
+                                            <Input
                                                 variant="static"
                                                 type="text"
                                                 size="sm"
                                                 placeholder={TABLE_HEAD[3]}
-                                                className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
                                                 containerProps={{
                                                     className: 'min-w-[1px]'
                                                 }}
@@ -622,23 +803,27 @@ export default function StudentTable() {
                                                 }}
                                                 value={item[header[3]]}
                                                 onChange={(e) => {
-                                                    updateObjectEdit(index, header[3], e.target.value)
+                                                    updateObjectNew(index, header[3], e.target.value)
                                                 }}
-                                            /> */}
-                                            <DayPickerInput selected={''} onChange={(date) => updateObjectEdit(index, header[3], date)} />
+                                            />
+                                            {/* <DayPickerInput selected={''} onChange={(date) => updateObjectEdit(header[3], date)} /> */}
                                         </td>
                                         <td className={classes}>
                                             <Input
                                                 variant="static"
                                                 type="text"
                                                 size="sm"
-                                                placeholder={header[1]}
-                                                className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                placeholder={TABLE_HEAD[4]}
+                                                className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
                                                 containerProps={{
                                                     className: 'min-w-[1px]'
                                                 }}
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
+                                                }}
+                                                value={item[header[4]]}
+                                                onChange={(e) => {
+                                                    updateObjectNew(index, header[4], e.target.value)
                                                 }}
                                             />
                                         </td>
@@ -647,13 +832,17 @@ export default function StudentTable() {
                                                 variant="static"
                                                 type="text"
                                                 size="sm"
-                                                placeholder={header[1]}
-                                                className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                placeholder={TABLE_HEAD[5]}
+                                                className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
                                                 containerProps={{
                                                     className: 'min-w-[1px]'
                                                 }}
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
+                                                }}
+                                                value={item[header[5]]}
+                                                onChange={(e) => {
+                                                    updateObjectNew(index, header[5], e.target.value)
                                                 }}
                                             />
                                         </td>
@@ -662,13 +851,17 @@ export default function StudentTable() {
                                                 variant="static"
                                                 type="text"
                                                 size="sm"
-                                                placeholder={header[1]}
-                                                className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                placeholder={TABLE_HEAD[6]}
+                                                className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
                                                 containerProps={{
                                                     className: 'min-w-[1px]'
                                                 }}
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
+                                                }}
+                                                value={item[header[6]]}
+                                                onChange={(e) => {
+                                                    updateObjectNew(index, header[6], e.target.value)
                                                 }}
                                             />
                                         </td>
@@ -677,13 +870,17 @@ export default function StudentTable() {
                                                 variant="static"
                                                 type="text"
                                                 size="sm"
-                                                placeholder={header[1]}
-                                                className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                placeholder={TABLE_HEAD[7]}
+                                                className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
                                                 containerProps={{
                                                     className: 'min-w-[1px]'
                                                 }}
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
+                                                }}
+                                                value={item[header[7]]}
+                                                onChange={(e) => {
+                                                    updateObjectNew(index, header[7], e.target.value)
                                                 }}
                                             />
                                         </td>
@@ -692,28 +889,24 @@ export default function StudentTable() {
                                                 variant="static"
                                                 type="text"
                                                 size="sm"
-                                                placeholder={header[1]}
-                                                className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                placeholder={TABLE_HEAD[8]}
+                                                className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
                                                 containerProps={{
                                                     className: 'min-w-[1px]'
                                                 }}
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
                                                 }}
+                                                value={item[header[8]]}
+                                                onChange={(e) => {
+                                                    updateObjectNew(index, header[8], e.target.value)
+                                                }}
                                             />
                                         </td>
-                                        <td className={classes}>
-                                            <Menu placement="left-start">
-                                                <MenuHandler>
-                                                    <IconButton variant="text">
-                                                        <PencilIcon className="h-4 w-4" />
-                                                    </IconButton>
-                                                </MenuHandler>
-                                                <MenuList>
-                                                    <MenuItem>Edit</MenuItem>
-                                                    <MenuItem>Remove</MenuItem>
-                                                </MenuList>
-                                            </Menu>
+                                        <td className={classes} onClick={() => handleCancelAdd(index)}>
+                                            <IconButton variant="text">
+                                                <ArrowUturnLeftIcon className="h-4 w-4" />
+                                            </IconButton>
                                         </td>
                                     </tr>
                                 );
@@ -722,8 +915,8 @@ export default function StudentTable() {
                     </tbody>
                 </table>
             </CardBody>
-            {/* <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-                <Typography variant="small" color="blue-gray" className="font-normal">
+            <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
+                {/* <Typography variant="small" color="blue-gray" className="font-normal">
                     Page 1 of 10
                 </Typography>
                 <div className="flex gap-2">
@@ -733,10 +926,16 @@ export default function StudentTable() {
                     <Button variant="outlined" size="sm">
                         Next
                     </Button>
-                </div>
-            </CardFooter> */}
-            <ModalAddStudent open={openModalAdd} handleOpen={handleAddStudent} />
-            <ModalEditStudent open={openModalEdit} handleOpen={handleOpenEditStudent} objectEdit={objectEdit} />
+                </div> */}
+            </CardFooter>
+            <ModalConfirmUpdate 
+                open={openModalConfirm} 
+                handleOpen={setOpenModalConfirm} 
+                objectNew={objectNew}
+                objectEdit={objectEdit} 
+                handleConfirmCallback={handleConfirmCallback}
+            />
+            {/* <ModalEditStudent open={openModalEdit} handleOpen={handleOpenEditStudent} objectEdit={objectEdit} /> */}
         </Card>
     );
 }
