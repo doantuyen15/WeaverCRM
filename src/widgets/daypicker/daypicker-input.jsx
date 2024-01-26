@@ -3,7 +3,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 const DayPickerInput = ({date, onChange}) => {
 	return (
-		<DatePicker selected={date} onChange={onChange} dateFormat='Pp' />
+		<DatePicker selected={date} onChange={onChange}  />
 	)
 }
 
