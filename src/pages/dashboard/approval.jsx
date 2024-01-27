@@ -25,13 +25,15 @@ import {
     projectsTableData,
     ordersOverviewData,
 } from "../../data";
-import { CheckCircleIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon, ClockIcon, MinusCircleIcon, PlusCircleIcon } from "@heroicons/react/24/solid";
+import { CheckBadgeIcon, CheckCircleIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon, ClockIcon, InformationCircleIcon, MinusCircleIcon, PencilIcon, PencilSquareIcon, PlusCircleIcon } from "@heroicons/react/24/solid";
 import Amethyst from "../../assets/amethyst.png";
 import { useController } from "../../context";
 import useFetch from "../../utils/api/request";
 import orderBy from 'lodash'
+import FormatDate from "../../utils/formatNumber/formatDate";
 
 const header = ["STT", "Loại lệnh", "Người tạo", "Thời gian tạo", "Chi tiết", "Note"]
+const headerMap = ["type_request", "created_at"]
 
 export function Approval() {
     const [controller] = useController();
@@ -55,21 +57,22 @@ export function Approval() {
         setLoading(true)
         const requestInfo = {
             headers: {
-                "authorization": `Bearer ${userInfo.token}`,
+                "authorization": `${userInfo.token}`,
             },
             method: 'get',
-            service: 'students',
+            service: 'getListApproval',
             callback: (data) => {
                 setLoading(false)
                 setTable(JSON.parse(data))
                 tableRef.current = JSON.parse(data)
+                console.log(tableRef.current);
             },
             handleError: (error) => {
                 console.log('error', error)
                 setLoading(false)
             }
         }
-        // useFetch(requestInfo)
+        useFetch(requestInfo)
     }
 
     const handleSort = (indexCol) => {
@@ -81,6 +84,36 @@ export function Approval() {
         setTable([...sorted])
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
+    }
+
+    const handApprove = (ok, item) => {
+        setLoading(true)
+        const requestInfo = {
+            headers: {
+                "authorization": `${userInfo.token}`,
+            },
+            body: [
+                item.id_approval,
+                item.type_request,
+                '1',
+                item.new_data_update,
+                '0',
+                '1'
+            ],
+            method: 'POST',
+            service: 'approval',
+            callback: (data) => {
+                setLoading(false)
+                setTable(JSON.parse(data))
+                tableRef.current = JSON.parse(data)
+                getApprovalList()
+            },
+            handleError: (error) => {
+                console.log('error', error)
+                setLoading(false)
+            }
+        }
+        useFetch(requestInfo)
     }
 
     return (
@@ -151,18 +184,22 @@ export function Approval() {
                                             </th>
                                         )
                                     )}
+                                    <th
+                                        className="z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors hover:bg-blue-gray-200"
+                                    />
                                 </tr>
                             </thead>
                             <tbody>
-                                {projectsTableData.map(
-                                    ({ img, name, members, budget, completion }, key) => {
-                                        const className = `py-3 px-5 ${key === projectsTableData.length - 1
+                                {table.map(
+                                    (item, index) => {
+                                        item.index = index
+                                        const className = `py-3 px-5 ${index === table.length - 1
                                                 ? ""
                                                 : "border-b border-blue-gray-50"
                                             }`;
 
                                         return (
-                                            <tr key={name}>
+                                            <tr key={index}>
                                                 <td className={className}>
                                                     <div className="flex items-center gap-4">
                                                         {/* <Avatar src={Amethyst} alt={name} size="sm" /> */}
@@ -171,47 +208,57 @@ export function Approval() {
                                                             color="blue-gray"
                                                             className="font-bold"
                                                         >
-                                                            {name}
+                                                            {item.index}
                                                         </Typography>
                                                     </div>
-                                                </td>
-                                                <td className={className}>
-                                                    {members.map(({ img, name }, key) => (
-                                                        <Tooltip key={name} content={name}>
-                                                            <Avatar
-                                                                src={img}
-                                                                alt={name}
-                                                                size="xs"
-                                                                variant="circular"
-                                                                className={`cursor-pointer border-2 border-white ${key === 0 ? "" : "-ml-2.5"
-                                                                    }`}
-                                                            />
-                                                        </Tooltip>
-                                                    ))}
                                                 </td>
                                                 <td className={className}>
                                                     <Typography
                                                         variant="small"
                                                         className="text-xs font-medium text-blue-gray-600"
                                                     >
-                                                        {budget}
+                                                        {item.type_request}
                                                     </Typography>
                                                 </td>
                                                 <td className={className}>
-                                                    <div className="w-10/12">
-                                                        <Typography
-                                                            variant="small"
-                                                            className="mb-1 block text-xs font-medium text-blue-gray-600"
-                                                        >
-                                                            {completion}%
-                                                        </Typography>
-                                                        <Progress
-                                                            value={completion}
-                                                            variant="gradient"
-                                                            color={completion === 100 ? "green" : "blue"}
-                                                            className="h-1"
-                                                        />
-                                                    </div>
+                                                    <Typography
+                                                        variant="small"
+                                                        className="text-xs font-medium text-blue-gray-600"
+                                                    >
+                                                        {/* {budget} */}
+                                                    </Typography>
+                                                </td>
+                                                <td className={className}>
+                                                    <Typography
+                                                        variant="small"
+                                                        className="mb-1 block text-xs font-medium text-blue-gray-600"
+                                                    >
+                                                        {FormatDate(item.created_at)}
+                                                    </Typography>
+                                                </td>
+                                                <td className={className}>
+                                                    <InformationCircleIcon className="w-4 h-4"/>
+                                                </td>
+                                                <td className={className}>
+                                                    <Typography
+                                                        variant="small"
+                                                        className="mb-1 block text-xs font-medium text-blue-gray-600"
+                                                    >
+                                                        {''}
+                                                    </Typography>
+                                                </td>
+                                                <td className={className}>
+                                                    <Menu placement="left-start">
+                                                        <MenuHandler>
+                                                            <IconButton variant="text">
+                                                                <PencilIcon className="h-4 w-4" />
+                                                            </IconButton>
+                                                        </MenuHandler>
+                                                        <MenuList>
+                                                            <MenuItem onClick={() => handApprove(true, item)}>Approve</MenuItem>
+                                                            <MenuItem onClick={() => handApprove(false, item)}>Reject</MenuItem>
+                                                        </MenuList>
+                                                    </Menu>
                                                 </td>
                                             </tr>
                                         );

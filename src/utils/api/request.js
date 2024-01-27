@@ -8,7 +8,7 @@ export default function useFetch(requestInfo) {
         .then((data) => {
             // Gọi hàm callback
             console.log('callback', data);
-            if (data.success || data.status == 'success') callback(data.Data || []);
+            if (data.success || data.status == 'success' || data.status == 'succes') callback(data.Data || []);
             else handleError(data.message)
         })
         .catch((error) => {

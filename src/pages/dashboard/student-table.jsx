@@ -296,9 +296,26 @@ export default function StudentTable() {
     }
 
     const sendRequestAddStudent = () => {
+        console.log('sendRequestAddStudent', Object.values(objectNew));
+        setLoading(true)
         const requestInfo = {
-
+            headers: {
+                "authorization": `${userInfo.token}`,
+            },
+            body: Object.values(objectNew[0]),
+            method: 'post',
+            service: 'createStudent',
+            callback: (data) => {
+                setLoading(false)
+                setOpenModalConfirm(false)
+            },
+            handleError: (error) => {
+                console.log('error', error)
+                setLoading(false)
+                setOpenModalConfirm(false)
+            }
         }
+        useFetch(requestInfo)
     }
 
     return (
@@ -934,6 +951,7 @@ export default function StudentTable() {
                 objectNew={objectNew}
                 objectEdit={objectEdit} 
                 handleConfirmCallback={handleConfirmCallback}
+                loading={loading}
             />
             {/* <ModalEditStudent open={openModalEdit} handleOpen={handleOpenEditStudent} objectEdit={objectEdit} /> */}
         </Card>

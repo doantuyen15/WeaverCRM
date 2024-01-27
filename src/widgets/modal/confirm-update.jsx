@@ -45,7 +45,7 @@ const TABLE_HEAD = [
     "Người phụ trách tư vấn/hướng dẫn học sinh"
 ];
 
-export function ModalConfirmUpdate({ handleOpen, open, objectNew, objectEdit, handleConfirmCallback }) {
+export function ModalConfirmUpdate({ handleOpen, open, objectNew, objectEdit, handleConfirmCallback, loading }) {
     return (
         <Dialog
             // size="xs"
@@ -82,7 +82,17 @@ export function ModalConfirmUpdate({ handleOpen, open, objectNew, objectEdit, ha
                             </tr>
                         </thead>
                         <tbody>
-                            {objectNew.length > 0 && <tr>Thêm mới</tr>}
+                            {objectNew.length > 0 &&
+                                <tr>
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-bold p-2"
+                                    >
+                                        Thêm mới
+                                    </Typography>
+                                </tr>
+                            }
                             {objectNew?.map(
                                 (item, index) => {
                                     const isLast = index === objectNew.length - 1;
@@ -186,7 +196,17 @@ export function ModalConfirmUpdate({ handleOpen, open, objectNew, objectEdit, ha
                                     );
                                 },
                             )}
-                            {objectEdit.length > 0 && <tr>Chỉnh sửa</tr>}
+                            {objectEdit.length > 0 &&
+                                <tr>
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal ml-2"
+                                    >
+                                        Chỉnh sửa
+                                    </Typography>
+                                </tr>
+                            }
                             {objectEdit?.map(
                                 (item, index) => {
                                     const isLast = index === objectEdit.length - 1;
@@ -295,10 +315,10 @@ export function ModalConfirmUpdate({ handleOpen, open, objectNew, objectEdit, ha
                 </CardBody>
                 <CardFooter className="flex items-center justify-end border-t border-blue-gray-50 p-4">
                     <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                        <Button className="flex items-center gap-3" size="sm" onClick={() => handleConfirmCallback(true)} disabled={objectEdit.length < 1}>
+                        <Button key={'Confirm'} className="flex items-center gap-3" loading={loading} size="sm" onClick={() => handleConfirmCallback(true)} disabled={!objectEdit && !objectNew}>
                             <ArrowUpTrayIcon strokeWidth={2} className="h-4 w-4" /> Confirm & Request
                         </Button>
-                        <Button className="flex items-center gap-3" size="sm" onClick={() => handleConfirmCallback(false)} disabled={objectEdit.length < 1}>
+                        <Button className="flex items-center gap-3" size="sm" onClick={() => handleConfirmCallback(false)} >
                             <ArrowUturnLeftIcon strokeWidth={2} className="h-4 w-4" /> Cancel
                         </Button>
                     </div>
