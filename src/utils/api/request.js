@@ -7,7 +7,7 @@ export default function useFetch(requestInfo) {
         .then((response) => response.json())
         .then((data) => {
             // Gọi hàm callback
-            console.log('callback', data);
+            console.log(`callback from service: ${service}`, JSON.parse(data.Data));
             if (data.success || data.status == 'success' || data.status == 'succes') callback(data.Data || []);
             else handleError(data.message)
         })

@@ -65,26 +65,40 @@ export const routes = [
 				element: <Roles />,
 				roles: ["1"]
 			},
+			// {
+			// 	icon: <TableCellsIcon {...menu} />,
+			// 	name: "tables",
+			// 	path: "/tables",
+			// 	roles: ["1"],
+			// 	// element: <Tables />,
+			// 	subpath: [
+			// 		{
+			// 			icon: <UserGroupIcon {...subMenu} />,
+			// 			name: "student",
+			// 			path: "/tables/student",
+			// 			element: <StudentTable />,
+			// 		},
+			// 		{
+			// 			icon: <BanknotesIcon {...subMenu} />,
+			// 			name: "tuition",
+			// 			path: "/tables/tuition",
+			// 			element: <Tables />,
+			// 		}
+			// 	]
+			// },
 			{
-				icon: <TableCellsIcon {...menu} />,
-				name: "tables",
-				path: "/tables",
-				roles: ["1"],
-				// element: <Tables />,
-				subpath: [
-					{
-						icon: <UserGroupIcon {...subMenu} />,
-						name: "student",
-						path: "/tables/student",
-						element: <StudentTable />,
-					},
-					{
-						icon: <BanknotesIcon {...subMenu} />,
-						name: "tuition",
-						path: "/tables/tuition",
-						element: <Tables />,
-					}
-				]
+				icon: <UserGroupIcon {...menu} />,
+				name: "student",
+				path: "/student",
+				element: <StudentTable />,
+				roles: ["1"]
+			},
+			{
+				icon: <BanknotesIcon {...menu} />,
+				name: "tuition",
+				path: "/tuition",
+				element: <Tables />,
+				roles: ["1"]
 			},
 			{
 				icon: <InformationCircleIcon {...menu} />,
@@ -102,26 +116,26 @@ export const routes = [
 			}
 		],
 	},
-	{
-		title: "auth pages",
-		layout: "auth",
-		pages: [
-			{
-				icon: <ServerStackIcon {...menu} />,
-				name: "sign in",
-				path: "/sign-in",
-				element: <SignIn />,
-				roles: ["1", "8"]
-			},
-			{
-				icon: <RectangleStackIcon {...menu} />,
-				name: "sign up",
-				path: "/sign-up",
-				element: <SignUp />,
-				roles: ["1", "8"]
-			},
-		],
-	},
+	// {
+	// 	title: "auth pages",
+	// 	layout: "auth",
+	// 	pages: [
+	// 		{
+	// 			icon: <ServerStackIcon {...menu} />,
+	// 			name: "sign in",
+	// 			path: "/sign-in",
+	// 			element: <SignIn />,
+	// 			roles: ["1", "8"]
+	// 		},
+	// 		{
+	// 			icon: <RectangleStackIcon {...menu} />,
+	// 			name: "sign up",
+	// 			path: "/sign-up",
+	// 			element: <SignUp />,
+	// 			roles: ["1", "8"]
+	// 		},
+	// 	],
+	// },
 ];
 
 

@@ -22,11 +22,12 @@ import {
     MenuHandler,
     MenuList,
     MenuItem,
-    Select,
-    Option,
-    List,
-    ListItem,
-    Textarea
+    AccordionHeader,
+    Accordion,
+    AccordionBody,
+    Popover,
+    PopoverContent,
+    PopoverHandler
 } from "@material-tailwind/react";
 import { ModalConfirmUpdate } from "../../widgets/modal/confirm-update";
 import { orderBy } from 'lodash'
@@ -41,116 +42,16 @@ import DayPickerInput from "../../widgets/daypicker/daypicker-input";
 
 const TABLE_HEAD = [
     "Tình trạng đăng ký",
-    "Số điện thoại",
+    "ID",
     "Họ & tên",
+    "Ngày đăng ký",
+    "Số điện thoại",
     "Ngày sinh",
     "Số điện thoại phụ",
     "Địa chỉ",
     "Email",
     "Người giới thiệu",
     "Người phụ trách tư vấn/hướng dẫn học sinh"
-];
-
-const TABLE_ROWS = [
-    {
-        firstname: "Nguyễn Văn",
-        lastname: "Test1",
-        email: "atesst.com",
-        job: "Manager",
-        org: "Organization",
-        online: 0,
-        date: "23/04/18",
-    },
-    {
-        firstname: "Nguyễn Văn",
-        lastname: "Test1",
-        email: "test1.com",
-        job: "Manager",
-        org: "Organization",
-        online: 1,
-        date: "23/04/18",
-    },
-    {
-        firstname: "Nguyễn Văn",
-        lastname: "Test1",
-        email: "atest2.com",
-        job: "Manager",
-        org: "Organization",
-        online: 2,
-        date: "23/04/18",
-    },
-    {
-        firstname: "Nguyễn Văn",
-        lastname: "Test1",
-        email: "test1.com",
-        job: "Manager",
-        org: "Organization",
-        online: 1,
-        date: "23/04/18",
-    },
-    {
-        firstname: "Nguyễn Văn",
-        lastname: "Test1",
-        email: "atest2.com",
-        job: "Manager",
-        org: "Organization",
-        online: 2,
-        date: "23/04/18",
-    },
-    {
-        firstname: "Nguyễn Văn",
-        lastname: "Test1",
-        email: "test1.com",
-        job: "Manager",
-        org: "Organization",
-        online: 1,
-        date: "23/04/18",
-    },
-    {
-        firstname: "Nguyễn Văn",
-        lastname: "Test1",
-        email: "atest2.com",
-        job: "Manager",
-        org: "Organization",
-        online: 2,
-        date: "23/04/18",
-    }
-    , {
-        firstname: "Nguyễn Văn",
-        lastname: "Test1",
-        email: "test1.com",
-        job: "Manager",
-        org: "Organization",
-        online: 1,
-        date: "23/04/18",
-    },
-    {
-        firstname: "Nguyễn Văn",
-        lastname: "Test1",
-        email: "atest2.com",
-        job: "Manager",
-        org: "Organization",
-        online: 2,
-        date: "23/04/18",
-    },
-    {
-        firstname: "Nguyễn Văn",
-        lastname: "Test1",
-        email: "test1.com",
-        job: "Manager",
-        org: "Organization",
-        online: 1,
-        date: "23/04/18",
-    },
-    {
-        firstname: "Nguyễn Văn",
-        lastname: "Test1",
-        email: "atest2.com",
-        job: "Manager",
-        org: "Organization",
-        online: 2,
-        date: "23/04/18",
-    }
 ];
 
 const ListStatus = [
@@ -171,16 +72,27 @@ const ListStatus = [
     }
 ]
 
-const header = [
+const Header = [
     'status_res',
-    'phone',
+    'id',
     'full_name',
+    'register_date',
+    'phone',
     'dob',
     'parent_phone',
     'address',
     'email',
     'referrer',
     'advisor'
+]
+
+const HeaderScore = [
+    'Chương trình học',
+    'Listening',
+    'Speaking',
+    'Reading',
+    'Writing',
+    'Score',
 ]
 
 export default function StudentTable() {
@@ -201,6 +113,9 @@ export default function StudentTable() {
     const tableRef = useRef([])
     const [editMode, setEditMode] = useState(false)
     const [editKey, setEditKey] = useState([])
+    const [openScore, setOpenScore] = useState(-1)
+    const timeoutHover = useRef(null)
+    const timeoutMouseOut = useRef(null)
 
     useEffect(() => {
         getStudentList()
@@ -253,7 +168,7 @@ export default function StudentTable() {
 
     const handleSort = (indexCol) => {
         let sorted
-        sorted = orderBy(tableRef.current, [header[indexCol]], [isAsc ? 'asc' : 'desc'])
+        sorted = orderBy(tableRef.current, [Header[indexCol]], [isAsc ? 'asc' : 'desc'])
         setTable([...sorted])
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
@@ -316,6 +231,26 @@ export default function StudentTable() {
             }
         }
         useFetch(requestInfo)
+    }
+
+    const triggerHover = (index) => {
+        return ({
+            // onDoubleClick: () => setOpenScore(openScore === index ? -1 : index),
+            // onMouseEnter: () => {
+            //     if (timeoutHover.current) clearTimeout(timeoutHover.current)
+            //     timeoutHover.current = setTimeout(() => {
+            //         setOpenScore(index)
+            //     }, 600)
+            // },
+            // onMouseLeave: () => {
+            //     if (timeoutMouseOut.current) clearTimeout(timeoutMouseOut.current)
+            //     timeoutMouseOut.current = setTimeout(() => {
+            //         setOpenScore(-1)
+            //     }, 0)
+            // },
+            onMouseEnter: () => setOpenScore(index),
+            onMouseLeave: () => setOpenScore(-1)
+        })
     }
 
     return (
@@ -422,7 +357,7 @@ export default function StudentTable() {
                                                         </MenuHandler>
                                                         <MenuList className="min-w-0 p-1">
                                                             {ListStatus.map(({ type, status, color }) => (
-                                                                <MenuItem className="p-1" onClick={() => updateObjectEdit(header[0], type)} >
+                                                                <MenuItem className="p-1" onClick={() => updateObjectEdit(Header[0], type)} >
                                                                     <Chip
                                                                         className="w-full text-center"
                                                                         variant="ghost"
@@ -449,11 +384,11 @@ export default function StudentTable() {
                                                     labelProps={{
                                                         className: "before:content-none after:content-none",
                                                     }}
-                                                    value={item[header[1]]}
+                                                    value={item[Header[1]]}
                                                     onChange={(e) => {
-                                                        updateObjectEdit(header[1], e.target.value)
+                                                        updateObjectEdit(Header[1], e.target.value)
                                                     }}
-                                                    error={item[header[1]].length !== 10}
+                                                    error={item[Header[1]].length !== 10}
                                                 />
                                             </td>
                                             <td className={classes}>
@@ -469,9 +404,9 @@ export default function StudentTable() {
                                                     labelProps={{
                                                         className: "before:content-none after:content-none",
                                                     }}
-                                                    value={item[header[2]]}
+                                                    value={item[Header[2]]}
                                                     onChange={(e) => {
-                                                        updateObjectEdit(header[2], e.target.value)
+                                                        updateObjectEdit(Header[2], e.target.value)
                                                     }}
                                                 />
                                             </td>
@@ -488,9 +423,9 @@ export default function StudentTable() {
                                                     labelProps={{
                                                         className: "before:content-none after:content-none",
                                                     }}
-                                                    value={item[header[3]]}
+                                                    value={item[Header[3]]}
                                                     onChange={(e) => {
-                                                        updateObjectEdit(header[3], e.target.value)
+                                                        updateObjectEdit(Header[3], e.target.value)
                                                     }}
                                                 />
                                                 {/* <DayPickerInput selected={''} onChange={(date) => updateObjectEdit(header[3], date)} /> */}
@@ -508,9 +443,9 @@ export default function StudentTable() {
                                                     labelProps={{
                                                         className: "before:content-none after:content-none",
                                                     }}
-                                                    value={item[header[4]]}
+                                                    value={item[Header[4]]}
                                                     onChange={(e) => {
-                                                        updateObjectEdit(header[4], e.target.value)
+                                                        updateObjectEdit(Header[4], e.target.value)
                                                     }}
                                                 />
                                             </td>
@@ -527,9 +462,9 @@ export default function StudentTable() {
                                                     labelProps={{
                                                         className: "before:content-none after:content-none",
                                                     }}
-                                                    value={item[header[5]]}
+                                                    value={item[Header[5]]}
                                                     onChange={(e) => {
-                                                        updateObjectEdit(header[5], e.target.value)
+                                                        updateObjectEdit(Header[5], e.target.value)
                                                     }}
                                                 />
                                             </td>
@@ -546,9 +481,9 @@ export default function StudentTable() {
                                                     labelProps={{
                                                         className: "before:content-none after:content-none",
                                                     }}
-                                                    value={item[header[6]]}
+                                                    value={item[Header[6]]}
                                                     onChange={(e) => {
-                                                        updateObjectEdit(header[6], e.target.value)
+                                                        updateObjectEdit(Header[6], e.target.value)
                                                     }}
                                                 />
                                             </td>
@@ -565,9 +500,9 @@ export default function StudentTable() {
                                                     labelProps={{
                                                         className: "before:content-none after:content-none",
                                                     }}
-                                                    value={item[header[7]]}
+                                                    value={item[Header[7]]}
                                                     onChange={(e) => {
-                                                        updateObjectEdit(header[7], e.target.value)
+                                                        updateObjectEdit(Header[7], e.target.value)
                                                     }}
                                                 />
                                             </td>
@@ -584,9 +519,9 @@ export default function StudentTable() {
                                                     labelProps={{
                                                         className: "before:content-none after:content-none",
                                                     }}
-                                                    value={item[header[8]]}
+                                                    value={item[Header[8]]}
                                                     onChange={(e) => {
-                                                        updateObjectEdit(header[8], e.target.value)
+                                                        updateObjectEdit(Header[8], e.target.value)
                                                     }}
                                                 />
                                             </td>
@@ -597,130 +532,248 @@ export default function StudentTable() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        <tr key={index} className="even:bg-blue-gray-50/50">
-                                            <td className={classes}>
-                                                <div className="w-max">
-                                                    <Menu placement="bottom-start">
-                                                        <MenuHandler>
-                                                            <div className="flex">
-                                                                <Chip
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    value={
-                                                                        <div className="flex items-center justify-center">
-                                                                            {ListStatus[Number(item.status_res)].status}
-                                                                            {/* <ChevronDownIcon strokeWidth={2} className="w-2.5 h-2.5" /> */}
-                                                                        </div>
-                                                                    }
-                                                                    className="min-w-32"
-                                                                    color={ListStatus[Number(item.status_res)].color}
-                                                                />
-                                                            </div>
-                                                        </MenuHandler>
-                                                        <MenuList className="min-w-0 p-1">
-                                                            {ListStatus.map(({ type, status, color }) => (
-                                                                <MenuItem className="p-1" >
-                                                                    <Chip
-                                                                        className="w-full text-center"
-                                                                        variant="ghost"
-                                                                        size="sm"
-                                                                        value={status}
-                                                                        color={color}
-                                                                    />
-                                                                </MenuItem>
-                                                            ))}
-                                                        </MenuList>
-                                                    </Menu>
-                                                </div>
-                                            </td>
-                                            <td className={classes}>
-                                                <div className="flex flex-col">
-                                                    <Typography
-                                                        variant="small"
-                                                        color="blue-gray"
-                                                        className="font-normal"
-                                                    >
-                                                        {formatPhone(item.phone)}
-                                                    </Typography>
-                                                </div>
-                                            </td>
-                                            <td className={classes}>
+                                        <Popover open={index === openScore}>
+                                            <PopoverHandler>
+                                                <tr {...triggerHover(index)} key={index} className="even:bg-blue-gray-50/50">
+                                                    <td className={classes}>
+                                                        <div className="w-max">
+                                                            <Menu placement="bottom-start">
+                                                                <MenuHandler>
+                                                                    <div className="flex">
+                                                                        <Chip
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            value={
+                                                                                <div className="flex items-center justify-center">
+                                                                                    {ListStatus[Number(item.status_res)].status}
+                                                                                    {/* <ChevronDownIcon strokeWidth={2} className="w-2.5 h-2.5" /> */}
+                                                                                </div>
+                                                                            }
+                                                                            className="min-w-32"
+                                                                            color={ListStatus[Number(item.status_res)].color}
+                                                                        />
+                                                                    </div>
+                                                                </MenuHandler>
+                                                                <MenuList className="min-w-0 p-1">
+                                                                    {ListStatus.map(({ type, status, color }) => (
+                                                                        <MenuItem className="p-1" >
+                                                                            <Chip
+                                                                                className="w-full text-center"
+                                                                                variant="ghost"
+                                                                                size="sm"
+                                                                                value={status}
+                                                                                color={color}
+                                                                            />
+                                                                        </MenuItem>
+                                                                    ))}
+                                                                </MenuList>
+                                                            </Menu>
+                                                        </div>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <div className="flex flex-col">
+                                                            <Typography
+                                                                variant="small"
+                                                                color="blue-gray"
+                                                                className="font-normal"
+                                                            >
+                                                                {formatPhone(item.id)}
+                                                            </Typography>
+                                                        </div>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            color="blue-gray"
+                                                            className="font-normal"
+                                                        >
+                                                            {item.full_name}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <div className="flex flex-col">
+                                                            <Typography
+                                                                variant="small"
+                                                                color="blue-gray"
+                                                                className="font-normal"
+                                                            >
+                                                                {''}
+                                                            </Typography>
+                                                        </div>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <div className="flex flex-col">
+                                                            <Typography
+                                                                variant="small"
+                                                                color="blue-gray"
+                                                                className="font-normal"
+                                                            >
+                                                                {formatPhone(item.phone)}
+                                                            </Typography>
+                                                        </div>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            color="blue-gray"
+                                                            className="font-normal"
+                                                        >
+                                                            {formatDate(item.dob)}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            color="blue-gray"
+                                                            className="font-normal"
+                                                        >
+                                                            {formatPhone(item.parent_phone)}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            color="blue-gray"
+                                                            className="font-normal"
+                                                        >
+                                                            {item.address}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            color="blue-gray"
+                                                            className="font-normal"
+                                                        >
+                                                            {item.email}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            color="blue-gray"
+                                                            className="font-normal"
+                                                        >
+                                                            {item.referrer}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            color="blue-gray"
+                                                            className="font-normal"
+                                                        >
+                                                            {item.advisor}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Menu placement="left-start">
+                                                            <MenuHandler>
+                                                                <IconButton variant="text">
+                                                                    <PencilIcon className="h-4 w-4" />
+                                                                </IconButton>
+                                                            </MenuHandler>
+                                                            <MenuList>
+                                                                <MenuItem onClick={() => handleEdit(item, index)}>Edit</MenuItem>
+                                                                <MenuItem>Remove</MenuItem>
+                                                            </MenuList>
+                                                        </Menu>
+                                                    </td>
+                                                </tr>
+                                            </PopoverHandler>
+                                            <PopoverContent {...triggerHover(index)} className="z-20">
                                                 <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-normal"
+                                                    variant="h3"
+                                                    className="flex items-center gap-1 font-normal text-blue-gray-600 p-4"
                                                 >
                                                     {item.full_name}
                                                 </Typography>
-                                            </td>
-                                            <td className={classes}>
                                                 <Typography
                                                     variant="small"
-                                                    color="blue-gray"
-                                                    className="font-normal"
+                                                    className="flex items-center gap-1 font-normal text-blue-gray-600 px-4 pb-4"
                                                 >
-                                                    {formatDate(item.dob)}
+                                                    Note: {item.note}
                                                 </Typography>
-                                            </td>
-                                            <td className={classes}>
-                                                <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-normal"
-                                                >
-                                                    {formatPhone(item.parent_phone)}
-                                                </Typography>
-                                            </td>
-                                            <td className={classes}>
-                                                <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-normal"
-                                                >
-                                                    {item.address}
-                                                </Typography>
-                                            </td>
-                                            <td className={classes}>
-                                                <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-normal"
-                                                >
-                                                    {item.email}
-                                                </Typography>
-                                            </td>
-                                            <td className={classes}>
-                                                <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-normal"
-                                                >
-                                                    {item.referrer}
-                                                </Typography>
-                                            </td>
-                                            <td className={classes}>
-                                                <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-normal"
-                                                >
-                                                    {item.advisor}
-                                                </Typography>
-                                            </td>
-                                            <td className={classes}>
-                                                <Menu placement="left-start">
-                                                    <MenuHandler>
-                                                        <IconButton variant="text">
-                                                            <PencilIcon className="h-4 w-4" />
-                                                        </IconButton>
-                                                    </MenuHandler>
-                                                    <MenuList>
-                                                        <MenuItem onClick={() => handleEdit(item, index)}>Edit</MenuItem>
-                                                        <MenuItem>Remove</MenuItem>
-                                                    </MenuList>
-                                                </Menu>
-                                            </td>
-                                        </tr>
+                                                <table className="text-left">
+                                                    <thead>
+                                                        <tr>
+                                                            {HeaderScore.map((head) => (
+                                                                <th
+                                                                    key={head}
+                                                                    className="border-b p-4"
+                                                                >
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        color="blue-gray"
+                                                                        className="font-bold leading-none opacity-70"
+                                                                    >
+                                                                        {head}
+                                                                    </Typography>
+                                                                </th>
+                                                            ))}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr key={'scorebody'}>
+                                                            <td className='p-4'>
+                                                                <Typography
+                                                                    variant="small"
+                                                                    color="blue-gray"
+                                                                    className="font-normal"
+                                                                >
+                                                                    Chương trình học
+                                                                </Typography>
+                                                            </td>
+                                                            <td className='p-4'>
+                                                                <Typography
+                                                                    variant="small"
+                                                                    color="blue-gray"
+                                                                    className="font-normal"
+                                                                >
+                                                                    {item.listening}
+                                                                </Typography>
+                                                            </td>
+                                                            <td className='p-4'>
+                                                                <Typography
+                                                                    variant="small"
+                                                                    color="blue-gray"
+                                                                    className="font-normal"
+                                                                >
+                                                                    {item.speaking}
+                                                                </Typography>
+                                                            </td>
+                                                            <td className='p-4'>
+                                                                <Typography
+                                                                    variant="small"
+                                                                    color="blue-gray"
+                                                                    className="font-medium"
+                                                                >
+                                                                    {item.reading}
+                                                                </Typography>
+                                                            </td>
+                                                            <td className='p-4'>
+                                                                <Typography
+                                                                    variant="small"
+                                                                    color="blue-gray"
+                                                                    className="font-medium"
+                                                                >
+                                                                    {item.writing}
+                                                                </Typography>
+                                                            </td>
+                                                            <td className='p-4'>
+                                                                <Typography
+                                                                    variant="small"
+                                                                    color="blue-gray"
+                                                                    className="font-medium"
+                                                                >
+                                                                    {item.vocabulary}
+                                                                </Typography>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </PopoverContent>
+                                        </Popover>
                                     )
                                 );
                             },
@@ -752,7 +805,7 @@ export default function StudentTable() {
                                                     </MenuHandler>
                                                     <MenuList className="min-w-0 p-1">
                                                         {ListStatus.map(({ type, status, color }) => (
-                                                            <MenuItem className="p-1" onClick={() => updateObjectNew(index, header[0], type)}>
+                                                            <MenuItem className="p-1" onClick={() => updateObjectNew(index, Header[0], type)}>
                                                                 <Chip
                                                                     className="w-full text-center"
                                                                     variant="ghost"
@@ -779,11 +832,11 @@ export default function StudentTable() {
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
                                                 }}
-                                                value={item[header[1]]}
+                                                value={item[Header[1]]}
                                                 onChange={(e) => {
-                                                    updateObjectNew(index, header[1], e.target.value)
+                                                    updateObjectNew(index, Header[1], e.target.value)
                                                 }}
-                                                error={item[header[1]].length !== 10}
+                                                error={item[Header[1]].length !== 10}
                                             />
                                         </td>
                                         <td className={classes}>
@@ -799,9 +852,9 @@ export default function StudentTable() {
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
                                                 }}
-                                                value={item[header[2]]}
+                                                value={item[Header[2]]}
                                                 onChange={(e) => {
-                                                    updateObjectNew(index, header[2], e.target.value)
+                                                    updateObjectNew(index, Header[2], e.target.value)
                                                 }}
                                             />
                                         </td>
@@ -818,9 +871,9 @@ export default function StudentTable() {
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
                                                 }}
-                                                value={item[header[3]]}
+                                                value={item[Header[3]]}
                                                 onChange={(e) => {
-                                                    updateObjectNew(index, header[3], e.target.value)
+                                                    updateObjectNew(index, Header[3], e.target.value)
                                                 }}
                                             />
                                             {/* <DayPickerInput selected={''} onChange={(date) => updateObjectEdit(header[3], date)} /> */}
@@ -838,9 +891,9 @@ export default function StudentTable() {
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
                                                 }}
-                                                value={item[header[4]]}
+                                                value={item[Header[4]]}
                                                 onChange={(e) => {
-                                                    updateObjectNew(index, header[4], e.target.value)
+                                                    updateObjectNew(index, Header[4], e.target.value)
                                                 }}
                                             />
                                         </td>
@@ -857,9 +910,9 @@ export default function StudentTable() {
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
                                                 }}
-                                                value={item[header[5]]}
+                                                value={item[Header[5]]}
                                                 onChange={(e) => {
-                                                    updateObjectNew(index, header[5], e.target.value)
+                                                    updateObjectNew(index, Header[5], e.target.value)
                                                 }}
                                             />
                                         </td>
@@ -876,9 +929,9 @@ export default function StudentTable() {
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
                                                 }}
-                                                value={item[header[6]]}
+                                                value={item[Header[6]]}
                                                 onChange={(e) => {
-                                                    updateObjectNew(index, header[6], e.target.value)
+                                                    updateObjectNew(index, Header[6], e.target.value)
                                                 }}
                                             />
                                         </td>
@@ -895,9 +948,9 @@ export default function StudentTable() {
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
                                                 }}
-                                                value={item[header[7]]}
+                                                value={item[Header[7]]}
                                                 onChange={(e) => {
-                                                    updateObjectNew(index, header[7], e.target.value)
+                                                    updateObjectNew(index, Header[7], e.target.value)
                                                 }}
                                             />
                                         </td>
@@ -914,9 +967,9 @@ export default function StudentTable() {
                                                 labelProps={{
                                                     className: "before:content-none after:content-none",
                                                 }}
-                                                value={item[header[8]]}
+                                                value={item[Header[8]]}
                                                 onChange={(e) => {
-                                                    updateObjectNew(index, header[8], e.target.value)
+                                                    updateObjectNew(index, Header[8], e.target.value)
                                                 }}
                                             />
                                         </td>
@@ -945,11 +998,11 @@ export default function StudentTable() {
                     </Button>
                 </div> */}
             </CardFooter>
-            <ModalConfirmUpdate 
-                open={openModalConfirm} 
-                handleOpen={setOpenModalConfirm} 
+            <ModalConfirmUpdate
+                open={openModalConfirm}
+                handleOpen={setOpenModalConfirm}
                 objectNew={objectNew}
-                objectEdit={objectEdit} 
+                objectEdit={objectEdit}
                 handleConfirmCallback={handleConfirmCallback}
                 loading={loading}
             />
