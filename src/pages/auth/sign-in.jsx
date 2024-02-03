@@ -14,11 +14,14 @@ import useFetch from "../../utils/api/request";
 import { setUserInfo, useController } from '../../context';
 import { useNavigate } from "react-router-dom";
 import useStorage from '../../utils/localStorageHook';
+import { NotificationDialog } from '../../widgets/modal/alert-popup';
 
 export function SignIn() {
   const [loading, setLoading] = useState(false)
   const [controller, dispatch] = useController();
   const [userInfoRes, setUserInfoRes] = useState({})
+  const [error, setError] = useState('')
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,57 +54,63 @@ export function SignIn() {
       },
       handleError: (error) => {
         console.log('error', error)
+        setError(String(error))
         setLoading(false)
       }
     }
     useFetch(requestInfo)
   }
 
+  const handleCallback = () => {
+    setError('')
+  }
+
   return (
-    <section className="m-8 flex justify-center gap-4">
-      <div className="lg:w-1/2 mt-24">
-        <Link style={{ position: 'absolute', top: 0, left: 10 }} to={-1}>
-          <div className="flex">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-            </svg>
-            <Typography variant="paragraph" className="blue-gray">Go back</Typography>
+    <>
+      <section className="m-8 flex justify-center gap-4">
+        <div className="lg:w-1/2 mt-24">
+          <Link style={{ position: 'absolute', top: 0, left: 10 }} to={-1}>
+            <div className="flex">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+              </svg>
+              <Typography variant="paragraph" className="blue-gray">Go back</Typography>
+            </div>
+          </Link>
+          <div className="text-center">
+            <img className="object-cover mx-auto mb-12" width={150} src={LogoDark} />
+            <Typography variant="h2" className="font-bold">Sign In</Typography>
+            {/* <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Welcome to CRM Weaver</Typography> */}
           </div>
-        </Link>
-        <div className="text-center">
-          <img className="object-cover mx-auto mb-12" width={150} src={LogoDark} />
-          <Typography variant="h2" className="font-bold">Sign In</Typography>
-          {/* <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Welcome to CRM Weaver</Typography> */}
-        </div>
-        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2" onSubmit={handleLogin}>
-          <div className="mb-1 flex flex-col gap-6">
-            <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
-              Account
-            </Typography>
-            <Input
-              name="username"
-              size="lg"
-              placeholder="Username"
-              className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-              labelProps={{
-                className: "before:content-none after:content-none",
-              }}
-            />
-            <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
-              Password
-            </Typography>
-            <Input
-              name="password"
-              type="password"
-              size="lg"
-              placeholder="********"
-              className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-              labelProps={{
-                className: "before:content-none after:content-none",
-              }}
-            />
-          </div>
-          {/* <Checkbox
+          <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2" onSubmit={handleLogin}>
+            <div className="mb-1 flex flex-col gap-6">
+              <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
+                Account
+              </Typography>
+              <Input
+                name="username"
+                size="lg"
+                placeholder="Username"
+                className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                labelProps={{
+                  className: "before:content-none after:content-none",
+                }}
+              />
+              <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
+                Password
+              </Typography>
+              <Input
+                name="password"
+                type="password"
+                size="lg"
+                placeholder="********"
+                className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                labelProps={{
+                  className: "before:content-none after:content-none",
+                }}
+              />
+            </div>
+            {/* <Checkbox
             label={
               <Typography
                 variant="small"
@@ -119,18 +128,18 @@ export function SignIn() {
             }
             containerProps={{ className: "-ml-2.5" }}
           /> */}
-          <Button type="submit" className="mt-6" fullWidth loading={loading}>
-            Sign In
-          </Button>
+            <Button type="submit" className="mt-6" fullWidth loading={loading}>
+              Sign In
+            </Button>
 
-          <div className="flex items-center justify-between gap-2 mt-6">
-            <Typography variant="small" className="font-medium text-gray-900">
-              <a href="#">
-                Forgot Password
-              </a>
-            </Typography>
-          </div>
-          {/* <div className="space-y-4 mt-8">
+            <div className="flex items-center justify-between gap-2 mt-6">
+              <Typography variant="small" className="font-medium text-gray-900">
+                <a href="#">
+                  Forgot Password
+                </a>
+              </Typography>
+            </div>
+            {/* <div className="space-y-4 mt-8">
             <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
               <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g clipPath="url(#clip0_1156_824)">
@@ -152,20 +161,22 @@ export function SignIn() {
               <span>Sign in With Twitter</span>
             </Button>
           </div> */}
-          <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4">
-            Not registered?
-            <Link to="/auth/sign-up" className="text-gray-900 ml-1">Create account</Link>
-          </Typography>
-        </form>
-      </div>
-      {/* <div className="w-2/5 h-full hidden lg:block">
+            <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4">
+              Not registered?
+              <Link to="/auth/sign-up" className="text-gray-900 ml-1">Create account</Link>
+            </Typography>
+          </form>
+        </div>
+        {/* <div className="w-2/5 h-full hidden lg:block">
         <img
           src="/img/pattern.png"
           className="h-full w-full object-cover rounded-3xl"
         />
       </div> */}
 
-    </section>
+      </section>
+      <NotificationDialog open={!!error} message={error} handleCallback={handleCallback} />
+    </>
   );
 }
 

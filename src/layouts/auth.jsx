@@ -32,7 +32,7 @@ export function Auth() {
   ];
 
   return (
-    <div className="relative min-h-screen w-full">
+    <div className="relative h-full w-full">
       <Routes>
         {routes.map(
           ({ layout, pages }) =>

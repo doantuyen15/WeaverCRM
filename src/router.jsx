@@ -116,26 +116,26 @@ export const routes = [
 			}
 		],
 	},
-	// {
-	// 	title: "auth pages",
-	// 	layout: "auth",
-	// 	pages: [
-	// 		{
-	// 			icon: <ServerStackIcon {...menu} />,
-	// 			name: "sign in",
-	// 			path: "/sign-in",
-	// 			element: <SignIn />,
-	// 			roles: ["1", "8"]
-	// 		},
-	// 		{
-	// 			icon: <RectangleStackIcon {...menu} />,
-	// 			name: "sign up",
-	// 			path: "/sign-up",
-	// 			element: <SignUp />,
-	// 			roles: ["1", "8"]
-	// 		},
-	// 	],
-	// },
+	{
+		// title: "auth pages",
+		layout: "auth",
+		pages: [
+			{
+				icon: <ServerStackIcon {...menu} />,
+				name: "sign in",
+				path: "/sign-in",
+				element: <SignIn />,
+				roles: ["1", "8"]
+			},
+			{
+				icon: <RectangleStackIcon {...menu} />,
+				name: "sign up",
+				path: "/sign-up",
+				element: <SignUp />,
+				roles: ["1"]
+			},
+		],
+	},
 ];
 
 

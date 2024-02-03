@@ -16,12 +16,12 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-	<React.StrictMode>
+	<React.Fragment>
 		<ThemeProvider>
 			<MaterialTailwindControllerProvider>
 				<ToastContainer position="bottom-right" autoClose={2500} />
 				<Router />
 			</MaterialTailwindControllerProvider>
 		</ThemeProvider>
-	</React.StrictMode>,
+	</React.Fragment>,
 );

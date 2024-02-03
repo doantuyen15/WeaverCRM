@@ -63,8 +63,8 @@ export function Approval() {
             service: 'getListApproval',
             callback: (data) => {
                 setLoading(false)
-                setTable(JSON.parse(data))
-                tableRef.current = JSON.parse(data)
+                setTable(data)
+                tableRef.current = data
                 console.log(tableRef.current);
             },
             handleError: (error) => {
@@ -104,8 +104,8 @@ export function Approval() {
             service: 'approval',
             callback: (data) => {
                 setLoading(false)
-                setTable(JSON.parse(data))
-                tableRef.current = JSON.parse(data)
+                setTable(data)
+                tableRef.current = data
                 getApprovalList()
             },
             handleError: (error) => {
