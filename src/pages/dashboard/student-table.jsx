@@ -812,7 +812,7 @@ export default function StudentTable() {
                                                                     size="sm"
                                                                     value={
                                                                         <div className="flex items-center justify-center">
-                                                                            {ListStatus[Number(item.status_res)].status}
+                                                                            {ListStatus[Number(item.status_res)]?.status}
                                                                             <ChevronDownIcon strokeWidth={2} className="w-2.5 h-2.5 ml-2" />
                                                                         </div>
                                                                     }
