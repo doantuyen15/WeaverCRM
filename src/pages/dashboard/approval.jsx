@@ -32,6 +32,7 @@ import { useController } from "../../context";
 import useFetch from "../../utils/api/request";
 import orderBy from 'lodash'
 import FormatDate from "../../utils/formatNumber/formatDate";
+import { Slide, toast } from "react-toastify";
 
 const header = ["STT", "Loại lệnh", "Người tạo", "Thời gian tạo", "Chi tiết", "Note"]
 const headerMap = ["type_request", "created_at"]
@@ -74,6 +75,7 @@ export function Approval() {
     const tableRef = useRef([])
 
     useEffect(() => {
+        // toast.error('Wow so easy!', {});
         getApprovalList()
     }, [])
 
