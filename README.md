@@ -1,5 +1,5 @@
 # ⚛ Electron - React - TailwindCSS Template With Router
-
+// "url": "https://github.com/barbarbar338/electron-react-tailwind-template"
 A very simple and functional template for you to use Electron, React and TailwindCSS together.
 
 # 🎀 Features

@@ -1,6 +1,6 @@
 import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { PopupPage } from "./pages/popup";
 import Dashboard from "./layouts/dashboard";
+import SplashScreen from "./layouts/splash";
 import Auth from "./layouts/auth";
 import {
 	HomeIcon,
@@ -25,8 +25,8 @@ export const Router = () => {
 			<Routes>
 				<Route path="/dashboard/*" element={<Dashboard />} />
 				<Route path="/auth/*" element={<Auth />} />
+				<Route path="splash" element={<SplashScreen />} />
 				<Route path="*" element={<Navigate to="/dashboard/home" replace />} />
-				<Route path="popup" element={<PopupPage />} />
 			</Routes>
 		</HashRouter>
 	);
@@ -100,24 +100,24 @@ export const routes = [
 				element: <Tables />,
 				roles: ["1"]
 			},
-			{
-				icon: <InformationCircleIcon {...menu} />,
-				name: "notifications",
-				path: "/notifications",
-				element: <Notifications />,
-				roles: ["1"]
-			},
-			{
-				icon: <UserGroupIcon {...menu} />,
-				name: "profiles",
-				path: "/profiles",
-				element: <Profile />,
-				roles: ["1"]
-			}
+			// {
+			// 	icon: <InformationCircleIcon {...menu} />,
+			// 	name: "notifications",
+			// 	path: "/notifications",
+			// 	element: <Notifications />,
+			// 	roles: ["1"]
+			// },
+			// {
+			// 	icon: <UserGroupIcon {...menu} />,
+			// 	name: "profiles",
+			// 	path: "/profiles",
+			// 	element: <Profile />,
+			// 	roles: ["1"]
+			// }
 		],
 	},
 	{
-		// title: "auth pages",
+		title: "",
 		layout: "auth",
 		pages: [
 			{

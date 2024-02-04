@@ -44,7 +44,7 @@ export function Roles() {
                 <CardBody className="p-4">
                     <div className="mb-10 flex items-center">
                         <div className="gird-cols-1 mb-12 grid gap-12 px-4 w-full">
-                            <Tabs value="treemap">
+                            <Tabs value={mod}>
                                 <TabsHeader className="w-96 mx-auto">
                                     <Tab value={"table"}>
                                         <TableCellsIcon className="-mt-1 mr-2 inline-block h-5 w-5" />

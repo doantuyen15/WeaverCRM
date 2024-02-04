@@ -1,10 +1,10 @@
 export default function useFetch(requestInfo) {
-    let { method, headers, body, service, callback, handleError } = requestInfo
+    let { method, headers, body, service, callback, handleError, handleTimeout } = requestInfo
     headers = {...headers, "content-type": "application/json"}
     body = JSON.stringify(body)
     console.log('fetch...', method, headers, body);
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    const timeout = setTimeout(() => controller.abort(), 10000);
     fetch(`https://wearver-uat.onrender.com/api/${service}`, { method, headers, body, signal: controller.signal })
         .then((response) => response.json())
         .then((data) => {
@@ -18,6 +18,9 @@ export default function useFetch(requestInfo) {
         .catch(error => {
             console.log('error', error.name);
             timeout && clearTimeout(timeout)
-            handleError(error)
+            if (error.name === 'AbortError') handleTimeout && handleTimeout()
+            else {
+                handleError(error)
+            }
         });
 }

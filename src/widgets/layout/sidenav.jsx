@@ -37,7 +37,6 @@ import { useController, setCollapsedSidenav, setShowSidenav } from "./../../cont
 import LogoDark from "../../assets/logo/we_logo_dark.png"
 import LogoLight from "../../assets/logo/we_logo_light.png"
 import { NavLink, useLocation } from 'react-router-dom';
-
 export function Sidenav({ brandName, routes }) {
   const [controller, dispatch] = useController();
   const { sidenavColor, sidenavType, collapsedSidenav, showSidenav, userInfo } = controller;
@@ -46,8 +45,6 @@ export function Sidenav({ brandName, routes }) {
     white: "bg-white shadow-sm",
   };
   const [open, setOpen] = React.useState('');
-  const [openAlert, setOpenAlert] = React.useState(true);
-  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const location = useLocation()
   const handleOpen = (value) => {
     setOpen(open === value ? '/' : value);
@@ -56,7 +53,6 @@ export function Sidenav({ brandName, routes }) {
   useEffect(() => {
     setOpen(location?.pathname)
   }, [])
-
 
   return (
     <aside

@@ -1,17 +1,20 @@
 {
 	"name": "crm-weaver",
 	"author": {
-		"email": "demirci.baris38@gmail.com",
-		"name": "Barış DEMİRCİ",
-		"url": "https://338.rocks"
+		"email": "doantuyen15@gmail.com",
+		"name": "Tin"
 	},
 	"description": "CRM Weaver",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/barbarbar338/electron-react-tailwind-template"
+		"url": "https://github.com/doantuyen15/WeaverCRMrelease"
+	},
+	"publish": {
+		"provider": "github",
+		"releaseType": "release"
 	},
 	"license": "GPL-3.0",
-	"version": "1.0.1",
+	"version": "1.0.0",
 	"private": true,
 	"devDependencies": {
 		"@types/node": "^18.11.10",
@@ -67,6 +70,14 @@
 		"deploy": "npm run react:build && npm run electron:deploy",
 		"format": "prettier --write .",
 		"update": "taze latest -w"
+	},
+	"build": {
+		"win": {
+			"icon": "public/icon.ico"
+		},
+		"mac": {
+			"icon": "public/icon.ico"
+		}
 	},
 	"eslintConfig": {
 		"extends": [
