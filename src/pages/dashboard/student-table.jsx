@@ -52,7 +52,7 @@ const TABLE_HEAD = [
     "Địa chỉ",
     "Email",
     "Người giới thiệu",
-    "Người phụ trách tư vấn/hướng dẫn học sinh"
+    "Advisor"
 ];
 
 const ListStatus = [
@@ -69,15 +69,15 @@ const ListStatus = [
     {
         type: 2,
         status: 'Đã nghỉ',
-        color: ''
+        color: 'gray'
     }
 ]
 
 const Header = [
     'status_res',
-    'id',
+    'id_student',
     'full_name',
-    'register_date',
+    'test_input_date',
     'phone',
     'dob',
     'parent_phone',
@@ -132,6 +132,7 @@ export default function StudentTable() {
             method: 'get',
             service: 'students',
             callback: (data) => {
+                console.log('students', data);
                 setLoading(false)
                 setTable(data)
                 tableRef.current = data
@@ -146,17 +147,20 @@ export default function StudentTable() {
 
     const handleAddStudent = () => {
         setOnAdd(true)
-        setObjectNew(prev => [...prev, {
+        const list = [...objectNew]
+        list.push({
             status_res: 0,
-            phone: '',
             full_name: '',
+            test_input_date: moment(Date.now()).format('DD/MM/YYYY'),
+            phone: '',
             dob: '',
             parent_phone: '',
             address: '',
             email: '',
             referrer: '',
             advisor: ''
-        }])
+        })
+        setObjectNew(list)
     }
 
     const handleCancelAdd = (removeIndex) => {
@@ -255,8 +259,8 @@ export default function StudentTable() {
         })
     }
 
-    const handleMakePayment = (ok) => {
-        console.log(ok);
+    const handleMakePayment = (ok, listPayment = []) => {
+        console.log('handleMakePayment', ok, listPayment);
         if (ok) {
             const requestInfo = {
                 headers: {
@@ -293,7 +297,7 @@ export default function StudentTable() {
                             </Typography>
                         </div>
                         <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                            <Button className="flex items-center gap-3" size="sm" onClick={handleConfirm} disabled={objectNew.length < 1 && objectEdit.length < 1}>
+                            <Button className="flex items-center gap-3" size="sm" onClick={handleConfirm} disabled={objectNew?.length < 1 && objectEdit.length < 1}>
                                 <ArrowUpTrayIcon strokeWidth={2} className="h-4 w-4" /> Confirm & Request
                             </Button>
                             <Button className="flex items-center gap-3" size="sm" onClick={handleAddStudent}>
@@ -567,7 +571,7 @@ export default function StudentTable() {
                                                     <tr {...triggerHover(index)} key={index} className="even:bg-blue-gray-50/50">
                                                         <td className={classes}>
                                                             <div className="w-max">
-                                                                <Menu placement="bottom-start">
+                                                                <Menu placement="bottom-start" open={false}>
                                                                     <MenuHandler>
                                                                         <div className="flex">
                                                                             <Chip
@@ -838,27 +842,10 @@ export default function StudentTable() {
                                                 </div>
                                             </td>
                                             <td className={classes}>
-                                                <Input
-                                                    autoFocus
-                                                    variant="static"
-                                                    type="text"
-                                                    placeholder={TABLE_HEAD[1]}
-                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                                    containerProps={{
-                                                        className: 'min-w-[1px]'
-                                                    }}
-                                                    labelProps={{
-                                                        className: "before:content-none after:content-none",
-                                                    }}
-                                                    value={item[Header[1]]}
-                                                    onChange={(e) => {
-                                                        updateObjectNew(index, Header[1], e.target.value)
-                                                    }}
-                                                    error={item[Header[1]].length !== 10}
-                                                />
                                             </td>
                                             <td className={classes}>
                                                 <Input
+                                                    autoFocus
                                                     variant="static"
                                                     type="text"
                                                     size="sm"
@@ -988,6 +975,44 @@ export default function StudentTable() {
                                                     value={item[Header[8]]}
                                                     onChange={(e) => {
                                                         updateObjectNew(index, Header[8], e.target.value)
+                                                    }}
+                                                />
+                                            </td>
+                                            <td className={classes}>
+                                                <Input
+                                                    variant="static"
+                                                    type="text"
+                                                    size="sm"
+                                                    placeholder={TABLE_HEAD[9]}
+                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                    containerProps={{
+                                                        className: 'min-w-[1px]'
+                                                    }}
+                                                    labelProps={{
+                                                        className: "before:content-none after:content-none",
+                                                    }}
+                                                    value={item[Header[9]]}
+                                                    onChange={(e) => {
+                                                        updateObjectNew(index, Header[9], e.target.value)
+                                                    }}
+                                                />
+                                            </td>
+                                            <td className={classes}>
+                                                <Input
+                                                    variant="static"
+                                                    type="text"
+                                                    size="sm"
+                                                    placeholder={TABLE_HEAD[10]}
+                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                    containerProps={{
+                                                        className: 'min-w-[1px]'
+                                                    }}
+                                                    labelProps={{
+                                                        className: "before:content-none after:content-none",
+                                                    }}
+                                                    value={item[Header[10]]}
+                                                    onChange={(e) => {
+                                                        updateObjectNew(index, Header[10], e.target.value)
                                                     }}
                                                 />
                                             </td>

@@ -12,6 +12,7 @@ import {
     Avatar,
     Tooltip,
     Progress,
+    Alert,
 } from "@material-tailwind/react";
 import {
     EllipsisVerticalIcon,
@@ -34,6 +35,29 @@ import FormatDate from "../../utils/formatNumber/formatDate";
 
 const header = ["STT", "Loại lệnh", "Người tạo", "Thời gian tạo", "Chi tiết", "Note"]
 const headerMap = ["type_request", "created_at"]
+const typeList = [
+    'Add Student',
+    'Delete Student',
+    'Resource management',
+    'Class management',
+    'View teaching schedule',
+    'View Student management',
+    'Update Student',
+    'Browse',
+    'View Financial and accounting management',
+    'View Staff Management',
+    'Add Staff',
+    'Delete Teacher',
+    'Cancel Browse',
+    'Read of Normal User',
+    'Admin',
+    'Decentralization',
+]
+const status = [
+    'Duyệt',
+    'Chờ Duyệt',
+    'Từ chối'
+]
 
 export function Approval() {
     const [controller] = useController();
@@ -93,12 +117,12 @@ export function Approval() {
                 "authorization": `${userInfo.token}`,
             },
             body: [
-                item.id_approval,
+                item.id_approve,
                 item.type_request,
-                '1',
+                item.status_request,
                 item.new_data_update,
-                '0',
-                '1'
+                ok ? '0' : '2',
+                item.id_user_requesting
             ],
             method: 'POST',
             service: 'approval',
@@ -208,7 +232,7 @@ export function Approval() {
                                                             color="blue-gray"
                                                             className="font-bold"
                                                         >
-                                                            {item.index}
+                                                            {item.index + 1}
                                                         </Typography>
                                                     </div>
                                                 </td>
@@ -217,7 +241,7 @@ export function Approval() {
                                                         variant="small"
                                                         className="text-xs font-medium text-blue-gray-600"
                                                     >
-                                                        {item.type_request}
+                                                        {typeList[item.type_request]}
                                                     </Typography>
                                                 </td>
                                                 <td className={className}>
@@ -225,7 +249,7 @@ export function Approval() {
                                                         variant="small"
                                                         className="text-xs font-medium text-blue-gray-600"
                                                     >
-                                                        {/* {budget} */}
+                                                        {item.requesting_username}
                                                     </Typography>
                                                 </td>
                                                 <td className={className}>
@@ -269,6 +293,19 @@ export function Approval() {
                     </CardBody>
                 </Card>
             </div>
+            {/* <Alert
+                open={true}
+                className="max-w-screen-md"
+            >
+                <Typography variant="h5" color="white">
+                    Success
+                </Typography>
+                <Typography color="white" className="mt-2 font-normal">
+                    I don&apos;t know what that word means. I&apos;m happy. But success,
+                    that goes back to what in somebody&apos;s eyes success means. For me,
+                    success is inner peace. That&apos;s a good day for me.
+                </Typography>
+            </Alert> */}
         </div>
     );
 }
