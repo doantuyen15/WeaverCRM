@@ -32,6 +32,8 @@ import { platformSettingsData, conversationsData, projectsData } from "./../../d
 import { authorsTableData, projectsTableData } from "./../../data";
 import React, { useState } from 'react'
 
+const Header = ["Tên", "Mật khẩu", "Số điện thoại", ""]
+
 export function Roles() {
     const [mod, setMod] = useState('table')
 
@@ -42,8 +44,8 @@ export function Roles() {
             </div>
             <Card className="mx-3 -mt-32 mb-6 lg:mx-4 border border-blue-gray-100">
                 <CardBody className="p-4">
-                    <div className="mb-10 flex items-center">
-                        <div className="gird-cols-1 mb-12 grid gap-12 px-4 w-full">
+                    <div className="flex items-center">
+                        <div className="gird-cols-1 grid gap-12 px-4 w-full">
                             <Tabs value={mod}>
                                 <TabsHeader className="w-96 mx-auto">
                                     <Tab value={"table"}>
@@ -60,12 +62,13 @@ export function Roles() {
                                         <table className="w-full min-w-[640px] table-auto">
                                             <thead>
                                                 <tr>
-                                                    {["author", "function", "status", "employed", ""].map((el) => (
+                                                    {Header.map((el) => (
                                                         <th
                                                             key={el}
                                                             className="border-b border-blue-gray-50 py-3 px-5 text-left"
                                                         >
                                                             <Typography
+                                                                
                                                                 variant="small"
                                                                 className="text-[11px] font-bold uppercase text-blue-gray-400"
                                                             >
@@ -87,7 +90,6 @@ export function Roles() {
                                                             <tr key={name}>
                                                                 <td className={className}>
                                                                     <div className="flex items-center gap-4">
-                                                                        <Avatar src={img} alt={name} size="sm" variant="rounded" />
                                                                         <div>
                                                                             <Typography
                                                                                 variant="small"
@@ -111,22 +113,14 @@ export function Roles() {
                                                                     </Typography>
                                                                 </td>
                                                                 <td className={className}>
-                                                                    <Chip
-                                                                        variant="gradient"
-                                                                        color={online ? "green" : "blue-gray"}
-                                                                        value={online ? "online" : "offline"}
-                                                                        className="py-0.5 px-2 text-[11px] font-medium w-fit"
-                                                                    />
-                                                                </td>
-                                                                <td className={className}>
                                                                     <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                                        {date}
+                                                                        {'0909.111.222'}
                                                                     </Typography>
                                                                 </td>
                                                                 <td className={className}>
                                                                     <Typography
                                                                         as="a"
-                                                                        href="#"
+                                                                        // href="#"
                                                                         className="text-xs font-semibold text-blue-gray-600"
                                                                     >
                                                                         Edit
@@ -143,7 +137,7 @@ export function Roles() {
                                         <Card className="w-96 relative mx-auto">
                                             <div className="bg-gradient-to-br from-gray-800 to-gray-900 absolute top-0 left-0 right-0 p-3">
                                                 <Typography variant="h3" color="white" className="font-bold text-center">
-                                                    Admin
+                                                    Giám đốc
                                                 </Typography>
                                             </div>
                                             <List className="mt-16 overflow-auto max-h-40">
@@ -188,6 +182,104 @@ export function Roles() {
                                                 </ListItem>
                                             </List>
                                         </Card>
+                                        <div className="flex mt-4">
+                                            <Card className="w-96 relative mx-auto">
+                                                <div className="bg-gradient-to-br from-gray-800 to-gray-900 absolute top-0 left-0 right-0 p-3">
+                                                    <Typography variant="h3" color="white" className="font-bold text-center">
+                                                        Học Vụ
+                                                    </Typography>
+                                                </div>
+                                                <List className="mt-16 overflow-auto max-h-40">
+                                                    <ListItem>
+                                                        <ListItemPrefix>
+                                                            <Avatar variant="circular" alt="candice" src="https://docs.material-tailwind.com/img/face-1.jpg" />
+                                                        </ListItemPrefix>
+                                                        <div>
+                                                            <Typography variant="h6" color="blue-gray">
+                                                                Tania Andrew
+                                                            </Typography>
+                                                            <Typography variant="small" color="gray" className="font-normal">
+                                                                Software Engineer @ Material Tailwind
+                                                            </Typography>
+                                                        </div>
+                                                    </ListItem>
+                                                    <ListItem>
+                                                        <ListItemPrefix>
+                                                            <Avatar variant="circular" alt="alexander" src="https://docs.material-tailwind.com/img/face-2.jpg" />
+                                                        </ListItemPrefix>
+                                                        <div>
+                                                            <Typography variant="h6" color="blue-gray">
+                                                                Alexander
+                                                            </Typography>
+                                                            <Typography variant="small" color="gray" className="font-normal">
+                                                                Backend Developer @ Material Tailwind
+                                                            </Typography>
+                                                        </div>
+                                                    </ListItem>
+                                                    <ListItem>
+                                                        <ListItemPrefix>
+                                                            <Avatar variant="circular" alt="emma" src="https://docs.material-tailwind.com/img/face-3.jpg" />
+                                                        </ListItemPrefix>
+                                                        <div>
+                                                            <Typography variant="h6" color="blue-gray">
+                                                                Emma Willever
+                                                            </Typography>
+                                                            <Typography variant="small" color="gray" className="font-normal">
+                                                                UI/UX Designer @ Material Tailwind
+                                                            </Typography>
+                                                        </div>
+                                                    </ListItem>
+                                                </List>
+                                            </Card>
+                                            <Card className="w-96 relative mx-auto">
+                                                <div className="bg-gradient-to-br from-gray-800 to-gray-900 absolute top-0 left-0 right-0 p-3">
+                                                    <Typography variant="h3" color="white" className="font-bold text-center">
+                                                        Kế Toán
+                                                    </Typography>
+                                                </div>
+                                                <List className="mt-16 overflow-auto max-h-40">
+                                                    <ListItem>
+                                                        <ListItemPrefix>
+                                                            <Avatar variant="circular" alt="candice" src="https://docs.material-tailwind.com/img/face-1.jpg" />
+                                                        </ListItemPrefix>
+                                                        <div>
+                                                            <Typography variant="h6" color="blue-gray">
+                                                                Tania Andrew
+                                                            </Typography>
+                                                            <Typography variant="small" color="gray" className="font-normal">
+                                                                Software Engineer @ Material Tailwind
+                                                            </Typography>
+                                                        </div>
+                                                    </ListItem>
+                                                    <ListItem>
+                                                        <ListItemPrefix>
+                                                            <Avatar variant="circular" alt="alexander" src="https://docs.material-tailwind.com/img/face-2.jpg" />
+                                                        </ListItemPrefix>
+                                                        <div>
+                                                            <Typography variant="h6" color="blue-gray">
+                                                                Alexander
+                                                            </Typography>
+                                                            <Typography variant="small" color="gray" className="font-normal">
+                                                                Backend Developer @ Material Tailwind
+                                                            </Typography>
+                                                        </div>
+                                                    </ListItem>
+                                                    <ListItem>
+                                                        <ListItemPrefix>
+                                                            <Avatar variant="circular" alt="emma" src="https://docs.material-tailwind.com/img/face-3.jpg" />
+                                                        </ListItemPrefix>
+                                                        <div>
+                                                            <Typography variant="h6" color="blue-gray">
+                                                                Emma Willever
+                                                            </Typography>
+                                                            <Typography variant="small" color="gray" className="font-normal">
+                                                                UI/UX Designer @ Material Tailwind
+                                                            </Typography>
+                                                        </div>
+                                                    </ListItem>
+                                                </List>
+                                            </Card>
+                                        </div>
                                     </TabPanel>
                                 </TabsBody>
                             </Tabs>

@@ -1,5 +1,7 @@
+import { toast } from "react-toastify";
+
 export default function useFetch(requestInfo) {
-    let { method, headers, body, service, callback, handleError, handleTimeout } = requestInfo
+    let { method, headers, body, service, callback, handleError, handleTimeout, showToast } = requestInfo
     headers = {...headers, "content-type": "application/json"}
     body = JSON.stringify(body)
     console.log('fetch...', method, headers, body);
@@ -12,7 +14,10 @@ export default function useFetch(requestInfo) {
             timeout && clearTimeout(timeout)
             let resData = data.Data
             if (typeof data.Data === 'string') resData = JSON.parse(data.Data)
-            if (data.success || data.status == 'success' || data.status == 'succes') callback(resData || []);
+            if (data.success || data.status == 'success' || data.status == 'succes') {
+                callback(resData || []);
+                if (showToast) toast.success(data?.message);
+            }
             else handleError(data.message)
         })
         .catch(error => {

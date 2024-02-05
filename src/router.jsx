@@ -127,13 +127,13 @@ export const routes = [
 				element: <SignIn />,
 				roles: ["1", "8"]
 			},
-			{
-				icon: <RectangleStackIcon {...menu} />,
-				name: "sign up",
-				path: "/sign-up",
-				element: <SignUp />,
-				roles: ["1"]
-			},
+			// {
+			// 	icon: <RectangleStackIcon {...menu} />,
+			// 	name: "sign up",
+			// 	path: "/sign-up",
+			// 	element: <SignUp />,
+			// 	roles: ["1"]
+			// },
 		],
 	},
 ];

@@ -84,7 +84,12 @@ const Header = [
     'address',
     'email',
     'referrer',
-    'advisor'
+    'advisor',
+    'listening',
+    'speaking',
+    'reading',
+    'writing',
+    'test_input_score'
 ]
 
 const HeaderScore = [
@@ -805,223 +810,312 @@ export default function StudentTable() {
                                     const isLast = index === objectNew.length - 1;
                                     const classes = "p-2" + (isLast ? " border-b border-blue-gray-50" : "");
                                     return (
-                                        <tr key={index} className="even:bg-blue-gray-50/50">
-                                            <td className={classes}>
-                                                <div className="w-max">
-                                                    <Menu placement="bottom-start">
-                                                        <MenuHandler>
-                                                            <div className="flex">
-                                                                <Chip
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    value={
-                                                                        <div className="flex items-center justify-center">
-                                                                            {ListStatus[Number(item.status_res)]?.status}
-                                                                            <ChevronDownIcon strokeWidth={2} className="w-2.5 h-2.5 ml-2" />
-                                                                        </div>
-                                                                    }
-                                                                    className="min-w-32"
-                                                                    color={ListStatus[Number(item.status_res)].color}
-                                                                />
-                                                            </div>
-                                                        </MenuHandler>
-                                                        <MenuList className="min-w-0 p-1">
-                                                            {ListStatus.map(({ type, status, color }) => (
-                                                                <MenuItem className="p-1" onClick={() => updateObjectNew(index, Header[0], type)}>
+                                        <>
+                                            <tr key={index} className="even:bg-blue-gray-50/50">
+                                                <td className={classes}>
+                                                    <div className="w-max">
+                                                        <Menu placement="bottom-start">
+                                                            <MenuHandler>
+                                                                <div className="flex">
                                                                     <Chip
-                                                                        className="w-full text-center"
                                                                         variant="ghost"
                                                                         size="sm"
-                                                                        value={status}
-                                                                        color={color}
+                                                                        value={
+                                                                            <div className="flex items-center justify-center">
+                                                                                {ListStatus[Number(item.status_res)]?.status}
+                                                                                <ChevronDownIcon strokeWidth={2} className="w-2.5 h-2.5 ml-2" />
+                                                                            </div>
+                                                                        }
+                                                                        className="min-w-32"
+                                                                        color={ListStatus[Number(item.status_res)].color}
                                                                     />
-                                                                </MenuItem>
-                                                            ))}
-                                                        </MenuList>
-                                                    </Menu>
-                                                </div>
-                                            </td>
-                                            <td className={classes}>
-                                            </td>
-                                            <td className={classes}>
-                                                <Input
-                                                    autoFocus
-                                                    variant="static"
-                                                    type="text"
-                                                    size="sm"
-                                                    placeholder={TABLE_HEAD[2]}
-                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                                    containerProps={{
-                                                        className: 'min-w-[1px]'
-                                                    }}
-                                                    labelProps={{
-                                                        className: "before:content-none after:content-none",
-                                                    }}
-                                                    value={item[Header[2]]}
-                                                    onChange={(e) => {
-                                                        updateObjectNew(index, Header[2], e.target.value)
-                                                    }}
-                                                />
-                                            </td>
-                                            <td className={classes}>
-                                                <Input
-                                                    variant="static"
-                                                    type="text"
-                                                    size="sm"
-                                                    placeholder={TABLE_HEAD[3]}
-                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                                    containerProps={{
-                                                        className: 'min-w-[1px]'
-                                                    }}
-                                                    labelProps={{
-                                                        className: "before:content-none after:content-none",
-                                                    }}
-                                                    value={item[Header[3]]}
-                                                    onChange={(e) => {
-                                                        updateObjectNew(index, Header[3], e.target.value)
-                                                    }}
-                                                />
-                                                {/* <DayPickerInput selected={''} onChange={(date) => updateObjectEdit(header[3], date)} /> */}
-                                            </td>
-                                            <td className={classes}>
-                                                <Input
-                                                    variant="static"
-                                                    type="text"
-                                                    size="sm"
-                                                    placeholder={TABLE_HEAD[4]}
-                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                                    containerProps={{
-                                                        className: 'min-w-[1px]'
-                                                    }}
-                                                    labelProps={{
-                                                        className: "before:content-none after:content-none",
-                                                    }}
-                                                    value={item[Header[4]]}
-                                                    onChange={(e) => {
-                                                        updateObjectNew(index, Header[4], e.target.value)
-                                                    }}
-                                                />
-                                            </td>
-                                            <td className={classes}>
-                                                <Input
-                                                    variant="static"
-                                                    type="text"
-                                                    size="sm"
-                                                    placeholder={TABLE_HEAD[5]}
-                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                                    containerProps={{
-                                                        className: 'min-w-[1px]'
-                                                    }}
-                                                    labelProps={{
-                                                        className: "before:content-none after:content-none",
-                                                    }}
-                                                    value={item[Header[5]]}
-                                                    onChange={(e) => {
-                                                        updateObjectNew(index, Header[5], e.target.value)
-                                                    }}
-                                                />
-                                            </td>
-                                            <td className={classes}>
-                                                <Input
-                                                    variant="static"
-                                                    type="text"
-                                                    size="sm"
-                                                    placeholder={TABLE_HEAD[6]}
-                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                                    containerProps={{
-                                                        className: 'min-w-[1px]'
-                                                    }}
-                                                    labelProps={{
-                                                        className: "before:content-none after:content-none",
-                                                    }}
-                                                    value={item[Header[6]]}
-                                                    onChange={(e) => {
-                                                        updateObjectNew(index, Header[6], e.target.value)
-                                                    }}
-                                                />
-                                            </td>
-                                            <td className={classes}>
-                                                <Input
-                                                    variant="static"
-                                                    type="text"
-                                                    size="sm"
-                                                    placeholder={TABLE_HEAD[7]}
-                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                                    containerProps={{
-                                                        className: 'min-w-[1px]'
-                                                    }}
-                                                    labelProps={{
-                                                        className: "before:content-none after:content-none",
-                                                    }}
-                                                    value={item[Header[7]]}
-                                                    onChange={(e) => {
-                                                        updateObjectNew(index, Header[7], e.target.value)
-                                                    }}
-                                                />
-                                            </td>
-                                            <td className={classes}>
-                                                <Input
-                                                    variant="static"
-                                                    type="text"
-                                                    size="sm"
-                                                    placeholder={TABLE_HEAD[8]}
-                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                                    containerProps={{
-                                                        className: 'min-w-[1px]'
-                                                    }}
-                                                    labelProps={{
-                                                        className: "before:content-none after:content-none",
-                                                    }}
-                                                    value={item[Header[8]]}
-                                                    onChange={(e) => {
-                                                        updateObjectNew(index, Header[8], e.target.value)
-                                                    }}
-                                                />
-                                            </td>
-                                            <td className={classes}>
-                                                <Input
-                                                    variant="static"
-                                                    type="text"
-                                                    size="sm"
-                                                    placeholder={TABLE_HEAD[9]}
-                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                                    containerProps={{
-                                                        className: 'min-w-[1px]'
-                                                    }}
-                                                    labelProps={{
-                                                        className: "before:content-none after:content-none",
-                                                    }}
-                                                    value={item[Header[9]]}
-                                                    onChange={(e) => {
-                                                        updateObjectNew(index, Header[9], e.target.value)
-                                                    }}
-                                                />
-                                            </td>
-                                            <td className={classes}>
-                                                <Input
-                                                    variant="static"
-                                                    type="text"
-                                                    size="sm"
-                                                    placeholder={TABLE_HEAD[10]}
-                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                                    containerProps={{
-                                                        className: 'min-w-[1px]'
-                                                    }}
-                                                    labelProps={{
-                                                        className: "before:content-none after:content-none",
-                                                    }}
-                                                    value={item[Header[10]]}
-                                                    onChange={(e) => {
-                                                        updateObjectNew(index, Header[10], e.target.value)
-                                                    }}
-                                                />
-                                            </td>
-                                            <td className={classes} onClick={() => handleCancelAdd(index)}>
-                                                <IconButton variant="text">
-                                                    <ArrowUturnLeftIcon className="h-4 w-4" />
-                                                </IconButton>
-                                            </td>
-                                        </tr>
+                                                                </div>
+                                                            </MenuHandler>
+                                                            <MenuList className="min-w-0 p-1">
+                                                                {ListStatus.map(({ type, status, color }) => (
+                                                                    <MenuItem className="p-1" onClick={() => updateObjectNew(index, Header[0], type)}>
+                                                                        <Chip
+                                                                            className="w-full text-center"
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            value={status}
+                                                                            color={color}
+                                                                        />
+                                                                    </MenuItem>
+                                                                ))}
+                                                            </MenuList>
+                                                        </Menu>
+                                                    </div>
+                                                </td>
+                                                <td className={classes}>
+                                                </td>
+                                                <td className={classes}>
+                                                    <Input
+                                                        autoFocus
+                                                        variant="static"
+                                                        type="text"
+                                                        size="sm"
+                                                        placeholder={TABLE_HEAD[2]}
+                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                        containerProps={{
+                                                            className: 'min-w-[1px]'
+                                                        }}
+                                                        labelProps={{
+                                                            className: "before:content-none after:content-none",
+                                                        }}
+                                                        value={item[Header[2]]}
+                                                        onChange={(e) => {
+                                                            updateObjectNew(index, Header[2], e.target.value)
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td className={classes}>
+                                                    <Input
+                                                        variant="static"
+                                                        type="text"
+                                                        size="sm"
+                                                        placeholder={TABLE_HEAD[3]}
+                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                        containerProps={{
+                                                            className: 'min-w-[1px]'
+                                                        }}
+                                                        labelProps={{
+                                                            className: "before:content-none after:content-none",
+                                                        }}
+                                                        value={item[Header[3]]}
+                                                        onChange={(e) => {
+                                                            updateObjectNew(index, Header[3], e.target.value)
+                                                        }}
+                                                    />
+                                                    {/* <DayPickerInput selected={''} onChange={(date) => updateObjectEdit(header[3], date)} /> */}
+                                                </td>
+                                                <td className={classes}>
+                                                    <Input
+                                                        variant="static"
+                                                        type="text"
+                                                        size="sm"
+                                                        placeholder={TABLE_HEAD[4]}
+                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                        containerProps={{
+                                                            className: 'min-w-[1px]'
+                                                        }}
+                                                        labelProps={{
+                                                            className: "before:content-none after:content-none",
+                                                        }}
+                                                        value={item[Header[4]]}
+                                                        onChange={(e) => {
+                                                            updateObjectNew(index, Header[4], e.target.value)
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td className={classes}>
+                                                    <Input
+                                                        variant="static"
+                                                        type="text"
+                                                        size="sm"
+                                                        placeholder={TABLE_HEAD[5]}
+                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                        containerProps={{
+                                                            className: 'min-w-[1px]'
+                                                        }}
+                                                        labelProps={{
+                                                            className: "before:content-none after:content-none",
+                                                        }}
+                                                        value={item[Header[5]]}
+                                                        onChange={(e) => {
+                                                            updateObjectNew(index, Header[5], e.target.value)
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td className={classes}>
+                                                    <Input
+                                                        variant="static"
+                                                        type="text"
+                                                        size="sm"
+                                                        placeholder={TABLE_HEAD[6]}
+                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                        containerProps={{
+                                                            className: 'min-w-[1px]'
+                                                        }}
+                                                        labelProps={{
+                                                            className: "before:content-none after:content-none",
+                                                        }}
+                                                        value={item[Header[6]]}
+                                                        onChange={(e) => {
+                                                            updateObjectNew(index, Header[6], e.target.value)
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td className={classes}>
+                                                    <Input
+                                                        variant="static"
+                                                        type="text"
+                                                        size="sm"
+                                                        placeholder={TABLE_HEAD[7]}
+                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                        containerProps={{
+                                                            className: 'min-w-[1px]'
+                                                        }}
+                                                        labelProps={{
+                                                            className: "before:content-none after:content-none",
+                                                        }}
+                                                        value={item[Header[7]]}
+                                                        onChange={(e) => {
+                                                            updateObjectNew(index, Header[7], e.target.value)
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td className={classes}>
+                                                    <Input
+                                                        variant="static"
+                                                        type="text"
+                                                        size="sm"
+                                                        placeholder={TABLE_HEAD[8]}
+                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                        containerProps={{
+                                                            className: 'min-w-[1px]'
+                                                        }}
+                                                        labelProps={{
+                                                            className: "before:content-none after:content-none",
+                                                        }}
+                                                        value={item[Header[8]]}
+                                                        onChange={(e) => {
+                                                            updateObjectNew(index, Header[8], e.target.value)
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td className={classes}>
+                                                    <Input
+                                                        variant="static"
+                                                        type="text"
+                                                        size="sm"
+                                                        placeholder={TABLE_HEAD[9]}
+                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                        containerProps={{
+                                                            className: 'min-w-[1px]'
+                                                        }}
+                                                        labelProps={{
+                                                            className: "before:content-none after:content-none",
+                                                        }}
+                                                        value={item[Header[9]]}
+                                                        onChange={(e) => {
+                                                            updateObjectNew(index, Header[9], e.target.value)
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td className={classes}>
+                                                    <Input
+                                                        variant="static"
+                                                        type="text"
+                                                        size="sm"
+                                                        placeholder={TABLE_HEAD[10]}
+                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                        containerProps={{
+                                                            className: 'min-w-[1px]'
+                                                        }}
+                                                        labelProps={{
+                                                            className: "before:content-none after:content-none",
+                                                        }}
+                                                        value={item[Header[10]]}
+                                                        onChange={(e) => {
+                                                            updateObjectNew(index, Header[10], e.target.value)
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td className={classes} onClick={() => handleCancelAdd(index)}>
+                                                    <IconButton variant="text">
+                                                        <ArrowUturnLeftIcon className="h-4 w-4" />
+                                                    </IconButton>
+                                                </td>
+                                            </tr>
+                                            <tr key={'score' + index} className="even:bg-blue-gray-50/50">
+                                                <td colSpan={2}></td>
+                                                <td colSpan={15}>
+                                                    <div className="flex items-center gap-4 p-2">
+                                                        <div className="flex items-center">
+                                                            <Typography color="gray" className="mr-2 font-normal">
+                                                                Wrting
+                                                            </Typography>
+                                                            <Input
+                                                                maxLength={5}
+                                                                type="tel"
+                                                                className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                                containerProps={{
+                                                                    className: "min-w-[72px] max-w-[72px]"
+                                                                }}
+                                                                labelProps={{
+                                                                    className: "before:content-none after:content-none",
+                                                                }}
+                                                                value={item[Header[11]]}
+                                                                onChange={(e) => {
+                                                                    updateObjectNew(index, Header[11], e.target.value)
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div className="flex items-center">
+                                                            <Typography color="gray" className="mr-2 font-normal">
+                                                                Reading
+                                                            </Typography>
+                                                            <Input
+                                                                maxLength={5}
+                                                                type="tel"
+                                                                className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                                containerProps={{
+                                                                    className: "min-w-[72px] max-w-[72px]"
+                                                                }}
+                                                                labelProps={{
+                                                                    className: "before:content-none after:content-none",
+                                                                }}
+                                                                value={item[Header[12]]}
+                                                                onChange={(e) => {
+                                                                    updateObjectNew(index, Header[12], e.target.value)
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div className="flex items-center">
+                                                            <Typography color="gray" className="mr-2 font-normal">
+                                                                Speaking
+                                                            </Typography>
+                                                            <Input
+                                                                maxLength={5}
+                                                                type="tel"
+                                                                className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                                containerProps={{
+                                                                    className: "min-w-[72px] max-w-[72px]"
+                                                                }}
+                                                                labelProps={{
+                                                                    className: "before:content-none after:content-none",
+                                                                }}
+                                                                value={item[Header[13]]}
+                                                                onChange={(e) => {
+                                                                    updateObjectNew(index, Header[13], e.target.value)
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div className="flex items-center">
+                                                            <Typography color="gray" className="mr-2 font-normal">
+                                                                Listening
+                                                            </Typography>
+                                                            <Input
+                                                                maxLength={5}
+                                                                type="tel"
+                                                                className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                                containerProps={{
+                                                                    className: "min-w-[72px] max-w-[72px]"
+                                                                }}
+                                                                labelProps={{
+                                                                    className: "before:content-none after:content-none",
+                                                                }}
+                                                                value={item[Header[14]]}
+                                                                onChange={(e) => {
+                                                                    updateObjectNew(index, Header[14], e.target.value)
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </>
                                     );
                                 },
                             )}

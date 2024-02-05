@@ -30,7 +30,7 @@ import { CheckBadgeIcon, CheckCircleIcon, ChevronDownIcon, ChevronUpDownIcon, Ch
 import Amethyst from "../../assets/amethyst.png";
 import { useController } from "../../context";
 import useFetch from "../../utils/api/request";
-import orderBy from 'lodash'
+import { orderBy } from 'lodash';
 import FormatDate from "../../utils/formatNumber/formatDate";
 import { Slide, toast } from "react-toastify";
 
@@ -75,7 +75,6 @@ export function Approval() {
     const tableRef = useRef([])
 
     useEffect(() => {
-        // toast.error('Wow so easy!', {});
         getApprovalList()
     }, [])
 
@@ -89,7 +88,8 @@ export function Approval() {
             service: 'getListApproval',
             callback: (data) => {
                 setLoading(false)
-                setTable(data)
+                setTable(data?.filter(item => item.status_request !== '1'))
+                // setTable(data)
                 tableRef.current = data
                 console.log(tableRef.current);
             },
@@ -130,14 +130,13 @@ export function Approval() {
             service: 'approval',
             callback: (data) => {
                 setLoading(false)
-                setTable(data)
-                tableRef.current = data
                 getApprovalList()
             },
             handleError: (error) => {
                 console.log('error', error)
                 setLoading(false)
-            }
+            },
+            showToast: true
         }
         useFetch(requestInfo)
     }

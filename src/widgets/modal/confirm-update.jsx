@@ -42,7 +42,11 @@ const TABLE_HEAD = [
     "Địa chỉ",
     "Email",
     "Người giới thiệu",
-    "Người phụ trách tư vấn/hướng dẫn học sinh"
+    "Người phụ trách tư vấn/hướng dẫn học sinh",
+    'Listening',
+    'Speaking',
+    'Reading',
+    'Writing'
 ];
 
 export function ModalConfirmUpdate({ handleOpen, open, objectNew, objectEdit, handleConfirmCallback, loading }) {
@@ -190,6 +194,42 @@ export function ModalConfirmUpdate({ handleOpen, open, objectNew, objectEdit, ha
                                                     className="font-normal"
                                                 >
                                                     {item.advisor}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {item.listening}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {item.speaking}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {item.reading}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {item.writing}
                                                 </Typography>
                                             </td>
                                         </tr>
