@@ -25,17 +25,76 @@ import {
     PencilIcon,
     TableCellsIcon,
     RectangleGroupIcon,
+    PlusIcon,
 } from "@heroicons/react/24/solid";
 import { Link } from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "./../../widgets/cards";
 import { platformSettingsData, conversationsData, projectsData } from "./../../data";
 import { authorsTableData, projectsTableData } from "./../../data";
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { PlusCircleIcon } from "@heroicons/react/24/outline";
+import { CreateAccount } from "../../widgets/modal/create-accout";
+import useFetch from "../../utils/api/request";
+import { useController } from "../../context";
 
-const Header = ["Tên", "Mật khẩu", "Số điện thoại", ""]
+const Header = ["Tên", "Chức vụ", "Mật khẩu", "Số điện thoại", ""]
 
 export function Roles() {
     const [mod, setMod] = useState('table')
+    const [openCreate, setOpenCreate] = useState(false)
+    const [controller] = useController();
+    const {userInfo} = controller;
+
+    useEffect(() => {
+        const requestInfo = {
+            headers: {
+                "authorization": `Bearer ${userInfo.token}`,
+            },
+            method: 'get',
+            service: 'getInfoStaff',
+            callback: (data) => {
+                console.log('students', data);
+                // setLoading(false)
+                // setTable(data)
+                // tableRef.current = data
+            },
+            handleError: (error) => {
+                console.log('error', error)
+                // setLoading(false)
+            }
+        }
+        useFetch(requestInfo)
+    }, [])
+    
+
+    const handleCancelCreate = () => {
+        setOpenCreate(false)
+    }
+
+    const handleCreateCallback = (ok, account) => {
+        console.log('handleCreateCallback' , account);
+        if (ok) {
+            const requestInfo = {
+                body: Object.values(account),
+                headers: {
+                    "authorization": `Bearer ${userInfo.token}`,
+                },
+                method: 'post',
+                service: 'registerUsers',
+                callback: (data) => {
+                    console.log('students', data);
+                    // setLoading(false)
+                    // setTable(data)
+                    // tableRef.current = data
+                },
+                handleError: (error) => {
+                    console.log('error', error)
+                    // setLoading(false)
+                }
+            }
+            useFetch(requestInfo)
+        }
+    }
 
     return (
         <>
@@ -45,7 +104,16 @@ export function Roles() {
             <Card className="mx-3 -mt-32 mb-6 lg:mx-4 border border-blue-gray-100">
                 <CardBody className="p-4">
                     <div className="flex items-center">
-                        <div className="gird-cols-1 grid gap-12 px-4 w-full">
+                        <div className="relative gird-cols-1 grid gap-12 px-4 w-full">
+                            <div className="absolute flex right-5 z-40 bg-blue-gray-50 gap-2 justify-center bg-opacity-60 rounded-lg p-1 items-center">
+                                <Button 
+                                    className="flex items-center gap-3" 
+                                    size="sm" 
+                                    onClick={() => setOpenCreate(true)}
+                                >
+                                    <PlusIcon strokeWidth={2} className="w-4 h-4 text-white" /> Create
+                                </Button>
+                            </div>
                             <Tabs value={mod}>
                                 <TabsHeader className="w-96 mx-auto">
                                     <Tab value={"table"}>
@@ -103,6 +171,11 @@ export function Roles() {
                                                                             </Typography>
                                                                         </div>
                                                                     </div>
+                                                                </td>
+                                                                <td className={className}>
+                                                                    <Typography className="text-xs font-semibold text-blue-gray-600">
+                                                                        {'******'}
+                                                                    </Typography>
                                                                 </td>
                                                                 <td className={className}>
                                                                     <Typography className="text-xs font-semibold text-blue-gray-600">
@@ -287,6 +360,7 @@ export function Roles() {
                     </div>
                 </CardBody>
             </Card>
+            <CreateAccount open={openCreate} handleOpen={handleCancelCreate} handleCallback={handleCreateCallback} />
         </>
     );
 }
