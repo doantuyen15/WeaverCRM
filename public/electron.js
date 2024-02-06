@@ -66,10 +66,8 @@ ipcMain.on("check_update", (event, arg) => {
 });
 
 ipcMain.on("finish_init_app", (event, arg) => {
-	config.mainWindow.once("ready-to-show", () => {
-		config.splash.close()
-	});
 	setTimeout(() => {
+		config.splash.close()
 		config.mainWindow.maximize()
 	}, 2000);
 });

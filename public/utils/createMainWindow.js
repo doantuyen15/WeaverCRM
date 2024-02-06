@@ -9,19 +9,19 @@ exports.createMainWindow = async () => {
 		webPreferences: {
 			nodeIntegration: true,
 			enableRemoteModule: true,
-			show: false,
 			devTools: config.isDev,
 			contextIsolation: false,
 			preload: __dirname + '/preload.js',
 			enableremotemodule: true,
             webSecurity: false,
-            allowRendererProcessReuse: true,
+            allowRendererProcessReuse: true
 		},
 		icon: config.icon,
 		title: config.appName,
+		show: false
 	});
     // window.maximize()
-	window.hide();
+	// window.hide();
 	window.setMenuBarVisibility(false);
 	remote.enable(window.webContents);
 
