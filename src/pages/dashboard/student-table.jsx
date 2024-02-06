@@ -93,7 +93,7 @@ const Header = [
 ]
 
 const HeaderScore = [
-    'Chương trình học',
+    // 'Chương trình học',
     'Listening',
     'Speaking',
     'Reading',
@@ -106,7 +106,7 @@ export default function StudentTable() {
     const { userInfo } = controller;
     const [openModalConfirm, setOpenModalConfirm] = React.useState(false);
     const [openModalEdit, setOpenModalEdit] = React.useState(false);
-    const [table, setTable] = useState([])
+    const [studentList, setStudentList] = useState([])
     const [keySort, setKeySort] = useState('')
     const [isAsc, setIsAsc] = useState(true)
     const [, updateState] = React.useState();
@@ -132,14 +132,14 @@ export default function StudentTable() {
         setLoading(true)
         const requestInfo = {
             headers: {
-                "authorization": `Bearer ${userInfo.token}`,
+                "authorization": `${userInfo.token}`,
             },
             method: 'get',
             service: 'students',
             callback: (data) => {
                 console.log('students', data);
                 setLoading(false)
-                setTable(data)
+                setStudentList(data)
                 tableRef.current = data
             },
             handleError: (error) => {
@@ -154,16 +154,26 @@ export default function StudentTable() {
         setOnAdd(true)
         const list = [...objectNew]
         list.push({
-            status_res: 0,
-            full_name: '',
-            test_input_date: moment(Date.now()).format('DD/MM/YYYY'),
-            phone: '',
+            status_res: '1',
             dob: '',
+            full_name: '',
+            phone: '',
             parent_phone: '',
             address: '',
             email: '',
             referrer: '',
-            advisor: ''
+            advisor: '',
+            test_input_date: moment(Date.now()).format('DD/MM/YYYY'),
+            listening: '', 
+            speaking: '',
+            reading: '',
+            writing: '',
+            grammar: '',
+            vocabulary: '',
+            test_input_score: '',
+            id_class_temp: '',
+            note: ''
+            // li
         })
         setObjectNew(list)
     }
@@ -174,13 +184,13 @@ export default function StudentTable() {
 
     const handleSearch = (searchValue) => {
         var search = tableRef.current.filter(item => item.full_name.toLowerCase().includes(searchValue.toLowerCase()));
-        setTable(search)
+        setStudentList(search)
     }
 
     const handleSort = (indexCol) => {
         let sorted
         sorted = orderBy(tableRef.current, [Header[indexCol]], [isAsc ? 'asc' : 'desc'])
-        setTable([...sorted])
+        setStudentList([...sorted])
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
     }
@@ -224,24 +234,33 @@ export default function StudentTable() {
     const sendRequestAddStudent = () => {
         console.log('sendRequestAddStudent', Object.values(objectNew));
         setLoading(true)
-        const requestInfo = {
-            headers: {
-                "authorization": `${userInfo.token}`,
-            },
-            body: Object.values(objectNew[0]),
-            method: 'post',
-            service: 'createStudent',
-            callback: (data) => {
-                setLoading(false)
-                setOpenModalConfirm(false)
-            },
-            handleError: (error) => {
-                console.log('error', error)
-                setLoading(false)
-                setOpenModalConfirm(false)
+
+        objectNew.forEach(item => {
+            const requestInfo = {
+                headers: {
+                    "authorization": `${userInfo.token}`,
+                },
+                body: Object.values(item),
+                method: 'post',
+                service: 'createStudent',
+                callback: (data) => {
+                    setLoading(false)
+                    setOpenModalConfirm(false)
+                },
+                handleError: (error) => {
+                    console.log('error', error)
+                    setLoading(false)
+                    setOpenModalConfirm(false)
+                },
+                showToast: true
             }
-        }
-        useFetch(requestInfo)
+            useFetch(requestInfo)
+        })
+    }
+
+    const handleRemove = () => {
+        console.log('handleRemove');
+        // setAlertModal(true)
     }
 
     const triggerHover = (index) => {
@@ -266,24 +285,39 @@ export default function StudentTable() {
 
     const handleMakePayment = (ok, listPayment = []) => {
         console.log('handleMakePayment', ok, listPayment);
+        setLoading(true)
+
         if (ok) {
-            const requestInfo = {
-                headers: {
-                    "authorization": `Bearer ${userInfo.token}`,
-                },
-                method: 'get',
-                service: 'students',
-                callback: (data) => {
-                    setLoading(false)
-                    setTable(data)
-                    tableRef.current = data
-                },
-                handleError: (error) => {
-                    console.log('error', error)
-                    setLoading(false)
-                }
-            }
-            // useFetch(requestInfo)
+            listPayment.forEach(item => {
+                setTimeout(() => {
+                    const requestInfo = {
+                        body: [
+                            item.id_student,
+                            item.id_class,
+                            item.id_class_type,
+                            item.date,
+                            item.tuition,
+                            item.note
+                        ],
+                        headers: {
+                            "authorization": `${userInfo.token}`,
+                        },
+                        method: 'post',
+                        service: 'createTuition',
+                        callback: (data) => {
+                            setLoading(false)
+                            // setStudentList(data)
+                            // tableRef.current = data
+                        },
+                        handleError: (error) => {
+                            // console.log('error', error)
+                            setLoading(false)
+                        },
+                        showToast: true
+                    }
+                    useFetch(requestInfo)
+                }, 300);
+            })
         }
         setOpenPayment(false)
     }
@@ -366,9 +400,9 @@ export default function StudentTable() {
                             </tr>
                         </thead>
                         <tbody>
-                            {table?.map(
+                            {studentList?.map(
                                 (item, index) => {
-                                    const isLast = index === table.length - 1;
+                                    const isLast = index === studentList.length - 1;
                                     const classes = isLast
                                         ? "p-2"
                                         : "p-2 border-b border-blue-gray-50";
@@ -571,7 +605,7 @@ export default function StudentTable() {
                                                 </td>
                                             </tr>
                                         ) : (
-                                            <Popover open={index === openScore} placement="bottom-start">
+                                            <Popover open={index === openScore} placement="top-start">
                                                 <PopoverHandler>
                                                     <tr {...triggerHover(index)} key={index} className="even:bg-blue-gray-50/50">
                                                         <td className={classes}>
@@ -714,13 +748,13 @@ export default function StudentTable() {
                                                                 </MenuHandler>
                                                                 <MenuList>
                                                                     <MenuItem onClick={() => handleEdit(item, index)}>Edit</MenuItem>
-                                                                    <MenuItem>Remove</MenuItem>
+                                                                    {userInfo.role === '1' && <MenuItem onClick={() => handleRemove(item, index)}>Remove</MenuItem>}
                                                                 </MenuList>
                                                             </Menu>
                                                         </td>
                                                     </tr>
                                                 </PopoverHandler>
-                                                <PopoverContent {...triggerHover(index)} className="z-20">
+                                                {(item.writing || item.vocabulary || item.speaking || item.reading) && (<PopoverContent {...triggerHover(index)} className="z-20">
                                                     <table className="text-left">
                                                         <thead>
                                                             <tr>
@@ -742,7 +776,7 @@ export default function StudentTable() {
                                                         </thead>
                                                         <tbody>
                                                             <tr key={'scorebody'}>
-                                                                <td className='p-4'>
+                                                                {/* <td className='p-4'>
                                                                     <Typography
                                                                         variant="small"
                                                                         color="blue-gray"
@@ -750,7 +784,7 @@ export default function StudentTable() {
                                                                     >
                                                                         Chương trình học
                                                                     </Typography>
-                                                                </td>
+                                                                </td> */}
                                                                 <td className='p-4'>
                                                                     <Typography
                                                                         variant="small"
@@ -799,7 +833,7 @@ export default function StudentTable() {
                                                             </tr>
                                                         </tbody>
                                                     </table>
-                                                </PopoverContent>
+                                                </PopoverContent>)}
                                             </Popover>
                                         )
                                     );
@@ -1145,7 +1179,7 @@ export default function StudentTable() {
                 />
                 {/* <ModalEditStudent open={openModalEdit} handleOpen={handleOpenEditStudent} objectEdit={objectEdit} /> */}
             </Card>
-            <PaymentPopup open={openPayment} handleCallback={handleMakePayment}/>
+            <PaymentPopup studentList={studentList} open={openPayment} handleCallback={handleMakePayment}/>
         </>
     );
 }

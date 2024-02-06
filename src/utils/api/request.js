@@ -14,11 +14,13 @@ export default function useFetch(requestInfo) {
             timeout && clearTimeout(timeout)
             let resData = data.Data
             if (typeof data.Data === 'string') resData = JSON.parse(data.Data)
-            if (data.success || data.status == 'success' || data.status == 'succes') {
+            if (data.status == 'success' || data.status == 'succes' || data.success == 'true') {
                 callback(resData || []);
                 if (showToast) toast.success(data?.message);
             }
-            else handleError(data.message)
+            else {
+                toast.error(data?.message);
+            }
         })
         .catch(error => {
             console.log('error', error.name);

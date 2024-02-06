@@ -18,6 +18,7 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { MinusCircleIcon } from "@heroicons/react/24/outline";
 import useStorage from "../../utils/localStorageHook";
 import useFetch from "../../utils/api/request";
+import moment from "moment";
 
 // const tuition = [
 //     {
@@ -50,16 +51,12 @@ import useFetch from "../../utils/api/request";
 //     }
 // ]
 
-export function PaymentPopup({ open, handleCallback }) {
+export function PaymentPopup({ studentList, open, handleCallback }) {
     const [controller] = useController();
     const { userInfo } = controller;
-    const [first, setfirst] = useState([])
     const [selectedClass, setSelectedClass] = useState({})
     const [loading, setLoading] = useState(false)
-    const [paymentList, setPaymentList] = useState([{
-        tuition: '',
-        class_name: ''
-    }])
+    const [paymentList, setPaymentList] = useState([])
     const paymentListRef = useRef([])
     const [tuition, setTuition] = useState(useStorage('get', 'tuition') || [])
 
@@ -70,8 +67,14 @@ export function PaymentPopup({ open, handleCallback }) {
 
     useEffect(() => {
         setPaymentList([{
+            student: '',
             tuition: '',
-            class_name: ''
+            class_name: '',
+            id_class: '',
+            id_class_type: '',
+            note: '',
+            date: moment(Date.now()).format('YYYY-MM-DD'),
+            id_student: ''
         }])
     }, [open])
     
@@ -84,6 +87,7 @@ export function PaymentPopup({ open, handleCallback }) {
             method: 'get',
             service: 'getAllClassRoom',
             callback: (data) => {
+                console.log('getAllClassRoom', data);
                 setLoading(false)
                 setTuition(data)
                 useStorage('set', 'tuition', data)
@@ -99,30 +103,44 @@ export function PaymentPopup({ open, handleCallback }) {
     const handleAdd = () => {
         const list = [...paymentList]
         list.push({
+            student: '',
             tuition: '',
-            class_name: ''
+            class_name: '',
+            id_class: '',
+            id_class_type: '',
+            note: '',
+            date: moment(Date.now()).format('YYYY-MM-DD'),
+            id_student: ''
         })
         setPaymentList(list)
     }
 
-    const updateListPayment = (item, index, mode = 'add') => {
-        let list = [...paymentList]
+    const updateListPayment = ({ key, index, value, mode = 'add' }) => {
         if (mode === 'delete') {
-            setPaymentList(list.filter((item, i) => i !== index))
+            setPaymentList(paymentList.filter((item, i) => i !== index))
         }
         else {
-            const list = [...paymentList]
-            list[index] = item
-            setPaymentList(list)
+            const objectEdit = [...paymentList]
+            if (key === 'tuition') {
+                objectEdit[index].tuition = value.tuition
+                objectEdit[index].id_class = value.id_class
+                objectEdit[index].id_class_type = value.id_class_type
+                objectEdit[index].class_name = value.class_name
+                setPaymentList(objectEdit)
+            } else {
+                objectEdit[index].student = value.full_name
+                objectEdit[index].id_student = value.id_we
+                setPaymentList(objectEdit)
+            }
         }
-        paymentListRef.current = list
+        paymentListRef.current = [...paymentList]
         console.log('paymentListRef.current', paymentListRef.current);
     }
     
     return (
         <>
             <Dialog
-                size="sm"
+                size="md"
                 open={open}
                 handler={() => { 
                     handleCallback(false)
@@ -133,41 +151,59 @@ export function PaymentPopup({ open, handleCallback }) {
                 <Card className="mx-auto w-full">
                     <CardBody className="flex flex-col">
                         {paymentList.map((info, index) => (
-                                <div className="flex py-4 border-b border-blue-gray-50 items-center">
-                                    <div className="gap-6 flex w-full">
-                                        <Select
-                                            label="Select Class"
-                                            selected={(element) =>
-                                                element &&
-                                                React.cloneElement(element, {
-                                                    disabled: true,
-                                                    className:
-                                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                                })
-                                            }
-                                        >
-                                            {tuition?.map(item => (
-                                                <Option onClick={() => updateListPayment(item, index)} key={item.class_name} value={item.class_name} className="flex items-center gap-2">
-                                                    {item.class_name}
-                                                </Option>
-                                            ))}
-                                        </Select>
-                                        <Input
-                                            readOnly
-                                            variant="outlined"
-                                            label="Tuition Fee"
-                                            contentEditable={false}
-                                            value={formatNum(info.tuition, 0, 'price')}
-                                            placeholder="Outlined"
-                                        />
-                                    </div>
-
-                                    <MinusCircleIcon
-                                        style={{ visibility: index == 0 ? 'hidden' : 'visible'}}
-                                        className="w-7 h-7 ml-3 text-blue-gray-200 cursor-pointer" 
-                                        onClick={() => updateListPayment(info, index, 'delete')}
+                            <div className="flex py-4 border-b border-blue-gray-50 items-center">
+                                <div className="gap-6 flex w-full">
+                                    <Select
+                                        label="Select Student"
+                                        selected={(element) =>
+                                            element &&
+                                            React.cloneElement(element, {
+                                                disabled: true,
+                                                className:
+                                                    "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                            })
+                                        }
+                                    >
+                                        {studentList?.map(item => (
+                                            <Option onClick={() => updateListPayment({ key: 'student', value: item, index: index })} key={item.id_student} value={item.id_we + ' - ' + item.class_name} className="flex items-center gap-2">
+                                                {item.id_we + ' - ' + item.full_name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                    <Select
+                                        disabled={!info.id_student}
+                                        label="Select Class"
+                                        selected={(element) =>
+                                            element &&
+                                            React.cloneElement(element, {
+                                                disabled: true,
+                                                className:
+                                                    "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                            })
+                                        }
+                                    >
+                                        {tuition?.map(item => (
+                                            <Option onClick={() => updateListPayment({ key: 'tuition', value: item, index: index })} key={item.class_name} value={item.class_name} className="flex items-center gap-2">
+                                                {item.class_name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                    <Input
+                                        readOnly
+                                        variant="outlined"
+                                        label="Tuition Fee"
+                                        contentEditable={false}
+                                        value={formatNum(info.tuition, 0, 'price')}
+                                        placeholder="Outlined"
                                     />
                                 </div>
+
+                                <MinusCircleIcon
+                                    style={{ visibility: index == 0 ? 'hidden' : 'visible' }}
+                                    className="w-7 h-7 ml-3 text-blue-gray-200 cursor-pointer"
+                                    onClick={() => updateListPayment({index: index, mode: 'delete'})}
+                                />
+                            </div>
                         ))}
                     </CardBody>
                     <CardFooter className="pt-0 flex justify-between">
@@ -179,7 +215,7 @@ export function PaymentPopup({ open, handleCallback }) {
                             <PlusIcon className="w-3.5 h-3.5 mr-2"/>
                             Add
                         </Button>
-                        <div>
+                        <div className="pr-4">
                             <Button variant="text" color="blue-gray" onClick={() => handleCallback(false)}>
                                 Close
                             </Button>
@@ -187,7 +223,7 @@ export function PaymentPopup({ open, handleCallback }) {
                                 disabled={paymentList.findIndex(item => item.class_name === '') > -1}
                                 loading={loading} 
                                 variant="gradient" 
-                                onClick={() => handleCallback(true, paymentList)}
+                                onClick={() => handleCallback(true, paymentListRef.current)}
                             >
                                 Confirm
                             </Button>

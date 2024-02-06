@@ -25,7 +25,7 @@ export function SignIn() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (userInfoRes.user_info) {
+    if (userInfoRes?.user_info) {
       console.log(userInfoRes);
       setUserInfo(dispatch, userInfoRes)
       navigate('/home')
@@ -48,15 +48,15 @@ export function SignIn() {
       ],
       service: 'login',
       callback: (data) => {
-        console.log(data[0]?.user_info?.role);
         setLoading(false)
         setUserInfoRes(data[0])
       },
       handleError: (error) => {
         console.log('error', error)
-        setError(String(error))
+        // setError(String(error))
         setLoading(false)
-      }
+      },
+      showToast: true
     }
     useFetch(requestInfo)
   }
@@ -132,13 +132,13 @@ export function SignIn() {
               Sign In
             </Button>
 
-            <div className="flex items-center justify-between gap-2 mt-6">
+            {/* <div className="flex items-center justify-between gap-2 mt-6">
               <Typography variant="small" className="font-medium text-gray-900">
                 <a href="#">
                   Forgot Password
                 </a>
               </Typography>
-            </div>
+            </div> */}
             {/* <div className="space-y-4 mt-8">
             <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
               <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -161,10 +161,10 @@ export function SignIn() {
               <span>Sign in With Twitter</span>
             </Button>
           </div> */}
-            <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4">
+            {/* <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4">
               Not registered?
               <Link to="/auth/sign-up" className="text-gray-900 ml-1">Create account</Link>
-            </Typography>
+            </Typography> */}
           </form>
         </div>
         {/* <div className="w-2/5 h-full hidden lg:block">

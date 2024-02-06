@@ -8,14 +8,20 @@ import {
   Tooltip,
   Progress,
   Switch,
+  Button,
+  CardFooter,
 } from "@material-tailwind/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { authorsTableData, projectsTableData } from "../../data";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
 import { orderBy } from 'lodash';
+import useFetch from "../../utils/api/request";
+import { useController } from "../../context";
+import { UserPlusIcon } from "@heroicons/react/24/solid";
+import { PaymentPopup } from "../../widgets/modal/payment";
 
-const Header = ['Mã HS', 'Tên', 'Khóa', 'Ngày đóng', 'Số tiền', 'Ghi chú']
+const Header = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền', 'Ghi chú']
 const tempData = [
   {
     name: 'Toan',
@@ -37,17 +43,82 @@ const tempData = [
 export function Tables() {
   const [list, setList] = useState([])
   const listRef = useRef(tempData)
+  const [controller] = useController();
+  const { userInfo } = controller;
+  const [openPayment, setOpenPayment] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const tableRef = useRef([])
 
   useEffect(() => {
-    const groupedData = tempData.reduce((acc, item) => {
-      acc[item.class_id] = acc[item.class_id] || [];
-      acc[item.class_id].push(item);
-      return acc;
-    }, {});
-    console.log('groupedData', groupedData);
-    setList(groupedData)
+    getStudentList()
   }, [])
 
+  const getStudentList = () => {
+    // setLoading(true)
+    const requestInfo = {
+      headers: {
+        "authorization": `${userInfo.token}`,
+      },
+      method: 'get',
+      service: 'getAllStudentClass',
+      callback: (data) => {
+        const groupedData = data.reduce((acc, item) => {
+          acc[item.code_class_room] = acc[item.code_class_room] || [];
+          acc[item.code_class_room].push(item);
+          return acc;
+        }, {});
+        setList(groupedData)
+        console.log('getAllStudentClass', groupedData);
+
+        // setLoading(false)
+        tableRef.current = data
+      },
+      handleError: (error) => {
+        console.log('error', error)
+        // setLoading(false)
+      }
+    }
+    useFetch(requestInfo)
+  }
+
+  const handleMakePayment = (ok, listPayment = []) => {
+    console.log('handleMakePayment', ok, listPayment);
+    setLoading(true)
+
+    if (ok) {
+      listPayment.forEach(item => {
+        setTimeout(() => {
+          const requestInfo = {
+            body: [
+              item.id_student,
+              item.id_class,
+              item.id_class_type,
+              item.date,
+              item.tuition,
+              item.note
+            ],
+            headers: {
+              "authorization": `${userInfo.token}`,
+            },
+            method: 'post',
+            service: 'createTuition',
+            callback: (data) => {
+              setLoading(false)
+              // setStudentList(data)
+              // tableRef.current = data
+            },
+            handleError: (error) => {
+              // console.log('error', error)
+              setLoading(false)
+            },
+            showToast: true
+          }
+          useFetch(requestInfo)
+        }, 300);
+      })
+    }
+    setOpenPayment(false)
+  }
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -57,8 +128,8 @@ export function Tables() {
             <Typography variant="h6" color="white">
               DANH SÁCH LỚP & HỌC PHÍ - Tháng 2
             </Typography>
-            <Switch 
-              color="amber" ripple={true} 
+            <Switch
+              color="amber" ripple={true}
               label={
                 <Typography color="white" className="font-medium">
                   Đã đóng
@@ -67,7 +138,7 @@ export function Tables() {
             />
           </div>
         </CardHeader>
-        <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
+        <CardBody className="overflow-x-scroll px-0 pt-0 pb-2 max-h-[55vh]">
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
@@ -90,8 +161,8 @@ export function Tables() {
               {Object.keys(list)?.map(
                 (item, key) => {
                   const className = `py-3 px-5 ${key === authorsTableData.length - 1
-                      ? ""
-                      : "border-b border-blue-gray-50"
+                    ? ""
+                    : "border-b border-blue-gray-50"
                     }`;
                   return (
                     <>
@@ -104,28 +175,23 @@ export function Tables() {
                           {item}
                         </Typography>
                       </tr>
-                      {list[item].map(({ name, date }, index) => (
+                      {list[item].map(({ id_we, full_name, date, note }, index) => (
                         <tr key={index}>
                           <td className={className}>
                             <Typography className="text-xs font-normal text-blue-gray-500">
-                              {'WE00000'}
+                              {id_we}
                             </Typography>
                           </td>
                           <td className={className}>
                             <Typography className="text-xs font-normal text-blue-gray-500">
-                              {name}
+                              {full_name}
                             </Typography>
                           </td>
                           {/* <td className={className}>
                             <Typography className="text-xs font-normal text-blue-gray-500">
-                              {class_id}
-                            </Typography>
-                          </td> */}
-                          <td className={className}>
-                            <Typography className="text-xs font-normal text-blue-gray-500">
                               {'LIFE'}
                             </Typography>
-                          </td>
+                          </td> */}
                           <td className={className}>
                             <Typography className="text-xs font-semibold text-blue-gray-600">
                               {moment(date).format('DD/MM/YYYY')}
@@ -138,7 +204,7 @@ export function Tables() {
                           </td>
                           <td className={className}>
                             <Typography className="text-xs font-normal text-blue-gray-500">
-                              {'ghi chú'}
+                              {note}
                             </Typography>
                           </td>
                         </tr>
@@ -150,7 +216,13 @@ export function Tables() {
             </tbody>
           </table>
         </CardBody>
+        <CardFooter className="pt-0 flex justify-end">
+          <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
+            <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Make a tuition payment
+          </Button>
+        </CardFooter>
       </Card>
+      <PaymentPopup studentList={tableRef.current} open={openPayment} handleCallback={handleMakePayment} />
     </div>
   );
 }

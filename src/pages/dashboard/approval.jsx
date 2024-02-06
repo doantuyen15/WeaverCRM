@@ -37,22 +37,12 @@ import { Slide, toast } from "react-toastify";
 const header = ["STT", "Loại lệnh", "Người tạo", "Thời gian tạo", "Chi tiết", "Note"]
 const headerMap = ["type_request", "created_at"]
 const typeList = [
-    'Add Student',
-    'Delete Student',
-    'Resource management',
-    'Class management',
-    'View teaching schedule',
-    'View Student management',
-    'Update Student',
-    'Browse',
-    'View Financial and accounting management',
-    'View Staff Management',
-    'Add Staff',
-    'Delete Teacher',
-    'Cancel Browse',
-    'Read of Normal User',
-    'Admin',
-    'Decentralization',
+    'Create Student',
+    'Update Info Student',
+    'Delete info Student',
+    'Create Class Tuition',
+    'Create Staff',
+    'Đóng tiền / Add Lớp cho học Sinh'
 ]
 const status = [
     'Duyệt',
@@ -88,7 +78,7 @@ export function Approval() {
             service: 'getListApproval',
             callback: (data) => {
                 setLoading(false)
-                setTable(data?.filter(item => item.status_request !== '1'))
+                setTable(data?.filter(item => item.status_request === '1'))
                 // setTable(data)
                 tableRef.current = data
                 console.log(tableRef.current);
@@ -112,7 +102,7 @@ export function Approval() {
         setIsAsc(prev => !prev)
     }
 
-    const handApprove = (ok, item) => {
+    const handleApprove = (ok, item) => {
         setLoading(true)
         const requestInfo = {
             headers: {
@@ -122,7 +112,7 @@ export function Approval() {
                 item.id_approve,
                 item.type_request,
                 item.status_request,
-                item.new_data_update,
+                JSON.parse(item.new_data_update),
                 ok ? '0' : '2',
                 item.id_user_requesting
             ],
@@ -242,7 +232,7 @@ export function Approval() {
                                                         variant="small"
                                                         className="text-xs font-medium text-blue-gray-600"
                                                     >
-                                                        {typeList[item.type_request]}
+                                                        {typeList[item.type_request - 1]}
                                                     </Typography>
                                                 </td>
                                                 <td className={className}>
@@ -280,8 +270,8 @@ export function Approval() {
                                                             </IconButton>
                                                         </MenuHandler>
                                                         <MenuList>
-                                                            <MenuItem onClick={() => handApprove(true, item)}>Approve</MenuItem>
-                                                            <MenuItem onClick={() => handApprove(false, item)}>Reject</MenuItem>
+                                                            <MenuItem onClick={() => handleApprove(true, item)}>Approve</MenuItem>
+                                                            <MenuItem onClick={() => handleApprove(false, item)}>Reject</MenuItem>
                                                         </MenuList>
                                                     </Menu>
                                                 </td>

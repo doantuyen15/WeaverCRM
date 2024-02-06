@@ -36,53 +36,59 @@ import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { CreateAccount } from "../../widgets/modal/create-accout";
 import useFetch from "../../utils/api/request";
 import { useController } from "../../context";
+import encryptString from "../../utils/encode/DataCryption";
 
 const Header = ["Tên", "Chức vụ", "Mật khẩu", "Số điện thoại", ""]
+// ['full_name', 'user_name', 'password', 'id_staff', 'id_user', 'id_card', 'id_card_date', 'issued_by', 'address', 'mail', 'phone', 'id_department', 'act_no_bank', 'bank_brch', 'academic_lv', 'college_graduation', 'working_status', 'dt_start', 'dt_end', 'note']
 
 export function Roles() {
     const [mod, setMod] = useState('table')
+    const [showPassword, setShowPassword] = useState(false)
     const [openCreate, setOpenCreate] = useState(false)
     const [controller] = useController();
     const {userInfo} = controller;
+    const [staffList, setStaffList] = useState([])
+    
 
     useEffect(() => {
+        getStaffList()
+    }, [])
+
+    const getStaffList = () => {
         const requestInfo = {
             headers: {
-                "authorization": `Bearer ${userInfo.token}`,
+                "authorization": `${userInfo.token}`,
             },
             method: 'get',
             service: 'getInfoStaff',
             callback: (data) => {
-                console.log('students', data);
-                // setLoading(false)
-                // setTable(data)
-                // tableRef.current = data
+                console.log('staffs', data);
+                setStaffList(data)
             },
             handleError: (error) => {
                 console.log('error', error)
-                // setLoading(false)
             }
         }
         useFetch(requestInfo)
-    }, [])
-    
+    }
 
     const handleCancelCreate = () => {
         setOpenCreate(false)
     }
 
-    const handleCreateCallback = (ok, account) => {
+    const handleCreateCallback = (ok, account = {}) => {
         console.log('handleCreateCallback' , account);
+        setOpenCreate(false)
         if (ok) {
             const requestInfo = {
-                body: Object.values(account),
+                body: Object.values({...account, password: encryptString(account.password)}),
                 headers: {
-                    "authorization": `Bearer ${userInfo.token}`,
+                    "authorization": `${userInfo.token}`,
                 },
                 method: 'post',
                 service: 'registerUsers',
                 callback: (data) => {
-                    console.log('students', data);
+                    getStaffList()
                     // setLoading(false)
                     // setTable(data)
                     // tableRef.current = data
@@ -90,7 +96,8 @@ export function Roles() {
                 handleError: (error) => {
                     console.log('error', error)
                     // setLoading(false)
-                }
+                },
+                showToast: true
             }
             useFetch(requestInfo)
         }
@@ -147,9 +154,9 @@ export function Roles() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {authorsTableData.map(
-                                                    ({ img, name, email, job, online, date }, key) => {
-                                                        const className = `py-3 px-5 ${key === authorsTableData.length - 1
+                                                {staffList.map(
+                                                    ({ full_name, user_name, password, id_staff, id_user, id_card, id_card_date, issued_by, address, mail, phone, id_department, act_no_bank, bank_brch, academic_lv, college_graduation, working_status, dt_start, dt_end, note }, key) => {
+                                                        const className = `py-3 px-5 ${key === staffList.length - 1
                                                             ? ""
                                                             : "border-b border-blue-gray-50"
                                                             }`;
@@ -164,25 +171,22 @@ export function Roles() {
                                                                                 color="blue-gray"
                                                                                 className="font-semibold"
                                                                             >
-                                                                                {name}
+                                                                                {full_name}
                                                                             </Typography>
                                                                             <Typography className="text-xs font-normal text-blue-gray-500">
-                                                                                {email}
+                                                                                {mail}
                                                                             </Typography>
                                                                         </div>
                                                                     </div>
                                                                 </td>
                                                                 <td className={className}>
                                                                     <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                                        {'******'}
+                                                                        {id_department}
                                                                     </Typography>
                                                                 </td>
                                                                 <td className={className}>
                                                                     <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                                        {job[0]}
-                                                                    </Typography>
-                                                                    <Typography className="text-xs font-normal text-blue-gray-500">
-                                                                        {job[1]}
+                                                                        {showPassword ? password : '******'}
                                                                     </Typography>
                                                                 </td>
                                                                 <td className={className}>
@@ -194,7 +198,7 @@ export function Roles() {
                                                                     <Typography
                                                                         as="a"
                                                                         // href="#"
-                                                                        className="text-xs font-semibold text-blue-gray-600"
+                                                                        className="text-xs font-semibold text-blue-gray-600 cursor-pointer"
                                                                     >
                                                                         Edit
                                                                     </Typography>

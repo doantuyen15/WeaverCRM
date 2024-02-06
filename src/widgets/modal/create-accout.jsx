@@ -10,15 +10,17 @@ import {
     CardBody,
     Input,
     CardFooter,
+    Select,
+    Option,
 } from "@material-tailwind/react";
 
 const Roles = [
     'Admin',
-	'Operational management',
-	'Financial management',
+	'Quản lý vận hành',
+	'Quản lý tài chính',
 	'Sale',
-	'Quality control',
-	'Teacher'
+	'Kiểm soát chất lượng',
+	'Giáo Viên'
 ]
 
 export function CreateAccount({ open, handleOpen, handleCallback }) {
@@ -42,6 +44,11 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
         'dt_end': '', 
         'note': ''
     })
+
+    const checkInfo = () => {
+        if (!account.username || !account.password || !account.id_department) return true
+        else return false
+    }
 
     return (
         <>
@@ -67,6 +74,7 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
                             Username
                         </Typography>
                         <Input 
+                            required
                             label="Username" 
                             size="lg"
                             value={account.username}
@@ -78,13 +86,14 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
                         <Typography className="-mb-2" variant="h6">
                             Password
                         </Typography>
-                        <Input 
-                            label="Password" 
+                        <Input
+                            required
+                            label="Password"
                             size="lg" 
                             value={account.password}
                             onChange={e => setAccount({ 
                                 ...account, 
-                                password: e.target.value 
+                                password: e.target.value
                             })}
                         />
                         <div className="grid grid-cols-2 gap-4">
@@ -94,10 +103,6 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
                                 </Typography>
                                 <Input
                                     label="Full Name"
-                                    size="lg"
-                                    containerProps={{
-                                        className: 'min-w-[0px]'
-                                    }}
                                     value={account.fullname}
                                     onChange={e => setAccount({ 
                                         ...account, 
@@ -111,10 +116,6 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
                                 </Typography>
                                 <Input
                                     label="Phone Number"
-                                    size="lg"
-                                    containerProps={{
-                                        className: 'min-w-[0px]'
-                                    }}
                                     value={account.phone}
                                     onChange={e => setAccount({ 
                                         ...account, 
@@ -123,9 +124,31 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
                                 />
                             </div>
                         </div>
+                        <Select
+                            label="Select Roles"
+                            selected={(element) =>
+                                element &&
+                                React.cloneElement(element, {
+                                    disabled: true,
+                                    className:
+                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                })
+                            }
+                        >
+                            {Roles?.map((item, index) => (
+                                <Option 
+                                    onClick={() => setAccount({
+                                        ...account,
+                                        id_department: index+1
+                                    })}
+                                    key={item} value={item} className="flex items-center gap-2">
+                                    {item}
+                                </Option>
+                            ))}
+                        </Select>
                     </CardBody>
                     <CardFooter className="pt-0">
-                        <Button variant="gradient" onClick={() => handleCallback(true, account)} fullWidth>
+                        <Button disabled={checkInfo()} variant="gradient" onClick={() => handleCallback(true, account)} fullWidth>
                             Create Account
                         </Button>
                     </CardFooter>
