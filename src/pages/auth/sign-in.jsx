@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 import LogoDark from "../../assets/logo/we_logo_dark.png"
 import LogoLight from "../../assets/logo/we_logo_light.png"
 import encryptString from "../../utils/encode/DataCryption";
-import useFetch from "../../utils/api/request";
+import {useFetch} from "../../utils/api/request";
 import { setUserInfo, useController } from '../../context';
 import { useNavigate } from "react-router-dom";
 import useStorage from '../../utils/localStorageHook';

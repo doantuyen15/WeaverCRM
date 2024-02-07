@@ -16,7 +16,7 @@ import { authorsTableData, projectsTableData } from "../../data";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
 import { orderBy } from 'lodash';
-import useFetch from "../../utils/api/request";
+import {useFetch} from "../../utils/api/request";
 import { useController } from "../../context";
 import { UserPlusIcon } from "@heroicons/react/24/solid";
 import { PaymentPopup } from "../../widgets/modal/payment";

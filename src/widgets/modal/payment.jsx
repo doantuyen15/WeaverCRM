@@ -17,7 +17,7 @@ import formatNum from "../../utils/formatNumber/formatNum";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { MinusCircleIcon } from "@heroicons/react/24/outline";
 import useStorage from "../../utils/localStorageHook";
-import useFetch from "../../utils/api/request";
+import {useFetch} from "../../utils/api/request";
 import moment from "moment";
 
 // const tuition = [

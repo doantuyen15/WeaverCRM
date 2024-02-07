@@ -29,7 +29,7 @@ import {
 import { CheckBadgeIcon, CheckCircleIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon, ClockIcon, InformationCircleIcon, MinusCircleIcon, PencilIcon, PencilSquareIcon, PlusCircleIcon } from "@heroicons/react/24/solid";
 import Amethyst from "../../assets/amethyst.png";
 import { useController } from "../../context";
-import useFetch from "../../utils/api/request";
+import {useFetch} from "../../utils/api/request";
 import { orderBy } from 'lodash';
 import FormatDate from "../../utils/formatNumber/formatDate";
 import { Slide, toast } from "react-toastify";

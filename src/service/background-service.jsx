@@ -8,9 +8,10 @@ import {
     Typography,
 } from "@material-tailwind/react";
 import { initializeApp } from "firebase/app";
-import { getDocs, collection, getFirestore } from "firebase/firestore";
+import { getDocs, collection, getFirestore, doc, getDoc } from "firebase/firestore";
 import config from '../configs/config.json';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import glb_sv from './global-service'
 
 export function BackgroundService() {
     const [showAlert, setShowAlert] = useState(false)
@@ -28,38 +29,48 @@ export function BackgroundService() {
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        await signInWithEmailAndPassword(auth, 'admin@weaver.edu.vn', 'hello1')
-        .then((userCredential) => {
-            // Signed in
-            const user = userCredential.user;
-            console.log('signInWithEmailAndPassword', user);
-            // navigate("/login")
-            // ...
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorCode, errorMessage);
-        });
-        // const usersRef = collection(db, "users");
+        // await signInWithEmailAndPassword(auth, 'admin@weaver.edu.vn', 'hello1')
+        // .then((userCredential) => {
+        //     // Signed in
+        //     const user = userCredential.user;
+        //     console.log('signInWithEmailAndPassword', user);
+        //     // navigate("/login")
+        //     // ...
+        // })
+        // .catch((error) => {
+        //     const errorCode = error.code;
+        //     const errorMessage = error.message;
+        //     console.log(errorCode, errorMessage);
+        // });
+
+        const db = getFirestore(app);
+        glb_sv.database = db;
+        console.log('background', db);
+
+        // const usersRef = collection(db, "student");
         // const querySnapshot = await getDocs(usersRef);
         // querySnapshot.forEach((doc) => {
         //   console.log(doc.id, "=>", doc.data());
         // });
 
-        const db = getFirestore(app);
-        global.database = db;
         try {
-            await getDocs(collection(db, 'document/student'))
-            .then((querySnapshot) => {
+            // const docRef = doc(db, "student");
+            // const docSnap = await getDocs(collection(db, "student"))
+            // .then(function (querySnapshot) {
 
-                console.log('doc_refs', querySnapshot);
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.log(errorCode, errorMessage);
-            })
+            //     console.log('student', querySnapshot.data());
+            // })
+
+            // await getDocs(collection('student'))
+            // .then((querySnapshot) => {
+
+            //     console.log('doc_refs', querySnapshot);
+            // })
+            // .catch((error) => {
+            //     const errorCode = error.code;
+            //     const errorMessage = error.message;
+            //     console.log(errorCode, errorMessage);
+            // })
         } catch (error) {
             const errorCode = error.code;
             const errorMessage = error.message;

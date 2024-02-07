@@ -34,7 +34,7 @@ import { authorsTableData, projectsTableData } from "./../../data";
 import React, { useEffect, useState } from 'react'
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { CreateAccount } from "../../widgets/modal/create-accout";
-import useFetch from "../../utils/api/request";
+import {useFetch} from "../../utils/api/request";
 import { useController } from "../../context";
 import encryptString from "../../utils/encode/DataCryption";
 

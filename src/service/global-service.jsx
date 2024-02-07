@@ -7,6 +7,7 @@ class globalService {
             token: ''
         }
         this.commonEvent = new Subject()
+        this.database = null
     }
 }
 

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
     MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
-import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, UserPlusIcon, ArrowUpTrayIcon, BackwardIcon, ArrowUturnLeftIcon, ArrowUturnDownIcon } from "@heroicons/react/24/solid";
+import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, UserPlusIcon, ArrowUpTrayIcon, BackwardIcon, ArrowUturnLeftIcon, ArrowUturnDownIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import {
     Card,
     CardHeader,
@@ -33,7 +33,7 @@ import { ModalConfirmUpdate } from "../../widgets/modal/confirm-update";
 import { orderBy } from 'lodash'
 import StudentInfo from "../../data/entities/studentInfo";
 import { ModalEditStudent } from "../../widgets/modal/edit-student";
-import useFetch from "../../utils/api/request";
+import {useFetch, useQuery} from "../../utils/api/request";
 import { useController } from "../../context";
 import moment from "moment";
 import formatDate from "../../utils/formatNumber/formatDate";
@@ -130,24 +130,28 @@ export default function StudentTable() {
 
     const getStudentList = () => {
         setLoading(true)
-        const requestInfo = {
-            headers: {
-                "authorization": `${userInfo.token}`,
-            },
-            method: 'get',
-            service: 'students',
-            callback: (data) => {
-                console.log('students', data);
-                setLoading(false)
-                setStudentList(data)
-                tableRef.current = data
-            },
-            handleError: (error) => {
-                console.log('error', error)
-                setLoading(false)
-            }
-        }
-        useFetch(requestInfo)
+        useQuery()
+        // .then(data => {
+        //     console.log('getStudentList', data);
+        // })
+        // const requestInfo = {
+        //     headers: {
+        //         "authorization": `${userInfo.token}`,
+        //     },
+        //     method: 'get',
+        //     service: 'students',
+        //     callback: (data) => {
+        //         console.log('students', data);
+        //         setLoading(false)
+        //         setStudentList(data)
+        //         tableRef.current = data
+        //     },
+        //     handleError: (error) => {
+        //         console.log('error', error)
+        //         setLoading(false)
+        //     }
+        // }
+        // useFetch(requestInfo)
     }
 
     const handleAddStudent = () => {
@@ -357,12 +361,23 @@ export default function StudentTable() {
                                 ))}
                             </TabsHeader>
                         </Tabs> */}
-                        <div className="w-full md:w-72">
-                            <Input
-                                label="Search"
-                                icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-                                onChange={(e) => handleSearch(e.target.value)}
-                            />
+                        <div className="w-full flex items-center justify-between">
+                            <div className="w-full md:w-72">
+                                <Input
+                                    className=""
+                                    label="Search"
+                                    icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                                    onChange={(e) => handleSearch(e.target.value)}
+                                />
+                            </div>
+                            <Button
+                                variant="text"
+                                className="flex items-center gap-3"
+                                size="sm"
+                                onClick={() => getStudentList()}
+                            >
+                                <ArrowPathIcon strokeWidth={2} className={`w-4 h-4 ${loading ? 'animate-spin' : null}`} /> Refresh
+                            </Button>
                         </div>
                     </div>
                 </CardHeader>

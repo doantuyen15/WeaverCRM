@@ -11,7 +11,7 @@ import { routes } from "./../router";
 import { Progress, Spinner, Typography } from "@material-tailwind/react";
 import LogoDark from "../assets/logo/we_logo_dark80.png"
 import { useState, useEffect } from "react";
-import useFetch from "../utils/api/request";
+import {useFetch} from "../utils/api/request";
 const ipcRenderer = window.ipcRenderer
 
 export function SplashScreen() {
