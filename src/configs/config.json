@@ -1,6 +1,11 @@
 {
-    "collapsedSidenav": false,
-    "sidenavColor": "dark",
-    "sidenavType": "white",
-    "fixedNavbar": false
+    "firebaseConfig": {
+        "apiKey": "AIzaSyCG1Jn6nqTAHi_qppzJwnIgtvn2xqswtfI",
+        "authDomain": "weavercrm.firebaseapp.com",
+        "projectId": "weavercrm",
+        "storageBucket": "weavercrm.appspot.com",
+        "messagingSenderId": "303459355765",
+        "appId": "1:303459355765:web:07a9f3074d43c800e9bc3c",
+        "measurementId": "G-XNC0RCR06V"
+    }
 }

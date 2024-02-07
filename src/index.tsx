@@ -11,6 +11,7 @@ import { Router } from "./router";
 import { ThemeProvider } from "@material-tailwind/react";
 import { MaterialTailwindControllerProvider } from "./context";
 import customTheme from "./styles/css/customTheme";
+import { BackgroundService } from "./service/background-service";
 
 const root = ReactDOM.createRoot(
 	document.getElementById("root") as HTMLElement,
@@ -21,6 +22,7 @@ root.render(
 		<ThemeProvider value={customTheme}>
 			<MaterialTailwindControllerProvider>
 				<Router />
+				<BackgroundService />
 				<ToastContainer position="top-right" transition={Slide} hideProgressBar closeOnClick pauseOnHover draggable />
 			</MaterialTailwindControllerProvider>
 		</ThemeProvider>
