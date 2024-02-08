@@ -53,9 +53,10 @@ export function SplashScreen() {
     
 
     useEffect(() => {
-        if (step === 1) fetchServer()
-        else if (step === 2) checkUpdate()
-        else if (step === 3) finished()
+        finished()
+        // if (step === 1) fetchServer()
+        // else if (step === 2) checkUpdate()
+        // else if (step === 3) finished()
     }, [step])
 
     const fetchServer = () => {

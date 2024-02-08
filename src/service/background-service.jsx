@@ -37,19 +37,19 @@ export function BackgroundService() {
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // await signInWithEmailAndPassword(auth, 'admin@weaver.edu.vn', 'hello1')
-        // .then((userCredential) => {
-        //     // Signed in
-        //     const user = userCredential.user;
-        //     console.log('signInWithEmailAndPassword', user);
-        //     // navigate("/login")
-        //     // ...
-        // })
-        // .catch((error) => {
-        //     const errorCode = error.code;
-        //     const errorMessage = error.message;
-        //     console.log(errorCode, errorMessage);
-        // });
+        await signInWithEmailAndPassword(auth, 'admin@weaver.edu.vn', 'hello1')
+        .then((userCredential) => {
+            // Signed in
+            const user = userCredential.user;
+            console.log('signInWithEmailAndPassword', user);
+            // navigate("/login")
+            // ...
+        })
+        .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorCode, errorMessage);
+        });
 
         const db = getFirestore(app);
         glb_sv.database = db;

@@ -4,7 +4,8 @@ class globalService {
     constructor() {
         this.userInfo = {
             roles: '',
-            token: ''
+            token: '',
+            uid: ''
         }
         this.commonEvent = new Subject()
         this.database = null

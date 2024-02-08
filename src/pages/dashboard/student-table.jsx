@@ -130,7 +130,7 @@ export default function StudentTable() {
 
     const getStudentList = () => {
         setLoading(true)
-        useQuery('student').then(data => console.log('student', data))
+        useQuery('get_student').then(data => console.log('student', data)).catch(err => console.log(err))
         // .then(data => {
         //     console.log('getStudentList', data);
         // })
@@ -239,27 +239,27 @@ export default function StudentTable() {
         console.log('sendRequestAddStudent', Object.values(objectNew));
         setLoading(true)
 
-        objectNew.forEach(item => {
-            const requestInfo = {
-                headers: {
-                    "authorization": `${userInfo.token}`,
-                },
-                body: Object.values(item),
-                method: 'post',
-                service: 'createStudent',
-                callback: (data) => {
-                    setLoading(false)
-                    setOpenModalConfirm(false)
-                },
-                handleError: (error) => {
-                    console.log('error', error)
-                    setLoading(false)
-                    setOpenModalConfirm(false)
-                },
-                showToast: true
-            }
-            useFetch(requestInfo)
-        })
+        // objectNew.forEach(item => {
+        //     const requestInfo = {
+        //         headers: {
+        //             "authorization": `${userInfo.token}`,
+        //         },
+        //         body: Object.values(item),
+        //         method: 'post',
+        //         service: 'createStudent',
+        //         callback: (data) => {
+        //             setLoading(false)
+        //             setOpenModalConfirm(false)
+        //         },
+        //         handleError: (error) => {
+        //             console.log('error', error)
+        //             setLoading(false)
+        //             setOpenModalConfirm(false)
+        //         },
+        //         showToast: true
+        //     }
+        //     useFetch(requestInfo)
+        // })
     }
 
     const handleRemove = () => {
