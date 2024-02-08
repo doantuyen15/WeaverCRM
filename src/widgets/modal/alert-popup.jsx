@@ -8,7 +8,7 @@ import {
     Typography,
 } from "@material-tailwind/react";
 
-export function NotificationDialog({ open, title = 'Notification', message, handleCallback }) {
+export function NotificationDialog({ open, title = 'Notification', message = '', handleCallback }) {
     return (
         <Dialog open={open} handler={() => handleCallback(false)}>
             <DialogHeader className="grid place-items-center gap-4">

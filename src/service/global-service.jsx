@@ -8,6 +8,9 @@ class globalService {
         }
         this.commonEvent = new Subject()
         this.database = null
+        this.showAlert = (params) => {
+            this.commonEvent.next({ type: 'SHOW_ALERT', params })
+        }
     }
 }
 

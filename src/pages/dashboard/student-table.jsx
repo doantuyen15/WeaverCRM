@@ -130,7 +130,7 @@ export default function StudentTable() {
 
     const getStudentList = () => {
         setLoading(true)
-        useQuery()
+        useQuery('student').then(data => console.log('student', data))
         // .then(data => {
         //     console.log('getStudentList', data);
         // })

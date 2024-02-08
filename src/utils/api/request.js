@@ -5,37 +5,25 @@ import glb_sv from '../../service/global-service'
 const controller = new AbortController();
 const timeout = setTimeout(() => controller.abort(), 10000);
 
-export async function useQuery(requestInfo) {
+export async function useQuery(service) {
     const db = glb_sv.database
     return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
             reject('Query timed out');
         }, 5000); // Set your desired timeout in milliseconds
-
-        getDocs(collection(db, "student"))
-            .then(
-                (snap) => {
-                    resolve(snap.docs)
-                    console.log(snap.docs, typeof snap.docs);
-                    // snap.forEach((doc) => {
-                    //     console.log(doc.id, "=>", doc.data());
-                    // });
-                }
-            )
-            .catch(reject)
-            .finally(() => clearTimeout(timeoutId));
-
-        // let collectionRef = collection(db, "student");
-        // const query = getDocs(collectionRef)
-        //     .then(snap => {
-        //         resolve(snap.docs[0].data());
-        //         clearTimeout(timeoutId)
-        //     })
-        //     .catch(error => {
-        //         console.log('error', error);
-        //         clearTimeout(timeoutId)
-        //         reject()
-        //     })
+        if (service === 'student') {
+            getDocs(collection(db, "student"))
+                .then(
+                    (snap) => {
+                        resolve(snap.docs.map(doc => doc.data()))
+                        // snap.forEach((doc) => {
+                        //     console.log(doc.id, "=>", doc.data());
+                        // });
+                    }
+                )
+                .catch(reject)
+                .finally(() => clearTimeout(timeoutId));
+        }
     });
 }
 
