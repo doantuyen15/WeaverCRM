@@ -13,7 +13,11 @@ import LogoDark from "../assets/logo/we_logo_dark80.png"
 import { useState, useEffect } from "react";
 import {useFetch} from "../utils/api/request";
 const ipcRenderer = window.ipcRenderer
-
+import config from '../configs/config.json';
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getDoc, getFirestore } from "firebase/firestore";
+import { glb_sv } from "../service";
 export function SplashScreen() {
     const [event, setEvent] = useState('Checking connect to server...')
     const [loading, setLoading] = useState(false)
@@ -53,32 +57,30 @@ export function SplashScreen() {
     
 
     useEffect(() => {
-        finished()
-        // if (step === 1) fetchServer()
-        // else if (step === 2) checkUpdate()
-        // else if (step === 3) finished()
+        if (step === 1) fetchServer()
+        else if (step === 2) checkUpdate()
+        else if (step === 3) finished()
     }, [step])
 
     const fetchServer = () => {
-        const requestInfo = {
-            method: 'get',
-            service: '',
-            // callback: (data) => {
-            //     setLoading(false)
-            //     setOpenModalConfirm(false)
-            // },
-            handleError: (error) => {
-                setStep(prev => prev += 1)
-            },
-            handleTimeout: () => {
-                setEvent('Can not connect to server, auto retry...')
-                setLoading('error')
-                setTimeout(() => {
-                    fetchServer()
-                }, 1500);
-            }
-        }
-        useFetch(requestInfo)
+        // const getUserInfo = async () => {
+        //     console.log('checkRoles');
+
+        //     await getDoc(doc(db, "account", glb_sv.userInfo.uid))
+        //         .then(info => {
+        //             const userRef = info.data()
+        //             glb_sv.userInfo = {
+        //                 ...glb_sv.userInfo,
+        //                 ...userRef
+        //             }
+        //             navigate("/dashboard/home")
+        //         });
+        //     // const querySnapshot = await getDocs(usersRef);
+        //     // querySnapshot.forEach((doc) => {
+        //     //   console.log(doc.id, "=>", doc.data());
+        //     // });
+        // }
+        setStep(2)
     }
 
     const checkUpdate = () => {

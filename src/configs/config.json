@@ -1,11 +1,12 @@
 {
     "firebaseConfig": {
-        "apiKey": "AIzaSyCG1Jn6nqTAHi_qppzJwnIgtvn2xqswtfI",
-        "authDomain": "weavercrm.firebaseapp.com",
-        "projectId": "weavercrm",
-        "storageBucket": "weavercrm.appspot.com",
-        "messagingSenderId": "303459355765",
-        "appId": "1:303459355765:web:07a9f3074d43c800e9bc3c",
-        "measurementId": "G-XNC0RCR06V"
+        "apiKey": "AIzaSyByvZ4ShMb7ROh7mh9xHByn58bTZqQuDKQ",
+        "authDomain": "weaver-crm.firebaseapp.com",
+        "databaseURL": "https://weaver-crm-default-rtdb.asia-southeast1.firebasedatabase.app",
+        "projectId": "weaver-crm",
+        "storageBucket": "weaver-crm.appspot.com",
+        "messagingSenderId": "707203151294",
+        "appId": "1:707203151294:web:c512db715a964295fa75ef",
+        "measurementId": "G-80YDQLRC55"
     }
 }

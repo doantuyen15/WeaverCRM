@@ -1,4 +1,4 @@
-import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { HashRouter, Navigate, Route, Routes, useLocation, Redirect } from "react-router-dom";
 import Dashboard from "./layouts/dashboard";
 import SplashScreen from "./layouts/splash";
 import Auth from "./layouts/auth";
@@ -16,17 +16,20 @@ import {
 import { Approval, Home, Notifications, Profile, Tables } from "./pages/dashboard";
 import { SignIn, SignUp } from "./pages/auth";
 import Roles from "./pages/dashboard/roles";
-import { IoInformationCircleOutline } from "react-icons/io5";
 import StudentTable from "./pages/dashboard/student-table";
 
 export const Router = () => {
+	console.log('Router', typeof localStorage.getItem("userInfo"));
 	return (
 		<HashRouter>
 			<Routes>
 				<Route path="/dashboard/*" element={<Dashboard />} />
 				<Route path="/auth/*" element={<Auth />} />
 				<Route path="splash" element={<SplashScreen />} />
-				<Route path="*" element={<Navigate to="/dashboard/home" replace />} />
+				<Route path="*" element={localStorage.getItem("userInfo") ? 
+					<Navigate to="/dashboard/home" replace /> : 
+					<Navigate to="/auth/sign-in" replace />} 
+				/>
 			</Routes>
 		</HashRouter>
 	);

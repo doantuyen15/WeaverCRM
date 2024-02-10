@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Typography,
   Card,
@@ -27,8 +27,16 @@ import {
 } from "../../data";
 import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
 import Amethyst from "../../assets/amethyst.png";
+import useStorage from "../../utils/localStorageHook";
+import { useNavigate } from "react-router-dom";
 
 export function Home() {
+  const navigate = useNavigate();
+
+  // useEffect(() => {
+
+  // }, [])
+  
   return (
     <div className="mt-12">
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">

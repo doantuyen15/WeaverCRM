@@ -9,20 +9,27 @@ import {
 } from "@material-tailwind/react";
 import { initializeApp } from "firebase/app";
 import { getDocs, collection, getFirestore, doc, getDoc } from "firebase/firestore";
-import config from '../configs/config.json';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import glb_sv from './global-service'
 import { NotificationDialog } from "../widgets/modal/alert-popup";
+import useStorage from "../utils/localStorageHook";
+import { Navigate } from "react-router-dom";
+import { glb_sv } from "./index";
+import config from '../configs/config.json';
+import { getFunctions } from 'firebase/functions';
+import { useController, setUserInfo } from "../context";
 
 export function BackgroundService() {
     const [showAlert, setShowAlert] = useState(false)
     const [alertParams, setAlertParams] = useState({});
+    const [controller, dispatch] = useController();
 
     useEffect(() => {
         readConfigInfo()
+
+
         const commonEvent = glb_sv.commonEvent.subscribe((msg) => {
             if (msg.type === 'ALERT_MODAL') {
-                setAlertParams({...msg.params, open: true})
+                setAlertParams({ ...msg.params, open: true })
             }
         })
 
@@ -32,28 +39,23 @@ export function BackgroundService() {
     }, [])
 
     const readConfigInfo = async () => {
-        console.log('readConfigInfo', config);
         const firebaseConfig = config.firebaseConfig
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-
-        await signInWithEmailAndPassword(auth, 'admin@weaver.edu.vn', 'hello1')
-        .then((userCredential) => {
-            // Signed in
-            const user = userCredential.user;
-            console.log('signInWithEmailAndPassword', user);
-            // navigate("/login")
-            // ...
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorCode, errorMessage);
-        });
-
         const db = getFirestore(app);
+        const functions = getFunctions(app);
         glb_sv.database = db;
-        console.log('background', db);
+        glb_sv.auth = auth
+        glb_sv.functions = functions
+        glb_sv.app = app
+        const userInfo = useStorage('get', 'userInfo')
+        if (userInfo.uid) {
+            console.log('userInfo', userInfo);
+            glb_sv.userInfo = userInfo
+            setUserInfo(dispatch, userInfo)
+        }
+
+
 
         // const usersRef = collection(db, "student");
         // const querySnapshot = await getDocs(usersRef);
@@ -61,29 +63,29 @@ export function BackgroundService() {
         //   console.log(doc.id, "=>", doc.data());
         // });
 
-        try {
-            // const docRef = doc(db, "student");
-            // const docSnap = await getDocs(collection(db, "student"))
-            // .then(function (querySnapshot) {
+        // try {
+        //     // const docRef = doc(db, "student");
+        //     // const docSnap = await getDocs(collection(db, "student"))
+        //     // .then(function (querySnapshot) {
 
-            //     console.log('student', querySnapshot.data());
-            // })
+        //     //     console.log('student', querySnapshot.data());
+        //     // })
 
-            // await getDocs(collection('student'))
-            // .then((querySnapshot) => {
+        //     // await getDocs(collection('student'))
+        //     // .then((querySnapshot) => {
 
-            //     console.log('doc_refs', querySnapshot);
-            // })
-            // .catch((error) => {
-            //     const errorCode = error.code;
-            //     const errorMessage = error.message;
-            //     console.log(errorCode, errorMessage);
-            // })
-        } catch (error) {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorCode, errorMessage);
-        }
+        //     //     console.log('doc_refs', querySnapshot);
+        //     // })
+        //     // .catch((error) => {
+        //     //     const errorCode = error.code;
+        //     //     const errorMessage = error.message;
+        //     //     console.log(errorCode, errorMessage);
+        //     // })
+        // } catch (error) {
+        //     const errorCode = error.code;
+        //     const errorMessage = error.message;
+        //     console.log(errorCode, errorMessage);
+        // }
     }
 
     return (

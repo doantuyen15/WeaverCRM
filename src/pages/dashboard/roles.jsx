@@ -37,6 +37,8 @@ import { CreateAccount } from "../../widgets/modal/create-accout";
 import {useFetch} from "../../utils/api/request";
 import { useController } from "../../context";
 import encryptString from "../../utils/encode/DataCryption";
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { glb_sv } from "../../service";
 
 const Header = ["Tên", "Chức vụ", "Mật khẩu", "Số điện thoại", ""]
 // ['full_name', 'user_name', 'password', 'id_staff', 'id_user', 'id_card', 'id_card_date', 'issued_by', 'address', 'mail', 'phone', 'id_department', 'act_no_bank', 'bank_brch', 'academic_lv', 'college_graduation', 'working_status', 'dt_start', 'dt_end', 'note']
@@ -45,31 +47,65 @@ export function Roles() {
     const [mod, setMod] = useState('table')
     const [showPassword, setShowPassword] = useState(false)
     const [openCreate, setOpenCreate] = useState(false)
-    const [controller] = useController();
-    const {userInfo} = controller;
     const [staffList, setStaffList] = useState([])
+    const userInfo = glb_sv.userInfo
+    const functions = getFunctions(glb_sv.app);
     
 
     useEffect(() => {
         getStaffList()
+        
     }, [])
 
     const getStaffList = () => {
-        const requestInfo = {
-            headers: {
-                "authorization": `${userInfo.token}`,
-            },
-            method: 'get',
-            service: 'getInfoStaff',
-            callback: (data) => {
-                console.log('staffs', data);
-                setStaffList(data)
-            },
-            handleError: (error) => {
-                console.log('error', error)
+        console.log('getStaffList');
+        // const functions = getFunctions();
+        const createUser = httpsCallable(functions, 'createUser');
+        try {
+            const userInfo = {
+                phoneNumber: "112233344",
+                password: "hello1",
+                displayName: "test1",
+                disabled: false,
+                // customClaims: { roleId: '01' },
+                photoURL: '',
+                email: 'test1@weaver.edu.vn',
+                emailVerified: true,
+                username: 'test2'
             }
+            createUser({ params: userInfo })
+            .then((result) => {
+                const data = result.data;
+                const sanitizedMessage = data.text;
+                console.log('data', data, sanitizedMessage);
+            })
+            .catch((error) => {
+                console.log('data', error);
+            });
+        // const admin = initializeApp({
+        //     credential: credential.cert(userInfo.cert),
+        //     databaseURL: "https://weavercrm.firebaseio.com"
+        //   });
+        // const requestInfo = {
+        //     headers: {
+        //         "authorization": `${userInfo.token}`,
+        //     },
+        //     method: 'get',
+        //     service: 'getInfoStaff',
+        //     callback: (data) => {
+        //         console.log('staffs', data);
+        //         setStaffList(data)
+        //     },
+        //     handleError: (error) => {
+        //         console.log('error', error)
+        //     }
+        // }
+        // useFetch(requestInfo)
+        } catch (error) {
+        console.log('getStaffList', error);
+            
         }
-        useFetch(requestInfo)
+
     }
 
     const handleCancelCreate = () => {

@@ -10,55 +10,101 @@ import { Link } from "react-router-dom";
 import LogoDark from "../../assets/logo/we_logo_dark.png"
 import LogoLight from "../../assets/logo/we_logo_light.png"
 import encryptString from "../../utils/encode/DataCryption";
-import {useFetch} from "../../utils/api/request";
+import { useFetch, useQuery } from "../../utils/api/request";
 import { setUserInfo, useController } from '../../context';
 import { useNavigate } from "react-router-dom";
 import useStorage from '../../utils/localStorageHook';
 import { NotificationDialog } from '../../widgets/modal/alert-popup';
+import { glb_sv } from '../../service';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 export function SignIn() {
   const [loading, setLoading] = useState(false)
-  const [controller, dispatch] = useController();
-  const [userInfoRes, setUserInfoRes] = useState({})
   const [error, setError] = useState('')
-
   const navigate = useNavigate();
+  const [controller, dispatch] = useController();
 
-  useEffect(() => {
-    if (userInfoRes?.user_info) {
-      console.log(userInfoRes);
-      setUserInfo(dispatch, userInfoRes)
-      navigate('/home')
-    }
-    if (userInfoRes.token) {
-      useStorage('set', 'userInfo', userInfoRes)
-    }
-  }, [userInfoRes])
+  // useEffect(() => {
+  //   if (userInfoRes?.user_info) {
+  //     console.log(userInfoRes);
+  //     setUserInfo(dispatch, userInfoRes)
+  //     navigate('/dashboard/home')
+  //   }
+  //   if (userInfoRes.token) {
+  //     useStorage('set', 'userInfo', userInfoRes)
+  //   }
+  // }, [userInfoRes])
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
+    const auth = glb_sv.auth
+    console.log('auth', auth);
     setLoading(true)
-    const user = e.target[0].value
-    const password = e.target[1].value
-    e.preventDefault()
-    const requestInfo = {
-      method: 'post',
-      body: [
-        user,
-        encryptString(password)
-      ],
-      service: 'login',
-      callback: (data) => {
-        setLoading(false)
-        setUserInfoRes(data[0])
-      },
-      handleError: (error) => {
-        console.log('error', error)
-        // setError(String(error))
-        setLoading(false)
-      },
-      showToast: true
+
+    const loginInfo = {
+      username: e.target[0].value,
+      password: e.target[1].value
     }
-    useFetch(requestInfo)
+    e.preventDefault()
+    await useQuery('get_token', loginInfo)
+      .then((userInfoRef) => {
+        useStorage('set', 'userInfo', userInfoRef || {})
+        setUserInfo(dispatch, userInfoRef)
+        glb_sv.userInfo = userInfoRef
+        navigate("/dashboard/home")
+      })
+      .catch((error) => {
+        // const errorCode = error.code;
+        // const errorMessage = error.message;
+        // console.log('error', errorCode, errorMessage);
+        glb_sv.showAlert({
+          content: error,
+          handleCallback: null
+        })
+
+      })
+
+    // await signInWithEmailAndPassword(auth, `${user}@weaver.edu.vn`, password)
+    //   .then(async (userCredential) => {
+    //     // Signed in
+    //     const userInfo = userCredential.user;
+    //     console.log('sign-in', userInfo);
+    //     useStorage('set', 'userInfo', userInfo)
+    //     glb_sv.userInfo = userInfo
+    //     // glb_sv.showAlert()
+
+    //     // ...
+    //   })
+    //   .catch((error) => {
+    //     // const errorCode = error.code;
+    //     // const errorMessage = error.message;
+    //     // console.log('error', errorCode, errorMessage);
+    //     glb_sv.showAlert({
+    //       content: error,
+    //       handleCallback: null
+    //     })
+
+    //   })
+    //   .finally(() => getUserInfo());
+  }
+
+  const getUserInfo = async () => {
+    console.log('checkRoles');
+    const db = glb_sv.database
+
+    await getDoc(doc(db, "account", glb_sv.userInfo.uid))
+      .then(info => {
+        const userRef = info.data()
+        glb_sv.userInfo = {
+          ...glb_sv.userInfo,
+          ...userRef
+        }
+        navigate("/dashboard/home")
+      });
+    // const querySnapshot = await getDocs(usersRef);
+    // querySnapshot.forEach((doc) => {
+    //   console.log(doc.id, "=>", doc.data());
+    // });
   }
 
   const handleCallback = () => {
@@ -69,7 +115,7 @@ export function SignIn() {
     <>
       <section className="m-8 flex justify-center gap-4">
         <div className="lg:w-1/2 mt-24">
-          <Link style={{ position: 'absolute', top: 0, left: 10 }} to={-1}>
+          <Link style={{ position: 'absolute', top: 0, left: 10 }} to={'/dashboard/home'}>
             <div className="flex">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -175,7 +221,7 @@ export function SignIn() {
       </div> */}
 
       </section>
-      <NotificationDialog open={!!error} message={error} handleCallback={handleCallback} />
+      {/* <NotificationDialog open={!!error} message={error} handleCallback={handleCallback} /> */}
     </>
   );
 }

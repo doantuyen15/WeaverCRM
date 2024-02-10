@@ -37,9 +37,11 @@ import { useController, setCollapsedSidenav, setShowSidenav } from "./../../cont
 import LogoDark from "../../assets/logo/we_logo_dark.png"
 import LogoLight from "../../assets/logo/we_logo_light.png"
 import { NavLink, useLocation } from 'react-router-dom';
+import { glb_sv } from '../../service';
 export function Sidenav({ brandName, routes }) {
   const [controller, dispatch] = useController();
-  const { sidenavColor, sidenavType, collapsedSidenav, showSidenav, userInfo } = controller;
+  const { sidenavColor, sidenavType, collapsedSidenav, showSidenav } = controller;
+  const userInfo = glb_sv.userInfo;
   const sidenavTypes = {
     dark: "bg-gradient-to-br from-gray-800 to-gray-900",
     white: "bg-white shadow-sm",
@@ -103,7 +105,7 @@ export function Sidenav({ brandName, routes }) {
               </div>
             )}
             {pages.map(({ icon, name, path, subpath, roles }, key) => (
-              roles?.includes(userInfo['user_info']['role']) && (
+              roles?.includes(userInfo.roles || '8') && (
                 <li key={name}>
                   {subpath?.length >= 1 ? (
                     <Accordion open={open?.includes(name)}>

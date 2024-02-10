@@ -46,11 +46,8 @@ export function MaterialTailwindControllerProvider({ children }) {
   })
 
   const userInfo = useStorage('get', 'userInfo', {
-    user_info: {
-      username: '',
-      role: '8'
-    },
-    token: '',
+    displayName: '',
+    role: '8'
   })
 
   const initialState = {

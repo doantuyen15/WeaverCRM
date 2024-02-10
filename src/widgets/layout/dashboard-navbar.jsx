@@ -31,7 +31,6 @@ export function DashboardNavbar() {
   const { fixedNavbar, collapsedSidenav, userInfo } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
-
   return (
     <Navbar
       color={fixedNavbar ? "white" : "transparent"}
@@ -83,7 +82,7 @@ export function DashboardNavbar() {
           >
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton>
-          {userInfo.user_info.username ? (
+          {userInfo.displayName ? (
             <Link to="#">
               <Button
                 variant="text"
@@ -91,7 +90,7 @@ export function DashboardNavbar() {
                 className="hidden items-center gap-1 px-4 xl:flex normal-case"
               >
                 <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-                {userInfo.user_info.username}
+                {userInfo.displayName}
               </Button>
               <IconButton
                 variant="text"

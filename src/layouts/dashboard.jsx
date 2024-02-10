@@ -9,6 +9,7 @@ import {
 } from "./../widgets/layout";
 import { routes } from "../router";
 import { useController, setOpenConfigurator, setCollapsedSidenav, setShowSidenav } from "./../context";
+import { glb_sv } from "../service";
 
 export function Dashboard() {
   const [controller, dispatch] = useController();
@@ -47,7 +48,7 @@ export function Dashboard() {
             ({ layout, pages }) =>
               layout === "dashboard" &&
               pages.map(({ path, element, subpath, roles }) => (
-                roles.includes(userInfo['user_info']['role']) &&
+                roles.includes(userInfo.roles || '8') &&
                 (subpath?.length > 0 ?
                   subpath.map(({ path, element }) => (
                     <Route exact path={path} element={element} />

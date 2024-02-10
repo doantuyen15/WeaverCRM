@@ -3,18 +3,31 @@ import { Subject } from 'rxjs'
 class globalService {
     constructor() {
         this.userInfo = {
-            roles: '',
-            token: '',
-            uid: ''
+            'uid': '',
+            'email': '',
+            'emailVerified': '',
+            'isAnonymous': '',
+            'providerData': '',
+            'stsTokenManager': '',
+            'createdAt': '',
+            'lastLoginAt': '',
+            'apiKey': '',
+            'appName': '',
+            'username': '',
+            'roles': '',
+            'cert': {}
         }
         this.commonEvent = new Subject()
         this.database = null
-        this.showAlert = (params) => {
-            this.commonEvent.next({ type: 'SHOW_ALERT', params })
+        this.auth = null
+        this.app = null
+        this.functions = null
+        this.showAlert = ({content, handleCallback}) => {
+            this.commonEvent.next({ type: 'SHOW_ALERT', params: {content: content, handleCallback: handleCallback} })
         }
     }
 }
 
 const theInstance = new globalService()
-window.global = theInstance
+window.glb_sv = theInstance
 export default theInstance
