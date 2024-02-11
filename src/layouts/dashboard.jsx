@@ -13,7 +13,7 @@ import { glb_sv } from "../service";
 
 export function Dashboard() {
   const [controller, dispatch] = useController();
-  const { sidenavType, collapsedSidenav, showSidenav, userInfo } = controller;
+  const { collapsedSidenav, userInfo } = controller;
 
   return (
     <div className="min-h-screen bg-blue-gray-50/50">

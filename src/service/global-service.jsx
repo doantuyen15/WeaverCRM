@@ -18,10 +18,6 @@ class globalService {
             'cert': {}
         }
         this.commonEvent = new Subject()
-        this.database = null
-        this.auth = null
-        this.app = null
-        this.functions = null
         this.showAlert = ({content, handleCallback}) => {
             this.commonEvent.next({ type: 'SHOW_ALERT', params: {content: content, handleCallback: handleCallback} })
         }

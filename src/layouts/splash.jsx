@@ -89,7 +89,7 @@ export function SplashScreen() {
     }
 
     const finished = () => {
-        setEvent('Finishing initialize app')
+        setEvent('Finishing initialize app...')
         ipcRenderer?.send("finish_init_app");
     }
     

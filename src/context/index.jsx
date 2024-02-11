@@ -47,7 +47,7 @@ export function MaterialTailwindControllerProvider({ children }) {
 
   const userInfo = useStorage('get', 'userInfo', {
     displayName: '',
-    role: '8'
+    roles: '8'
   })
 
   const initialState = {
@@ -57,7 +57,7 @@ export function MaterialTailwindControllerProvider({ children }) {
     fixedNavbar: config.fixedNavbar,
     openConfigurator: false,
     showSidenav: false,
-    userInfo: userInfo
+    userInfo: userInfo,
   };
 
   const [controller, dispatch] = React.useReducer(reducer, initialState);

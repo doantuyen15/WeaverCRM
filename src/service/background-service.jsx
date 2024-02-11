@@ -16,7 +16,8 @@ import { Navigate } from "react-router-dom";
 import { glb_sv } from "./index";
 import config from '../configs/config.json';
 import { getFunctions } from 'firebase/functions';
-import { useController, setUserInfo } from "../context";
+import { useController, setUserInfo, setFirebase } from "../context";
+const ipcRenderer = window.ipcRenderer
 
 export function BackgroundService() {
     const [showAlert, setShowAlert] = useState(false)
@@ -44,11 +45,12 @@ export function BackgroundService() {
         const auth = getAuth(app);
         const db = getFirestore(app);
         const functions = getFunctions(app);
-        glb_sv.database = db;
-        glb_sv.auth = auth
-        glb_sv.functions = functions
-        glb_sv.app = app
+        // glb_sv.database = db;
+        // glb_sv.auth = auth
+        // glb_sv.functions = functions
+
         const userInfo = useStorage('get', 'userInfo')
+        console.log('readConfigInfo', userInfo);
         if (userInfo.uid) {
             console.log('userInfo', userInfo);
             glb_sv.userInfo = userInfo

@@ -25,28 +25,18 @@ const Roles = [
 
 export function CreateAccount({ open, handleOpen, handleCallback }) {
     const [account, setAccount] = useState({
-        'fullname': '', 
-        'username': '', 
-        'password': '', 
-        'id_card': '', 
-        'id_card_date': '',
-        'issued_by': '', 
-        'address': '', 
-        'mail': '', 
-        'phone': '', 
-        'id_department': '', 
-        'act_no_bank': '', 
-        'bank_brch': '', 
-        'academic_lv': '', 
-        'college_graduation': '', 
-        'working_status': '', 
-        'dt_start': '', 
-        'dt_end': '', 
-        'note': ''
+        phoneNumber: "",
+        password: "",
+        displayName: "",
+        photoURL: "",
+        email: "",
+        username: "",
+        uid: "",
+        roles: ""
     })
 
     const checkInfo = () => {
-        if (!account.username || !account.password || !account.id_department) return true
+        if (!account.username || !account.password || !account.roles) return true
         else return false
     }
 
@@ -116,10 +106,10 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
                                 </Typography>
                                 <Input
                                     label="Phone Number"
-                                    value={account.phone}
+                                    value={account.phoneNumber}
                                     onChange={e => setAccount({ 
                                         ...account, 
-                                        phone: e.target.value 
+                                        phoneNumber: e.target.value 
                                     })}
                                 />
                             </div>
@@ -139,7 +129,7 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
                                 <Option 
                                     onClick={() => setAccount({
                                         ...account,
-                                        id_department: index+1
+                                        roles: String(index)
                                     })}
                                     key={item} value={item} className="flex items-center gap-2">
                                     {item}

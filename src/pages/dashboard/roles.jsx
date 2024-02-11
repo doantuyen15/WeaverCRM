@@ -31,10 +31,10 @@ import { Link } from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "./../../widgets/cards";
 import { platformSettingsData, conversationsData, projectsData } from "./../../data";
 import { authorsTableData, projectsTableData } from "./../../data";
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { CreateAccount } from "../../widgets/modal/create-accout";
-import {useFetch} from "../../utils/api/request";
+import {useFetch, useQuery} from "../../utils/api/request";
 import { useController } from "../../context";
 import encryptString from "../../utils/encode/DataCryption";
 import { getFunctions, httpsCallable } from 'firebase/functions';
@@ -48,63 +48,20 @@ export function Roles() {
     const [showPassword, setShowPassword] = useState(false)
     const [openCreate, setOpenCreate] = useState(false)
     const [staffList, setStaffList] = useState([])
-    const userInfo = glb_sv.userInfo
-    const functions = getFunctions(glb_sv.app);
+    const [controller, dispatch] = useController();
+    const { userInfo } = controller;
+    // const userInfo = glb_sv.userInfo
     
-
     useEffect(() => {
-        getStaffList()
         
+        getStaffList()
+       
     }, [])
 
     const getStaffList = () => {
         console.log('getStaffList');
         // const functions = getFunctions();
-        const createUser = httpsCallable(functions, 'createUser');
-        try {
-            const userInfo = {
-                phoneNumber: "112233344",
-                password: "hello1",
-                displayName: "test1",
-                disabled: false,
-                // customClaims: { roleId: '01' },
-                photoURL: '',
-                email: 'test1@weaver.edu.vn',
-                emailVerified: true,
-                username: 'test2'
-            }
-            createUser({ params: userInfo })
-            .then((result) => {
-                const data = result.data;
-                const sanitizedMessage = data.text;
-                console.log('data', data, sanitizedMessage);
-            })
-            .catch((error) => {
-                console.log('data', error);
-            });
-        // const admin = initializeApp({
-        //     credential: credential.cert(userInfo.cert),
-        //     databaseURL: "https://weavercrm.firebaseio.com"
-        //   });
-        // const requestInfo = {
-        //     headers: {
-        //         "authorization": `${userInfo.token}`,
-        //     },
-        //     method: 'get',
-        //     service: 'getInfoStaff',
-        //     callback: (data) => {
-        //         console.log('staffs', data);
-        //         setStaffList(data)
-        //     },
-        //     handleError: (error) => {
-        //         console.log('error', error)
-        //     }
-        // }
-        // useFetch(requestInfo)
-        } catch (error) {
-        console.log('getStaffList', error);
-            
-        }
+
 
     }
 
@@ -116,26 +73,27 @@ export function Roles() {
         console.log('handleCreateCallback' , account);
         setOpenCreate(false)
         if (ok) {
-            const requestInfo = {
-                body: Object.values({...account, password: encryptString(account.password)}),
-                headers: {
-                    "authorization": `${userInfo.token}`,
-                },
-                method: 'post',
-                service: 'registerUsers',
-                callback: (data) => {
-                    getStaffList()
-                    // setLoading(false)
-                    // setTable(data)
-                    // tableRef.current = data
-                },
-                handleError: (error) => {
-                    console.log('error', error)
-                    // setLoading(false)
-                },
-                showToast: true
-            }
-            useFetch(requestInfo)
+            useQuery('create_user', account)
+            // const requestInfo = {
+            //     body: Object.values({...account, password: encryptString(account.password)}),
+            //     headers: {
+            //         "authorization": `${userInfo.token}`,
+            //     },
+            //     method: 'post',
+            //     service: 'registerUsers',
+            //     callback: (data) => {
+            //         getStaffList()
+            //         // setLoading(false)
+            //         // setTable(data)
+            //         // tableRef.current = data
+            //     },
+            //     handleError: (error) => {
+            //         console.log('error', error)
+            //         // setLoading(false)
+            //     },
+            //     showToast: true
+            // }
+            // useFetch(requestInfo)
         }
     }
 

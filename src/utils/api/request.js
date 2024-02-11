@@ -20,6 +20,7 @@ export function useQuery(service, params = {}) {
         case 'get_student': return getStudent()
         case 'add_student': return addStudent()
         case 'get_account_info': return getAccountInfo()
+        case 'create_user': return createUser()
         default:
             break;
     }
@@ -65,6 +66,24 @@ const getTokenLogin = (params) => {
         // .catch(reject)
         // .finally(() => clearTimeout(timeoutId));
     });
+}
+
+const createUser = (account) => {
+    console.log('createUser', account, functions.current);
+    const createUser = httpsCallable(functions.current, 'createUser');
+    try {
+        createUser({ params: account })
+        .then((result) => {
+            const data = result.data;
+            const sanitizedMessage = data.text;
+            console.log('data', data, sanitizedMessage);
+        })
+        .catch((error) => {
+            console.log('data', error);
+        });
+    } catch (error) {
+        console.log('createUser', error);
+    }
 }
 
 const getStudent = () => {
