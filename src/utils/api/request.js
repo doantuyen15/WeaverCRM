@@ -20,7 +20,8 @@ export function useQuery(service, params = {}) {
         case 'get_student': return getStudent()
         case 'add_student': return addStudent()
         case 'get_account_info': return getAccountInfo()
-        case 'create_user': return createUser()
+        case 'create_user': return createUser(params)
+        case 'get_staff_list': return getStaffList()
         default:
             break;
     }
@@ -69,14 +70,11 @@ const getTokenLogin = (params) => {
 }
 
 const createUser = (account) => {
-    console.log('createUser', account, functions.current);
-    const createUser = httpsCallable(functions.current, 'createUser');
+    const createUser = httpsCallable(functions, 'createUser');
     try {
         createUser({ params: account })
         .then((result) => {
-            const data = result.data;
-            const sanitizedMessage = data.text;
-            console.log('data', data, sanitizedMessage);
+            toast.success(result.data?.message);
         })
         .catch((error) => {
             console.log('data', error);
@@ -84,6 +82,21 @@ const createUser = (account) => {
     } catch (error) {
         console.log('createUser', error);
     }
+}
+
+const getStaffList = () => {
+    const createUser = httpsCallable(functions, 'getStaffList');
+    // try {
+    //     createUser({ params: account })
+    //     .then((result) => {
+    //         toast.success(result?.message);
+    //     })
+    //     .catch((error) => {
+    //         console.log('data', error);
+    //     });
+    // } catch (error) {
+    //     console.log('createUser', error);
+    // }
 }
 
 const getStudent = () => {

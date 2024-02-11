@@ -45,9 +45,10 @@ export function BackgroundService() {
         const auth = getAuth(app);
         const db = getFirestore(app);
         const functions = getFunctions(app);
-        // glb_sv.database = db;
-        // glb_sv.auth = auth
-        // glb_sv.functions = functions
+        glb_sv.database = db;
+        glb_sv.auth = auth
+        glb_sv.functions = functions
+        glb_sv.app = app
 
         const userInfo = useStorage('get', 'userInfo')
         console.log('readConfigInfo', userInfo);

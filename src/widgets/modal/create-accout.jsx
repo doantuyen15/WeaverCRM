@@ -129,7 +129,7 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
                                 <Option 
                                     onClick={() => setAccount({
                                         ...account,
-                                        roles: String(index)
+                                        roles: String(index + 1)
                                     })}
                                     key={item} value={item} className="flex items-center gap-2">
                                     {item}
