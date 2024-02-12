@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 import LogoDark from "../../assets/logo/we_logo_dark.png"
 import LogoLight from "../../assets/logo/we_logo_light.png"
 import encryptString from "../../utils/encode/DataCryption";
-import { useFetch, useQuery } from "../../utils/api/request";
+import { useFetch, useFirebase } from "../../utils/api/request";
 import { setUserInfo, useController } from '../../context';
 import { useNavigate } from "react-router-dom";
 import useStorage from '../../utils/localStorageHook';
@@ -46,8 +46,9 @@ export function SignIn() {
       password: e.target[1].value
     }
     e.preventDefault()
-    await useQuery('get_token', loginInfo)
+    await useFirebase('get_token', loginInfo)
       .then((userInfoRef) => {
+        console.log('userInfoRef', userInfoRef);
         useStorage('set', 'userInfo', userInfoRef || {})
         setUserInfo(dispatch, userInfoRef)
         glb_sv.userInfo = userInfoRef

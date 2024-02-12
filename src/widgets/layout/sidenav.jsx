@@ -106,7 +106,7 @@ export function Sidenav({ brandName, routes }) {
             )}
             {pages.map(({ icon, name, path, subpath, roles }, key) => (
               roles?.includes(userInfo.roles || '8') && (
-                <li key={name}>
+                <li key={name} style={{ visibility: userInfo.uid && layout === 'auth' ? 'hidden' : 'visible'}}>
                   {subpath?.length >= 1 ? (
                     <Accordion open={open?.includes(name)}>
                       <ListItem className="p-0" selected={open === `/${layout}${path}`}>

@@ -11,7 +11,7 @@ var db = glb_sv.database
 var userInfo = glb_sv.userInfo
 var functions = glb_sv.functions;
 
-export function useQuery(service, params = {}) {
+export function useFirebase(service, params = {}) {
     if (!db) db = glb_sv.database
     if (!userInfo) userInfo = glb_sv.userInfo
     if (!functions) functions = glb_sv.functions;
@@ -33,7 +33,6 @@ const getTokenLogin = (params) => {
         const timeoutId = setTimeout(() => {
             reject('Query timed out');
         }, 5000);
-        console.log('functions', functions);
         const getToken = httpsCallable(functions, 'getToken');
         getToken({ params: params })
             .then(async (result) => {
@@ -42,7 +41,7 @@ const getTokenLogin = (params) => {
                 const displayName = result.data.displayName;
                 await signInWithCustomToken(auth, token)
                     .then(user => {
-                        const userInfoRef = {...user.user, roles: roles, displayName: displayName || user.user.uid}
+                        const userInfoRef = {...user.user, roles: roles, displayName: displayName}
                         resolve(userInfoRef)
                     })
                     .catch(error => {

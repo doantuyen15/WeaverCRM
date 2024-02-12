@@ -33,7 +33,7 @@ import { ModalConfirmUpdate } from "../../widgets/modal/confirm-update";
 import { orderBy } from 'lodash'
 import StudentInfo from "../../data/entities/studentInfo";
 import { ModalEditStudent } from "../../widgets/modal/edit-student";
-import {useFetch, useQuery} from "../../utils/api/request";
+import {useFetch, useFirebase} from "../../utils/api/request";
 import { useController } from "../../context";
 import moment from "moment";
 import formatDate from "../../utils/formatNumber/formatDate";
@@ -130,7 +130,7 @@ export default function StudentTable() {
 
     const getStudentList = () => {
         setLoading(true)
-        useQuery('get_student').then(data => console.log('student', data)).catch(err => console.log(err))
+        useFirebase('get_student').then(data => console.log('student', data)).catch(err => console.log(err))
         // .then(data => {
         //     console.log('getStudentList', data);
         // })

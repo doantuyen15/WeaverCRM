@@ -34,7 +34,7 @@ import { authorsTableData, projectsTableData } from "./../../data";
 import React, { useEffect, useRef, useState } from 'react'
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { CreateAccount } from "../../widgets/modal/create-accout";
-import {useFetch, useQuery} from "../../utils/api/request";
+import {useFetch, useFirebase} from "../../utils/api/request";
 import { useController } from "../../context";
 import encryptString from "../../utils/encode/DataCryption";
 import { getFunctions, httpsCallable } from 'firebase/functions';
@@ -73,7 +73,7 @@ export function Roles() {
         console.log('handleCreateCallback' , account);
         setOpenCreate(false)
         if (ok) {
-            useQuery('create_user', account)
+            useFirebase('create_user', account)
             // const requestInfo = {
             //     body: Object.values({...account, password: encryptString(account.password)}),
             //     headers: {
