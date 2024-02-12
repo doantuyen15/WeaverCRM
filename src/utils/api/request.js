@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import { getDocs, collection, getFirestore, doc, getDoc, query } from "firebase/firestore";
+import { getDocs, collection, getFirestore, doc, getDoc, query, deleteDoc } from "firebase/firestore";
 import glb_sv from '../../service/global-service'
 import { httpsCallable } from 'firebase/functions';
 import { signInWithCustomToken } from "firebase/auth";
@@ -22,6 +22,7 @@ export function useFirebase(service, params = {}) {
         case 'get_account_info': return getAccountInfo()
         case 'create_user': return createUser(params)
         case 'get_staff_list': return getStaffList()
+        case 'update_user': return updateUser(params)
         default:
             break;
     }
@@ -69,33 +70,63 @@ const getTokenLogin = (params) => {
 }
 
 const createUser = (account) => {
-    const createUser = httpsCallable(functions, 'createUser');
-    try {
-        createUser({ params: account })
-        .then((result) => {
-            toast.success(result.data?.message);
-        })
-        .catch((error) => {
-            console.log('data', error);
-        });
-    } catch (error) {
-        console.log('createUser', error);
-    }
+    return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+            reject('Query timed out');
+        }, 5000);
+        const createUser = httpsCallable(functions, 'createUser');
+        try {
+            createUser({ params: account })
+                .then((result) => {
+                    resolve()
+                    toast.success(result.data?.message);
+                })
+                .catch((error) => {
+                    reject()
+                    console.log('data', error);
+                })
+                .finally(() => clearTimeout(timeoutId))
+        } catch (error) {
+            console.log('createUser', error);
+        }
+    });
 }
 
 const getStaffList = () => {
-    const createUser = httpsCallable(functions, 'getStaffList');
-    // try {
-    //     createUser({ params: account })
-    //     .then((result) => {
-    //         toast.success(result?.message);
-    //     })
-    //     .catch((error) => {
-    //         console.log('data', error);
-    //     });
-    // } catch (error) {
-    //     console.log('createUser', error);
-    // }
+    return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+            reject('Query timed out');
+        }, 5000);
+        getDocs(collection(db, "account"))
+            .then(
+                (snap) => {
+                    resolve(snap.docs.map(doc => doc.data()))
+                    // snap.forEach((doc) => {
+                    //     console.log(doc.id, "=>", doc.data());
+                    // });
+                }
+            )
+            .catch(reject)
+            .finally(() => clearTimeout(timeoutId));
+    });
+}
+
+const updateUser = ({type, account}) => {
+    return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+            reject('Query timed out');
+        }, 5000);
+        deleteDoc(doc(db, "account", account.username))
+            .then(() => {
+                toast.success(`Delete account ${account.username} successful!`)
+                resolve()
+            })
+            .catch((err) => {
+                toast.error(`error: ${err}`)
+                reject()
+            })
+            .finally(() => clearTimeout(timeoutId))
+    });
 }
 
 const getStudent = () => {

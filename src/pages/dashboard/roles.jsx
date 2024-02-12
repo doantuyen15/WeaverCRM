@@ -16,7 +16,12 @@ import {
     Chip,
     List,
     ListItem,
-    ListItemPrefix
+    ListItemPrefix,
+    Menu,
+    MenuHandler,
+    MenuList,
+    MenuItem,
+    IconButton
 } from "@material-tailwind/react";
 import {
     HomeIcon,
@@ -26,6 +31,8 @@ import {
     TableCellsIcon,
     RectangleGroupIcon,
     PlusIcon,
+    EllipsisVerticalIcon,
+    ArrowPathIcon,
 } from "@heroicons/react/24/solid";
 import { Link } from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "./../../widgets/cards";
@@ -50,6 +57,7 @@ export function Roles() {
     const [staffList, setStaffList] = useState([])
     const [controller, dispatch] = useController();
     const { userInfo } = controller;
+    const [loading, setLoading] = useState(false)
     // const userInfo = glb_sv.userInfo
     
     useEffect(() => {
@@ -59,10 +67,17 @@ export function Roles() {
     }, [])
 
     const getStaffList = () => {
-        console.log('getStaffList');
+        setLoading(true)
+
+        useFirebase('get_staff_list')
+        .then((list) => {
+            console.log('list', list);
+            setStaffList(list)
+        })
+        .finally(() => {
+            setLoading(false)
+        })
         // const functions = getFunctions();
-
-
     }
 
     const handleCancelCreate = () => {
@@ -73,7 +88,9 @@ export function Roles() {
         console.log('handleCreateCallback' , account);
         setOpenCreate(false)
         if (ok) {
-            useFirebase('create_user', account)
+            useFirebase('create_user', account).then(() => {
+                getStaffList()
+            })
             // const requestInfo = {
             //     body: Object.values({...account, password: encryptString(account.password)}),
             //     headers: {
@@ -97,6 +114,18 @@ export function Roles() {
         }
     }
 
+    const handleUpdate = (type, account) => {
+        setLoading(true)
+        useFirebase('update_user', {type, account})
+        .then(() => {
+            setLoading(false)
+            getStaffList()
+        })
+        .catch(() => {
+            setLoading(false)
+        })
+    }
+
     return (
         <>
             <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('../../assets/background-image.png')] bg-cover	bg-center">
@@ -106,13 +135,21 @@ export function Roles() {
                 <CardBody className="p-4">
                     <div className="flex items-center">
                         <div className="relative gird-cols-1 grid gap-12 px-4 w-full">
-                            <div className="absolute flex right-5 z-40 bg-blue-gray-50 gap-2 justify-center bg-opacity-60 rounded-lg p-1 items-center">
+                            <div className="absolute flex right-5 z-40 gap-2 justify-center rounded-lg p-1 items-center">
                                 <Button 
-                                    className="flex items-center gap-3" 
+                                    className="flex items-center gap-3"
                                     size="sm" 
                                     onClick={() => setOpenCreate(true)}
                                 >
-                                    <PlusIcon strokeWidth={2} className="w-4 h-4 text-white" /> Create
+                                    <PlusIcon strokeWidth={2} className="w-4 h-4 text-white" />
+                                    Create
+                                </Button>
+                                <Button
+                                    className="flex items-center gap-3"
+                                    size="sm"
+                                    onClick={() => getStaffList()}
+                                >
+                                    <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
                                 </Button>
                             </div>
                             <Tabs value={mod}>
@@ -149,14 +186,21 @@ export function Roles() {
                                             </thead>
                                             <tbody>
                                                 {staffList.map(
-                                                    ({ full_name, user_name, password, id_staff, id_user, id_card, id_card_date, issued_by, address, mail, phone, id_department, act_no_bank, bank_brch, academic_lv, college_graduation, working_status, dt_start, dt_end, note }, key) => {
+                                                    ({ phoneNumber,
+                                                        password,
+                                                        displayName,
+                                                        photoURL,
+                                                        email,
+                                                        username,
+                                                        uid,
+                                                        roles }, key) => {
                                                         const className = `py-3 px-5 ${key === staffList.length - 1
                                                             ? ""
                                                             : "border-b border-blue-gray-50"
                                                             }`;
 
                                                         return (
-                                                            <tr key={name}>
+                                                            <tr key={username}>
                                                                 <td className={className}>
                                                                     <div className="flex items-center gap-4">
                                                                         <div>
@@ -165,17 +209,17 @@ export function Roles() {
                                                                                 color="blue-gray"
                                                                                 className="font-semibold"
                                                                             >
-                                                                                {full_name}
+                                                                                {username}
                                                                             </Typography>
                                                                             <Typography className="text-xs font-normal text-blue-gray-500">
-                                                                                {mail}
+                                                                                {email}
                                                                             </Typography>
                                                                         </div>
                                                                     </div>
                                                                 </td>
                                                                 <td className={className}>
                                                                     <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                                        {id_department}
+                                                                        {roles}
                                                                     </Typography>
                                                                 </td>
                                                                 <td className={className}>
@@ -185,17 +229,25 @@ export function Roles() {
                                                                 </td>
                                                                 <td className={className}>
                                                                     <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                                        {'0909.111.222'}
+                                                                        {phoneNumber}
                                                                     </Typography>
                                                                 </td>
                                                                 <td className={className}>
-                                                                    <Typography
-                                                                        as="a"
-                                                                        // href="#"
-                                                                        className="text-xs font-semibold text-blue-gray-600 cursor-pointer"
-                                                                    >
-                                                                        Edit
-                                                                    </Typography>
+                                                                    <Menu placement="bottom-end">
+                                                                        <MenuHandler>
+                                                                            <IconButton size="sm" variant="text" color="blue-gray">
+                                                                                <EllipsisVerticalIcon
+                                                                                    strokeWidth={3}
+                                                                                    fill="currenColor"
+                                                                                    className="h-6 w-6"
+                                                                                />
+                                                                            </IconButton>
+                                                                        </MenuHandler>
+                                                                        <MenuList>
+                                                                            <MenuItem>Update</MenuItem>
+                                                                            <MenuItem onClick={() => handleUpdate('delete', staffList[key])}>Remove</MenuItem>
+                                                                        </MenuList>
+                                                                    </Menu>
                                                                 </td>
                                                             </tr>
                                                         );
