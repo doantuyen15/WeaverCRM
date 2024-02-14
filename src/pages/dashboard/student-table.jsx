@@ -75,7 +75,7 @@ const ListStatus = [
 
 const Header = [
     'status_res',
-    'id_student',
+    'id',
     'full_name',
     'test_input_date',
     'phone',
@@ -130,10 +130,14 @@ export default function StudentTable() {
 
     const getStudentList = () => {
         setLoading(true)
-        useFirebase('get_student').then(data => console.log('student', data)).catch(err => console.log(err))
-        // .then(data => {
-        //     console.log('getStudentList', data);
-        // })
+        useFirebase('get_student')
+            .then(data => {
+                console.log('getStudentList', data);
+                tableRef.current = data
+                setStudentList(data)
+            })
+            .catch(err => console.log(err))
+            .finally(() => setLoading(false))
         // const requestInfo = {
         //     headers: {
         //         "authorization": `${userInfo.token}`,
@@ -177,7 +181,6 @@ export default function StudentTable() {
             test_input_score: '',
             id_class_temp: '',
             note: ''
-            // li
         })
         setObjectNew(list)
     }
@@ -238,7 +241,8 @@ export default function StudentTable() {
     const sendRequestAddStudent = () => {
         console.log('sendRequestAddStudent', Object.values(objectNew));
         setLoading(true)
-
+        useFirebase('add_student', objectNew)
+        
         // objectNew.forEach(item => {
         //     const requestInfo = {
         //         headers: {
@@ -346,9 +350,9 @@ export default function StudentTable() {
                             <Button className="flex items-center gap-3" size="sm" onClick={handleAddStudent}>
                                 <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add student
                             </Button>
-                            <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
+                            {/* <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
                                 <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Make a tuition payment
-                            </Button>
+                            </Button> */}
                         </div>
                     </div>
                     <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
@@ -371,12 +375,11 @@ export default function StudentTable() {
                                 />
                             </div>
                             <Button
-                                variant="text"
                                 className="flex items-center gap-3"
                                 size="sm"
                                 onClick={() => getStudentList()}
                             >
-                                <ArrowPathIcon strokeWidth={2} className={`w-4 h-4 ${loading ? 'animate-spin' : null}`} /> Refresh
+                                <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
                             </Button>
                         </div>
                     </div>
@@ -397,7 +400,7 @@ export default function StudentTable() {
                                             className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
                                         >
                                             {head}{" "}
-                                            {index !== TABLE_HEAD.length - 1 && (
+                                            {(index === 0 || index === 1) && (
                                                 keySort !== index ? (
                                                     <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
                                                 ) : keySort === index && isAsc ? (
@@ -665,7 +668,7 @@ export default function StudentTable() {
                                                                     color="blue-gray"
                                                                     className="font-normal"
                                                                 >
-                                                                    {formatPhone(item.id)}
+                                                                    {item.id}
                                                                 </Typography>
                                                             </div>
                                                         </td>

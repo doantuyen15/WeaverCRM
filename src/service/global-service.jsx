@@ -15,7 +15,8 @@ class globalService {
             'appName': '',
             'username': '',
             'roles': '',
-            'cert': {}
+            'cert': {},
+            'displayName': ''
         }
         this.database = null
         this.auth = null

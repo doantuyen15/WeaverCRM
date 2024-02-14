@@ -58,39 +58,52 @@ export function Roles() {
     const [controller, dispatch] = useController();
     const { userInfo } = controller;
     const [loading, setLoading] = useState(false)
+    const [editAccount, setEditAccount] = useState({})
     // const userInfo = glb_sv.userInfo
     
     useEffect(() => {
-        
         getStaffList()
-       
     }, [])
 
     const getStaffList = () => {
         setLoading(true)
-
         useFirebase('get_staff_list')
         .then((list) => {
             console.log('list', list);
+            setLoading(false)
             setStaffList(list)
         })
-        .finally(() => {
-            setLoading(false)
-        })
+        .catch(() => setLoading(false))
         // const functions = getFunctions();
     }
 
     const handleCancelCreate = () => {
         setOpenCreate(false)
+        setEditAccount({
+            phoneNumber: "",
+            password: "",
+            displayName: "",
+            photoURL: "",
+            email: "",
+            username: "",
+            uid: "",
+            roles: ""
+        })
     }
 
-    const handleCreateCallback = (ok, account = {}) => {
+    const handleUserCallback = (ok, account = {}) => {
         console.log('handleCreateCallback' , account);
         setOpenCreate(false)
         if (ok) {
-            useFirebase('create_user', account).then(() => {
-                getStaffList()
-            })
+            if (account.isUpdate) {
+                useFirebase('update_user', account).then(() => {
+                    getStaffList()
+                })
+            } else {
+                useFirebase('create_user', account).then(() => {
+                    getStaffList()
+                })
+            }
             // const requestInfo = {
             //     body: Object.values({...account, password: encryptString(account.password)}),
             //     headers: {
@@ -116,14 +129,20 @@ export function Roles() {
 
     const handleUpdate = (type, account) => {
         setLoading(true)
-        useFirebase('update_user', {type, account})
-        .then(() => {
-            setLoading(false)
-            getStaffList()
-        })
-        .catch(() => {
-            setLoading(false)
-        })
+        if (type === 'update') {
+            console.log('handleUpdate', {...account, isUpdate: true});
+            setEditAccount({...account, isUpdate: true})
+            setOpenCreate(true)
+        } else {
+            useFirebase('delete_user', {type, account})
+            .then(() => {
+                setLoading(false)
+                getStaffList()
+            })
+            .catch(() => {
+                setLoading(false)
+            })
+        }
     }
 
     return (
@@ -244,7 +263,7 @@ export function Roles() {
                                                                             </IconButton>
                                                                         </MenuHandler>
                                                                         <MenuList>
-                                                                            <MenuItem>Update</MenuItem>
+                                                                            <MenuItem onClick={() => handleUpdate('update', staffList[key])}>Update</MenuItem>
                                                                             <MenuItem onClick={() => handleUpdate('delete', staffList[key])}>Remove</MenuItem>
                                                                         </MenuList>
                                                                     </Menu>
@@ -410,7 +429,7 @@ export function Roles() {
                     </div>
                 </CardBody>
             </Card>
-            <CreateAccount open={openCreate} handleOpen={handleCancelCreate} handleCallback={handleCreateCallback} />
+            <CreateAccount open={openCreate} editAccount={editAccount} handleOpen={handleCancelCreate} handleCallback={handleUserCallback}/>
         </>
     );
 }

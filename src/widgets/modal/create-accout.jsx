@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Button,
     Dialog,
@@ -23,8 +23,8 @@ const Roles = [
 	'Giáo Viên'
 ]
 
-export function CreateAccount({ open, handleOpen, handleCallback }) {
-    const [account, setAccount] = useState({
+export function CreateAccount({ open, handleOpen, handleCallback, editAccount = {} }) {
+    const [account, setAccount] = useState(editAccount || {
         phoneNumber: "",
         password: "",
         displayName: "",
@@ -35,6 +35,10 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
         roles: ""
     })
 
+    useEffect(() => {
+        setAccount(editAccount)
+    }, [editAccount])
+    
     const checkInfo = () => {
         if (!account.username || !account.password || !account.roles) return true
         else return false
@@ -116,6 +120,7 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
                         </div>
                         <Select
                             label="Select Roles"
+                            value={Roles[Number(account.roles - 1)]}
                             selected={(element) =>
                                 element &&
                                 React.cloneElement(element, {
@@ -126,7 +131,7 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
                             }
                         >
                             {Roles?.map((item, index) => (
-                                <Option 
+                                <Option
                                     onClick={() => setAccount({
                                         ...account,
                                         roles: String(index + 1)
@@ -139,7 +144,7 @@ export function CreateAccount({ open, handleOpen, handleCallback }) {
                     </CardBody>
                     <CardFooter className="pt-0">
                         <Button disabled={checkInfo()} variant="gradient" onClick={() => handleCallback(true, account)} fullWidth>
-                            Create Account
+                            {account.isUpdate ? 'Update Account' : 'Create Account'}
                         </Button>
                     </CardFooter>
                 </Card>

@@ -18,6 +18,10 @@ const root = ReactDOM.createRoot(
 	document.getElementById("root") as HTMLElement,
 );
 
+console.warn = function() {
+	// Suppress warning logs in development mode
+}
+
 root.render(
 	<React.Fragment>
 		<ThemeProvider value={customTheme}>

@@ -17,6 +17,7 @@ import {
 import {
     EllipsisVerticalIcon,
     ArrowUpIcon,
+    InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { StatisticsCard } from "./../../widgets/cards";
 import { StatisticsChart } from "./../../widgets/charts";
@@ -26,24 +27,27 @@ import {
     projectsTableData,
     ordersOverviewData,
 } from "../../data";
-import { CheckBadgeIcon, CheckCircleIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon, ClockIcon, InformationCircleIcon, MinusCircleIcon, PencilIcon, PencilSquareIcon, PlusCircleIcon } from "@heroicons/react/24/solid";
+import { CheckBadgeIcon, CheckCircleIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon, ClockIcon, MinusCircleIcon, PencilIcon, PencilSquareIcon, PlusCircleIcon } from "@heroicons/react/24/solid";
 import Amethyst from "../../assets/amethyst.png";
 import { useController } from "../../context";
-import {useFetch} from "../../utils/api/request";
+import {useFetch, useFirebase} from "../../utils/api/request";
 import { orderBy } from 'lodash';
 import FormatDate from "../../utils/formatNumber/formatDate";
 import { Slide, toast } from "react-toastify";
+import { ModalApproveDetail } from "../../widgets/modal/approve-detail";
 
-const header = ["STT", "Loại lệnh", "Người tạo", "Thời gian tạo", "Chi tiết", "Note"]
-const headerMap = ["type_request", "created_at"]
-const typeList = [
-    'Create Student',
-    'Update Info Student',
-    'Delete info Student',
-    'Create Class Tuition',
-    'Create Staff',
-    'Đóng tiền / Add Lớp cho học Sinh'
+const header = [
+    "STT", 
+    // "Loại lệnh",
+    "Người tạo",
+    "Thời gian tạo",
+    "Chi tiết",
+    "Note"
 ]
+const headerMap = ["type_request", "created_at"]
+const typeList = {
+    'add_student': 'Add Student'
+}
 const status = [
     'Duyệt',
     'Chờ Duyệt',
@@ -53,7 +57,7 @@ const status = [
 export function Approval() {
     const [controller] = useController();
     const {userInfo} = controller;
-    const [table, setTable] = useState([])
+    const [list, setList] = useState([])
     const [keySort, setKeySort] = useState('')
     const [isAsc, setIsAsc] = useState(true)
     const [, updateState] = React.useState();
@@ -63,6 +67,8 @@ export function Approval() {
     const [onAdd, setOnAdd] = useState(false)
     const focusRef = useRef(null)
     const tableRef = useRef([])
+    const [openDetail, setOpenDetail] = useState(false)
+    const [itemDetail, setItemDetail] = useState([])
 
     useEffect(() => {
         getApprovalList()
@@ -70,25 +76,18 @@ export function Approval() {
 
     const getApprovalList = () => {
         setLoading(true)
-        const requestInfo = {
-            headers: {
-                "authorization": `${userInfo.token}`,
-            },
-            method: 'get',
-            service: 'getListApproval',
-            callback: (data) => {
+        useFirebase('get_approval_list')
+            .then(data => {
                 setLoading(false)
-                setTable(data?.filter(item => item.status_request === '1'))
-                // setTable(data)
-                tableRef.current = data
-                console.log(tableRef.current);
-            },
-            handleError: (error) => {
-                console.log('error', error)
-                setLoading(false)
-            }
-        }
-        useFetch(requestInfo)
+                const groupedData = data.reduce((acc, item) => {
+                    acc[Object.keys(item)[0]] = acc[Object.keys(item)[0]] || [];
+                    acc[Object.keys(item)[0]].push({...Object.values(item)[0], type: Object.keys(item)[0]});
+                    return acc;
+                }, {});
+                setList(groupedData)
+                console.log('get_approval_list', groupedData)
+            })
+            .catch(err => console.log(err))
     }
 
     const handleSort = (indexCol) => {
@@ -97,38 +96,23 @@ export function Approval() {
         //     sorted = orderBy(TABLE_ROWS, ['name'], [isAsc ? 'asc' : 'desc'])
         // } else return
         sorted = orderBy(tableRef.current, [header[indexCol]], [isAsc ? 'asc' : 'desc'])
-        setTable([...sorted])
+        setList([...sorted])
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
     }
 
     const handleApprove = (ok, item) => {
         setLoading(true)
-        const requestInfo = {
-            headers: {
-                "authorization": `${userInfo.token}`,
-            },
-            body: [
-                item.id_approve,
-                item.type_request,
-                item.status_request,
-                JSON.parse(item.new_data_update),
-                ok ? '0' : '2',
-                item.id_user_requesting
-            ],
-            method: 'POST',
-            service: 'approval',
-            callback: (data) => {
+        useFirebase("update_approval", item)
+            .then(res => {
                 setLoading(false)
                 getApprovalList()
-            },
-            handleError: (error) => {
-                console.log('error', error)
-                setLoading(false)
-            },
-            showToast: true
-        }
-        useFetch(requestInfo)
+            })
+    }
+
+    const openApproveDetail = (item, type) => {
+        setOpenDetail(true)
+        setItemDetail(item)
     }
 
     return (
@@ -150,7 +134,7 @@ export function Approval() {
                                 className="flex items-center gap-1 font-normal text-blue-gray-600"
                             >
                                 <MinusCircleIcon strokeWidth={3} className="h-4 w-4 text-blue-gray-200" />
-                                <strong>{table.length} waiting</strong>
+                                <strong>{list.length} waiting</strong>
                             </Typography>
                         </div>
                         <Menu placement="left-start">
@@ -205,77 +189,91 @@ export function Approval() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {table.map(
-                                    (item, index) => {
-                                        item.index = index
-                                        const className = `py-3 px-5 ${index === table.length - 1
+                                {Object.keys(list)?.map(
+                                    (type, index) => {
+                                        const className = `py-3 px-5 ${index === list.length - 1
                                                 ? ""
                                                 : "border-b border-blue-gray-50"
                                             }`;
 
                                         return (
-                                            <tr key={index}>
-                                                <td className={className}>
-                                                    <div className="flex items-center gap-4">
-                                                        {/* <Avatar src={Amethyst} alt={name} size="sm" /> */}
-                                                        <Typography
-                                                            variant="small"
-                                                            color="blue-gray"
-                                                            className="font-bold"
-                                                        >
-                                                            {item.index + 1}
-                                                        </Typography>
-                                                    </div>
-                                                </td>
-                                                <td className={className}>
+                                            <>
+                                                <tr>
                                                     <Typography
                                                         variant="small"
-                                                        className="text-xs font-medium text-blue-gray-600"
+                                                        color="blue-gray"
+                                                        className="font-bold pt-4 pl-4"
                                                     >
-                                                        {typeList[item.type_request - 1]}
+                                                        {typeList[type]}
                                                     </Typography>
-                                                </td>
-                                                <td className={className}>
-                                                    <Typography
-                                                        variant="small"
-                                                        className="text-xs font-medium text-blue-gray-600"
-                                                    >
-                                                        {item.requesting_username}
-                                                    </Typography>
-                                                </td>
-                                                <td className={className}>
-                                                    <Typography
-                                                        variant="small"
-                                                        className="mb-1 block text-xs font-medium text-blue-gray-600"
-                                                    >
-                                                        {FormatDate(item.created_at)}
-                                                    </Typography>
-                                                </td>
-                                                <td className={className}>
-                                                    <InformationCircleIcon className="w-4 h-4"/>
-                                                </td>
-                                                <td className={className}>
-                                                    <Typography
-                                                        variant="small"
-                                                        className="mb-1 block text-xs font-medium text-blue-gray-600"
-                                                    >
-                                                        {''}
-                                                    </Typography>
-                                                </td>
-                                                <td className={className}>
-                                                    <Menu placement="left-start">
-                                                        <MenuHandler>
-                                                            <IconButton variant="text">
-                                                                <PencilIcon className="h-4 w-4" />
-                                                            </IconButton>
-                                                        </MenuHandler>
-                                                        <MenuList>
-                                                            <MenuItem onClick={() => handleApprove(true, item)}>Approve</MenuItem>
-                                                            <MenuItem onClick={() => handleApprove(false, item)}>Reject</MenuItem>
-                                                        </MenuList>
-                                                    </Menu>
-                                                </td>
-                                            </tr>
+                                                </tr>
+                                                {list[type].map((item, stt) => (
+                                                    <tr key={index}>
+                                                        <td className={className}>
+                                                            <div className="flex items-center gap-4">
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="text-xs font-medium text-blue-gray-600"
+                                                                >
+                                                                    {stt}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        {/* <td className={className}>
+                                                            <Typography
+                                                                variant="small"
+                                                                className="text-xs font-medium text-blue-gray-600"
+                                                            >
+                                                                {typeList[item.type_request - 1]}
+                                                            </Typography>
+                                                        </td> */}
+                                                        <td className={className}>
+                                                            {/* <Avatar src={Amethyst} alt={name} size="sm" /> */}
+                                                            <Typography
+                                                                variant="small"
+                                                                className="text-xs font-medium text-blue-gray-600"
+                                                            >
+                                                                {item.requesting_username}
+                                                            </Typography>
+                                                        </td>
+                                                        <td className={className}>
+                                                            <Typography
+                                                                variant="small"
+                                                                className="text-xs font-medium text-blue-gray-600"
+                                                            >
+                                                                {item.created_at}
+                                                            </Typography>
+                                                        </td>
+                                                        <td className={className}>
+                                                            <InformationCircleIcon 
+                                                                className="w-5 h-5 cursor-pointer"
+                                                                onClick={() => openApproveDetail(item.data, type)} 
+                                                            />
+                                                        </td>
+                                                        <td className={className}>
+                                                            <Typography
+                                                                variant="small"
+                                                                className="text-xs font-medium text-blue-gray-600"
+                                                            >
+                                                                {''}
+                                                            </Typography>
+                                                        </td>
+                                                        <td className={className}>
+                                                            <Menu placement="left-start">
+                                                                <MenuHandler>
+                                                                    <IconButton variant="text">
+                                                                        <PencilIcon className="h-4 w-4" />
+                                                                    </IconButton>
+                                                                </MenuHandler>
+                                                                <MenuList>
+                                                                    <MenuItem onClick={() => handleApprove(true, item)}>Approve</MenuItem>
+                                                                    <MenuItem onClick={() => handleApprove(false, item)}>Reject</MenuItem>
+                                                                </MenuList>
+                                                            </Menu>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </>
                                         );
                                     }
                                 )}
@@ -284,19 +282,7 @@ export function Approval() {
                     </CardBody>
                 </Card>
             </div>
-            {/* <Alert
-                open={true}
-                className="max-w-screen-md"
-            >
-                <Typography variant="h5" color="white">
-                    Success
-                </Typography>
-                <Typography color="white" className="mt-2 font-normal">
-                    I don&apos;t know what that word means. I&apos;m happy. But success,
-                    that goes back to what in somebody&apos;s eyes success means. For me,
-                    success is inner peace. That&apos;s a good day for me.
-                </Typography>
-            </Alert> */}
+            <ModalApproveDetail open={openDetail} handleOpen={setOpenDetail} data={itemDetail}/>
         </div>
     );
 }
