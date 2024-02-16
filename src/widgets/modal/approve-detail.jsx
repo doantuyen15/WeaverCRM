@@ -12,7 +12,7 @@ import {
     Chip,
 } from "@material-tailwind/react";
 import FormatPhone from "../../utils/formatNumber/formatPhone";
-import FormatDate from "../../utils/formatNumber/formatDate";
+import formatDate from "../../utils/formatNumber/formatDate";
 import { ArrowUpTrayIcon, ArrowUturnLeftIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 
 const ListStatus = [
@@ -130,7 +130,7 @@ export function ModalApproveDetail({ handleOpen, open, data }) {
                                                     color="blue-gray"
                                                     className="font-normal"
                                                 >
-                                                    {FormatDate(item.dob)}
+                                                    {formatDate(item.dob)}
                                                 </Typography>
                                             </td>
                                             <td className={classes}>

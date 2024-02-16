@@ -51,7 +51,7 @@ import moment from "moment";
 //     }
 // ]
 
-export function PaymentPopup({ studentList, open, handleCallback }) {
+export function CreateClasses({ studentList, open, handleCallback }) {
     const [controller] = useController();
     const { userInfo } = controller;
     const [selectedClass, setSelectedClass] = useState({})
@@ -59,45 +59,47 @@ export function PaymentPopup({ studentList, open, handleCallback }) {
     const [paymentList, setPaymentList] = useState([])
     const paymentListRef = useRef([])
     const [tuition, setTuition] = useState(useStorage('get', 'tuition') || [])
+    // const [studentList, setStudentList] = useState([])
 
 
     // useEffect(() => {
-    //     if (!tuition?.length) getTuition()
-    // }, [])
+    //     const classListRef = useStorage('get', 'classList', [])
+    //     if (classListRef?.length === 0) getClassList()
+    //     else {
+    //     //   tableRef.current = classListRef
+    //       setClassList(classListRef)
+    //     }
+    //   }, [])
 
-    useEffect(() => {
-        setPaymentList([{
-            student: '',
-            tuition: '',
-            class_name: '',
-            id_class: '',
-            id_class_type: '',
-            note: '',
-            date: moment(Date.now()).format('YYYY-MM-DD'),
-            id_student: ''
-        }])
-    }, [open])
+    //   const getStudentList = () => {
+    //     setLoading(true)
+    //     useFirebase('get_student')
+    //       .then(data => {
+    //         setLoading(false)
+    //         // tableRef.current = data
+    //         setStudentList(data)
+    //         useStorage('set', 'studentInfo', data)
+    //       })
+    //       .catch(err => console.log(err))
+    //       .finally(() => setLoading(false))
+    //   }
+
+    // useEffect(() => {
+    //     setPaymentList([{
+    //         student: '',
+    //         tuition: '',
+    //         class_name: '',
+    //         id_class: '',
+    //         id_class_type: '',
+    //         note: '',
+    //         date: moment(Date.now()).format('YYYY-MM-DD'),
+    //         id_student: ''
+    //     }])
+    // }, [open])
     
     const getTuition = () => {
         console.log('getTuition');
-        // const requestInfo = {
-        //     headers: {
-        //         "authorization": `${userInfo.token}`,
-        //     },
-        //     method: 'get',
-        //     service: 'getAllClassRoom',
-        //     callback: (data) => {
-        //         console.log('getAllClassRoom', data);
-        //         setLoading(false)
-        //         setTuition(data)
-        //         useStorage('set', 'tuition', data)
-        //     },
-        //     handleError: (error) => {
-        //         console.log('error', error)
-        //         setLoading(false)
-        //     }
-        // }
-        // useFetch(requestInfo)
+
     }
 
     const handleAdd = () => {
@@ -115,7 +117,7 @@ export function PaymentPopup({ studentList, open, handleCallback }) {
         setPaymentList(list)
     }
 
-    const updateListPayment = ({ key, index, value, mode = 'add' }) => {
+    const updateClassList = ({ key, index, value, mode = 'add' }) => {
         if (mode === 'delete') {
             setPaymentList(paymentList.filter((item, i) => i !== index))
         }
@@ -164,7 +166,7 @@ export function PaymentPopup({ studentList, open, handleCallback }) {
                                         }
                                     >
                                         {studentList?.map(item => (
-                                            <Option onClick={() => updateListPayment({ key: 'student', value: item, index: index })} key={item.id_student} value={item.id + ' - ' + item.class_name} className="flex items-center gap-2">
+                                            <Option onClick={() => updateClassList({ key: 'student', value: item, index: index })} key={item.id_student} value={item.id + ' - ' + item.class_name} className="flex items-center gap-2">
                                                 {item.id + ' - ' + item.full_name}
                                             </Option>
                                         ))}
@@ -182,7 +184,7 @@ export function PaymentPopup({ studentList, open, handleCallback }) {
                                         }
                                     >
                                         {tuition?.map(item => (
-                                            <Option onClick={() => updateListPayment({ key: 'tuition', value: item, index: index })} key={item.class_name} value={item.class_name} className="flex items-center gap-2">
+                                            <Option onClick={() => updateClassList({ key: 'tuition', value: item, index: index })} key={item.class_name} value={item.class_name} className="flex items-center gap-2">
                                                 {item.class_name}
                                             </Option>
                                         ))}
@@ -200,7 +202,7 @@ export function PaymentPopup({ studentList, open, handleCallback }) {
                                 <MinusCircleIcon
                                     style={{ visibility: index == 0 ? 'hidden' : 'visible' }}
                                     className="w-7 h-7 ml-3 text-blue-gray-200 cursor-pointer"
-                                    onClick={() => updateListPayment({index: index, mode: 'delete'})}
+                                    onClick={() => updateClassList({index: index, mode: 'delete'})}
                                 />
                             </div>
                         ))}

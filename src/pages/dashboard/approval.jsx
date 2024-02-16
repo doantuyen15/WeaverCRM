@@ -13,6 +13,7 @@ import {
     Tooltip,
     Progress,
     Alert,
+    Button,
 } from "@material-tailwind/react";
 import {
     EllipsisVerticalIcon,
@@ -27,12 +28,12 @@ import {
     projectsTableData,
     ordersOverviewData,
 } from "../../data";
-import { CheckBadgeIcon, CheckCircleIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon, ClockIcon, MinusCircleIcon, PencilIcon, PencilSquareIcon, PlusCircleIcon } from "@heroicons/react/24/solid";
+import { ArrowPathIcon, CheckBadgeIcon, CheckCircleIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon, ClockIcon, MinusCircleIcon, PencilIcon, PencilSquareIcon, PlusCircleIcon } from "@heroicons/react/24/solid";
 import Amethyst from "../../assets/amethyst.png";
 import { useController } from "../../context";
 import {useFetch, useFirebase} from "../../utils/api/request";
 import { orderBy } from 'lodash';
-import FormatDate from "../../utils/formatNumber/formatDate";
+import formatDate from "../../utils/formatNumber/formatDate";
 import { Slide, toast } from "react-toastify";
 import { ModalApproveDetail } from "../../widgets/modal/approve-detail";
 
@@ -103,7 +104,7 @@ export function Approval() {
 
     const handleApprove = (ok, item) => {
         setLoading(true)
-        useFirebase("update_approval", item)
+        useFirebase("update_approval", {approval: item, ok})
             .then(res => {
                 setLoading(false)
                 getApprovalList()
@@ -134,11 +135,19 @@ export function Approval() {
                                 className="flex items-center gap-1 font-normal text-blue-gray-600"
                             >
                                 <MinusCircleIcon strokeWidth={3} className="h-4 w-4 text-blue-gray-200" />
-                                <strong>{list.length} waiting</strong>
+                                <strong>{Object.values(list)?.length || 0} waiting</strong>
                             </Typography>
                         </div>
                         <Menu placement="left-start">
                             <MenuHandler>
+                                <div>
+
+                                <Button
+                                    size="sm"
+                                    onClick={() => getApprovalList()}
+                                >
+                                    <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
+                                </Button>
                                 <IconButton size="sm" variant="text" color="blue-gray">
                                     <EllipsisVerticalIcon
                                         strokeWidth={3}
@@ -146,6 +155,7 @@ export function Approval() {
                                         className="h-6 w-6"
                                     />
                                 </IconButton>
+                                </div>
                             </MenuHandler>
                             <MenuList>
                                 <MenuItem>Accept All</MenuItem>

@@ -10,16 +10,25 @@ import {
   Switch,
   Button,
   CardFooter,
+  AccordionHeader,
+  List,
+  ListItem,
+  AccordionBody,
+  Accordion,
 } from "@material-tailwind/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { authorsTableData, projectsTableData } from "../../data";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
 import { orderBy } from 'lodash';
-import {useFetch} from "../../utils/api/request";
+import { useFetch, useFirebase } from "../../utils/api/request";
 import { useController } from "../../context";
-import { UserPlusIcon } from "@heroicons/react/24/solid";
+import { ArrowPathIcon, PlusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
 import { PaymentPopup } from "../../widgets/modal/payment";
+import useStorage from "../../utils/localStorageHook";
+import PriceCheckIcon from '@mui/icons-material/PriceCheck';
+import formatNum from "../../utils/formatNumber/formatNum";
+import formatDate from "../../utils/formatNumber/formatDate";
 
 const Header = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền', 'Ghi chú']
 const tempData = [
@@ -40,7 +49,7 @@ const tempData = [
   }
 ]
 
-export function Tables() {
+export function Tuition() {
   const [list, setList] = useState([])
   const listRef = useRef(tempData)
   const [controller] = useController();
@@ -48,37 +57,49 @@ export function Tables() {
   const [openPayment, setOpenPayment] = useState(false)
   const [loading, setLoading] = useState(false)
   const tableRef = useRef([])
+  const [classList, setClassList] = useState([])
+  const [openList, setOpenList] = useState([])
 
   useEffect(() => {
-    getStudentList()
+    const studentList = useStorage('get', 'studentInfo', [])
+    if (studentList?.length === 0) getStudentList()
+    else {
+      tableRef.current = studentList
+    }
+    const classListRef = useStorage('get', 'classList', [])
+    if (classListRef?.length === 0) getClassList()
+    else {
+      tableRef.current = classListRef
+      setClassList(classListRef)
+    }
   }, [])
 
   const getStudentList = () => {
-    // setLoading(true)
-    const requestInfo = {
-      headers: {
-        "authorization": `${userInfo.token}`,
-      },
-      method: 'get',
-      service: 'getAllStudentClass',
-      callback: (data) => {
-        const groupedData = data.reduce((acc, item) => {
-          acc[item.code_class_room] = acc[item.code_class_room] || [];
-          acc[item.code_class_room].push(item);
-          return acc;
-        }, {});
-        setList(groupedData)
-        console.log('getAllStudentClass', groupedData);
-
-        // setLoading(false)
+    setLoading(true)
+    useFirebase('get_student')
+      .then(data => {
+        setLoading(false)
         tableRef.current = data
-      },
-      handleError: (error) => {
-        console.log('error', error)
-        // setLoading(false)
-      }
-    }
-    useFetch(requestInfo)
+        // setStudentList(data)
+        // handleSort(1)
+        useStorage('set', 'studentInfo', data)
+      })
+      .catch(err => console.log(err))
+      .finally(() => setLoading(false))
+  }
+
+  const getClassList = () => {
+    setLoading(true)
+    useFirebase('get_class_list')
+      .then(data => {
+        setLoading(false)
+        tableRef.current = data
+        setClassList(data)
+        useStorage('set', 'classList', data)
+        console.log('get_class_list', data);
+      })
+      .catch(err => console.log(err))
+      .finally(() => setLoading(false))
   }
 
   const handleMakePayment = (ok, listPayment = []) => {
@@ -86,38 +107,17 @@ export function Tables() {
     setLoading(true)
 
     if (ok) {
-      listPayment.forEach(item => {
-        setTimeout(() => {
-          const requestInfo = {
-            body: [
-              item.id_student,
-              item.id_class,
-              item.id_class_type,
-              item.date,
-              item.tuition,
-              item.note
-            ],
-            headers: {
-              "authorization": `${userInfo.token}`,
-            },
-            method: 'post',
-            service: 'createTuition',
-            callback: (data) => {
-              setLoading(false)
-              // setStudentList(data)
-              // tableRef.current = data
-            },
-            handleError: (error) => {
-              // console.log('error', error)
-              setLoading(false)
-            },
-            showToast: true
-          }
-          useFetch(requestInfo)
-        }, 300);
-      })
+      //
     }
     setOpenPayment(false)
+  }
+
+  const handleOpenTable = (index) => {
+    if (openList.includes(index)) setOpenList([...openList.filter(i => i !== index)])
+    else {
+      openList.push(index)
+      setOpenList([...openList])
+    }
   }
 
   return (
@@ -126,105 +126,150 @@ export function Tables() {
         <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
           <div className="flex justify-between">
             <Typography variant="h6" color="white">
-              DANH SÁCH LỚP & HỌC PHÍ - Tháng 2
+              DANH SÁCH ĐÓNG HỌC PHÍ - Tháng {moment().format('MM')}
             </Typography>
-            <Switch
-              color="amber" ripple={true}
-              label={
-                <Typography color="white" className="font-medium">
-                  Đã đóng
-                </Typography>
-              }
-            />
           </div>
         </CardHeader>
-        <CardBody className="overflow-x-scroll px-0 pt-0 pb-2 max-h-[55vh]">
-          <table className="w-full min-w-[640px] table-auto">
-            <thead>
-              <tr>
-                {Header.map((el) => (
-                  <th
-                    key={el}
-                    className="border-b border-blue-gray-50 py-3 px-5 text-left"
+        <CardBody className="overflow-x-scroll px-0 pt-0 pb-2 max-h-[60vh]">
+          <div className="flex justify-end pr-4 gap-2">
+            <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
+              <PriceCheckIcon style={{ fontSize: '1rem' }} /> Make a tuition payment
+            </Button>
+            <Button
+              className="flex items-center gap-3"
+              size="sm"
+              onClick={() => getClassList()}
+            >
+              <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
+            </Button>
+          </div>
+          <List>
+            {classList.map((item, index) => (
+              <ListItem>
+                <Accordion
+                  open={!openList.includes(index)}
+                >
+                  <AccordionHeader
+                    onClick={() => handleOpenTable(index)}
                   >
-                    <Typography
-                      variant="small"
-                      className="text-[11px] font-bold uppercase text-blue-gray-400"
-                    >
-                      {el}
-                    </Typography>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {Object.keys(list)?.map(
-                (item, key) => {
-                  const className = `py-3 px-5 ${key === authorsTableData.length - 1
-                    ? ""
-                    : "border-b border-blue-gray-50"
-                    }`;
-                  return (
-                    <>
-                      <tr>
+                    <div className="flex justify-between items-center w-full">
+                      <Typography variant="h6" color="blue-gray">
+                        {item.id}
+                      </Typography>
+                      <div className="flex gap-4">
                         <Typography
                           variant="small"
-                          color="blue-gray"
-                          className="font-bold pt-4 pl-4"
+                          className="text-[11px] font-bold text-blue-gray-400"
                         >
-                          {item}
+                          Create at: {formatDate(item.start_date)}
                         </Typography>
-                      </tr>
-                      {list[item].map(({ id_we, full_name, date, note }, index) => (
-                        <tr key={index}>
-                          <td className={className}>
-                            <Typography className="text-xs font-normal text-blue-gray-500">
-                              {id_we}
-                            </Typography>
-                          </td>
-                          <td className={className}>
-                            <Typography className="text-xs font-normal text-blue-gray-500">
-                              {full_name}
-                            </Typography>
-                          </td>
-                          {/* <td className={className}>
-                            <Typography className="text-xs font-normal text-blue-gray-500">
-                              {'LIFE'}
-                            </Typography>
-                          </td> */}
-                          <td className={className}>
-                            <Typography className="text-xs font-semibold text-blue-gray-600">
-                              {moment(date).format('DD/MM/YYYY')}
-                            </Typography>
-                          </td>
-                          <td className={className}>
-                            <Typography className="text-xs font-normal text-blue-gray-500">
-                              {700.000}
-                            </Typography>
-                          </td>
-                          <td className={className}>
-                            <Typography className="text-xs font-normal text-blue-gray-500">
-                              {note}
-                            </Typography>
-                          </td>
-                        </tr>
-                      ))}
-                    </>
-                  );
-                }
-              )}
-            </tbody>
-          </table>
+                        <Typography
+                          variant="small"
+                          className="text-[11px] font-bold text-blue-gray-400"
+                        >
+                          Teacher: {item.teacher}
+                        </Typography>
+                        <Typography
+                          variant="small"
+                          className="text-[11px] font-bold text-blue-gray-400"
+                        >
+                          Total student: {item.student_list?.length || 0}
+                        </Typography>
+                      </div>
+                    </div>
+                  </AccordionHeader>
+                  <AccordionBody>
+                    <TuitionTable list={item.student_list} />
+                  </AccordionBody>
+                </Accordion>
+              </ListItem>
+            ))}
+          </List>
         </CardBody>
-        <CardFooter className="pt-0 flex justify-end">
-          <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
-            <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Make a tuition payment
-          </Button>
-        </CardFooter>
+        {/* <CardFooter className="pt-0 gap-2 flex justify-end">
+                    <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
+                        <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Make a tuition payment
+                    </Button>
+                    <Button
+                        className="flex items-center gap-3"
+                        size="sm"
+                        onClick={() => getStudentList()}
+                    >
+                        <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
+                    </Button>
+                </CardFooter> */}
       </Card>
       <PaymentPopup studentList={tableRef.current} open={openPayment} handleCallback={handleMakePayment} />
     </div>
   );
 }
 
-export default Tables;
+export default Tuition;
+
+export const TuitionTable = ({ list }) => {
+  return (
+    <>
+      <table className="w-full min-w-[640px] table-auto" >
+        <thead>
+          <tr>
+            {Header.map((el) => (
+              <th
+                key={el}
+                className="border-b border-blue-gray-50 py-3 px-5 text-left"
+              >
+                <Typography
+                  variant="small"
+                  className="text-[11px] font-bold uppercase text-blue-gray-400"
+                >
+                  {el}
+                </Typography>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {list?.map(({ id, full_name, tuition_fee, tuition_date, note }, index) => {
+            const className = `py-3 px-5 ${index === authorsTableData.length - 1
+              ? ""
+              : "border-b border-blue-gray-50"
+              }`;
+            return (
+              <tr key={index}>
+                <td className={className}>
+                  <Typography className="text-xs font-normal text-blue-gray-500">
+                    {id}
+                  </Typography>
+                </td>
+                <td className={className}>
+                  <Typography className={`text-xs font-normal ${!tuition_fee ? 'text-red-500' : 'text-blue-gray-500'}`}>
+                    {full_name}
+                  </Typography>
+                </td>
+                {/* <td className={className}>
+                            <Typography className="text-xs font-normal text-blue-gray-500">
+                              {'LIFE'}
+                            </Typography>
+                          </td> */}
+                <td className={className}>
+                  <Typography className="text-xs font-normal text-blue-gray-600">
+                    {formatDate(tuition_date)}
+                  </Typography>
+                </td>
+                <td className={className}>
+                  <Typography className="text-xs font-semibold text-blue-gray-500">
+                    {formatNum(tuition_fee, 0, 'price')}
+                  </Typography>
+                </td>
+                <td className={className}>
+                  <Typography className="text-xs font-normal text-blue-gray-500">
+                    {note}
+                  </Typography>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </>
+  )
+}

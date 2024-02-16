@@ -34,6 +34,7 @@ export function useFirebase(service: string, params: any) {
         case 'get_account_info': return getAccountInfo()
         case 'get_staff_list': return getStaffList()
         case 'get_approval_list': return getApprovalList()
+        case 'get_class_list': return getClassList()
         case 'add_student': return addStudent(params)
         case 'create_user': return createUser(params)
         case 'delete_user': return deleteUser(params)
@@ -44,57 +45,62 @@ export function useFirebase(service: string, params: any) {
     }
 }
 
-const updateApproval = (approval: any) => {
+const getClassList = () => {
+    return new useRequest((resolve: any, reject: any) => {
+        getDocs(collection(db, "classes"))
+            .then(
+                (snap) => {
+                    try {
+                        const classList = snap.docs.map(doc => {
+                            // const student = doc.data().student_list.map(
+                            //     async (studentRef: any) => {
+                            //         const data = await getDoc(studentRef)
+                            //         return data.data()
+                            //     })
+                            // console.log('classList', student);
+                            // .then((doc) => {return doc.data()})
+                            return (
+                                doc.data()
+                            )
+                        })
+                        resolve(classList)
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            )
+            .catch(reject)
+            .finally(() => clearTimeout(timeoutId));
+    });
+}
+
+const updateApproval = ({approval, ok}: any) => {
     return new useRequest(async (resolve: any, reject: any) => {
-        if (approval.type === 'add_student') {
-            const batch = writeBatch(db);
-            if (approval?.data?.length === 0) {
-                reject(('No data provided'));
-                return
-            }
-            const listUpdate: any = {}
-            let id = 0
-            await getDoc(doc(db, 'student', 'table')).then((list) => console.log('getDoc', id = (Object.keys(list.data() as any)?.length-1 || 0)));
-            approval?.data?.forEach((student: any) => {
-                id += 1
-                listUpdate['WE' + ('00000' + id).slice(-5)] = student
-            })
-            const studentRef = doc(db, 'student', 'table')
-            batch.update(studentRef, listUpdate)
-            batch.delete(doc(db, 'approval', approval?.id))
-            batch.commit()
-                .then(resolve)
-                .catch(reject)
+        const approvalRef = doc(db, 'approval', approval?.id)
+        if (!ok) {
+            deleteDoc(approvalRef).then(resolve).catch(reject)
         }
-
-
-        // updateDoc(doc(db, "student", "table"), 'approval')
-        //     .then(res => {
-        //         resolve(res)
-        //     })
-        //     .catch((error) => {
-        //         reject(error)
-        //         // An error occurred
-        //         // ...
-        //     })
-        //     .finally(() => {
-        //         console.log('updateUser clear tm', timeoutId);
-        //         clearTimeout(timeoutId)
-        //     }
-        // deleteDoc(doc(db, `approval/${account.username}`), { ...account })
-        //     .then(res => {
-        //         resolve(res)
-        //     })
-        //     .catch((error) => {
-        //         reject(error)
-        //         // An error occurred
-        //         // ...
-        //     })
-        //     .finally(() => {
-        //         console.log('updateUser clear tm', timeoutId);
-        //         clearTimeout(timeoutId)
-        //     }
-        //     );
+        else {
+            if (approval.type === 'add_student') {
+                const batch = writeBatch(db);
+                if (approval?.data?.length === 0) {
+                    reject(('No data provided'));
+                    return
+                }
+                let id = 0
+                await getDocs(collection(db, 'student')).then(snap => id = snap.docs.length);
+                approval?.data?.forEach((student: any) => {
+                    id += 1
+                    const docId = 'WE' + ('00000' + id).slice(-5)
+                    const studentRef = doc(db, 'student', docId)
+                    batch.set(studentRef, student)
+                })
+                batch.delete(approvalRef)
+                batch.commit()
+                    .then(resolve)
+                    .catch(reject)
+            }
+        }
     })
 }
 
@@ -111,7 +117,6 @@ const getApprovalList = () => {
                             data.push(item)
                         })
                         console.log(snap);
-                        
                         resolve(data)
                     } catch (error) {
                         reject(error)
@@ -251,17 +256,20 @@ const getStudent = () => {
         getDocs(collection(db, "student"))
             .then(
                 (snap) => {
-                    const res: any = snap.docs[0].data()
-                    const version = res.version
-                    delete res['version']
-                    const map = Object.values(res).map((student: any, index) => {
-                        return { ...student, id: Object.keys(res)[index] }
-                    })
-                    if (version) useStorage('set', 'studentTable', JSON.stringify({length: map?.length, ver: version}))
-                    resolve(map)
-                    // snap.forEach((doc) => {
-                    //     console.log(doc.id, "=>", doc.data());
-                    // });
+                    // const res: any = snap.docs[0].data()
+                    // const version = res.version
+                    // delete res['version']
+                    // const map = Object.values(res).map((student: any, index) => {
+                    //     return { ...student, id: Object.keys(res)[index] }
+                    // })
+                    // if (version) useStorage('set', 'studentTable', JSON.stringify({length: map?.length, ver: version}))
+                    // resolve(map)
+                    const data = snap.docs.map((doc) => {
+                        const map = doc.data()
+                        map.id = doc.id
+                        return map
+                    });
+                    resolve(data)
                 }
             )
             .catch(reject)
@@ -287,27 +295,21 @@ const getAccountInfo = () => {
 
 const addStudent = (list: any[]) => {
     return new useRequest((resolve: any, reject: any) => {
+        let studentList = []
+        try {
+            studentList = list.map(item => { return {...item}})
+        } catch (error) {
+            reject(error)
+        }
         addDoc(collection(db, 'approval'), {
             add_student: {
-                'data': list,
+                'data': studentList,
                 'requesting_username': userInfo.displayName,
                 'created_at': moment(Date.now()).format('DD.MM.YYYY')
             }
         })
             .then(resolve)
             .catch(reject)
-            .finally(() => clearTimeout(timeoutId));
-        // getDocs(collection(db, "approval"))
-        //     .then(
-        //         (snap) => {
-        //             resolve(snap.docs.map(doc => doc.data()))
-        //             // snap.forEach((doc) => {
-        //             //     console.log(doc.id, "=>", doc.data());
-        //             // });
-        //         }
-        //     )
-        //     .catch(reject)
-        //     .finally(() => clearTimeout(timeoutId));
     });
 }
 

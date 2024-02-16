@@ -13,7 +13,7 @@ import {
 	BanknotesIcon,
 	DocumentCheckIcon,
 } from "@heroicons/react/24/solid";
-import { Approval, Home, Notifications, Profile, Tables } from "./pages/dashboard";
+import { Approval, Home, Notifications, Profile, Tuition, Class } from "./pages/dashboard";
 import { SignIn, SignUp } from "./pages/auth";
 import Roles from "./pages/dashboard/roles";
 import StudentTable from "./pages/dashboard/student-table";
@@ -100,7 +100,14 @@ export const routes = [
 				icon: <BanknotesIcon {...menu} />,
 				name: "tuition",
 				path: "/tuition",
-				element: <Tables />,
+				element: <Tuition />,
+				roles: ["1"]
+			},
+			{
+				icon: <TableCellsIcon {...menu} />,
+				name: "class",
+				path: "/class",
+				element: <Class />,
 				roles: ["1"]
 			},
 			// {

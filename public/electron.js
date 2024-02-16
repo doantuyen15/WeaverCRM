@@ -21,11 +21,12 @@ if (!config.isDev) {
 }
 
 autoUpdater.allowPrerelease = false
+app.commandLine.appendSwitch("lang", "vi-VI");
 
 app.on("ready", async () => {
 	config.mainWindow = await createMainWindow();
 	config.splash = await createSplashScreen();
-
+	console.log(app.getLocale());
 	// config.mainWindow.openDevTools()
 	// globalShortcut.register('F11', () => {
 	// 	config.mainWindow.webContents.openDevTools()
@@ -40,7 +41,7 @@ app.on("ready", async () => {
 
 	// showNotification(
 	// 	config.appName,
-	// 	"Application running on background! See application tray.",
+	// 	app.getLocale(),
 	// );
 });
 
@@ -59,7 +60,6 @@ ipcMain.on("app_version", (event) => {
 
 ipcMain.on("check_update", (event, arg) => {
 	if (config.isDev) {
-		console.log('check_update');
 		event.sender.send("update_not_available");
 	}
 	else autoUpdater.checkForUpdates()

@@ -11,6 +11,8 @@ import {
   MenuList,
   MenuItem,
   Avatar,
+  PopoverHandler,
+  PopoverContent,
 } from "@material-tailwind/react";
 import {
   UserCircleIcon,
@@ -25,12 +27,24 @@ import {
   setOpenConfigurator,
   setCollapsedSidenav,
 } from "./../../context";
+import { Popover } from "@mui/material";
+import { AccountInfo } from "../modal/account-info";
+import { useState } from "react";
 
 export function DashboardNavbar() {
   const [controller, dispatch] = useController();
   const { fixedNavbar, collapsedSidenav, userInfo } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
+  const [openAccountInfo, setOpenAccountInfo] = useState(false)
+
+  const handleSignOut = () => {
+    localStorage.removeItem('userInfo')
+    setTimeout(() => {
+      window.location.replace('/dashboard/home')
+    }, 1000);
+  }
+
   return (
     <Navbar
       color={fixedNavbar ? "white" : "transparent"}
@@ -71,9 +85,9 @@ export function DashboardNavbar() {
           </Typography>
         </div>
         <div className="flex items-center">
-          <div className="mr-auto md:mr-4 md:w-56">
+          {/* <div className="mr-auto md:mr-4 md:w-56">
             <Input label="Search" />
-          </div>
+          </div> */}
           <IconButton
             variant="text"
             color="blue-gray"
@@ -83,8 +97,9 @@ export function DashboardNavbar() {
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton>
           {userInfo.uid ? (
-            <Link to="#">
+            <>
               <Button
+                onClick={() => setOpenAccountInfo(true)}
                 variant="text"
                 color="blue-gray"
                 className="hidden items-center gap-1 px-4 xl:flex normal-case"
@@ -99,7 +114,7 @@ export function DashboardNavbar() {
               >
                 <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
               </IconButton>
-            </Link>
+            </>
           ) : (
             <Link to="/auth/sign-in">
               <Button
@@ -206,6 +221,12 @@ export function DashboardNavbar() {
           </IconButton>
         </div>
       </div>
+      <AccountInfo 
+        open={openAccountInfo} 
+        handleOpen={setOpenAccountInfo} 
+        userInfo={userInfo}
+        handleSignOut={handleSignOut}
+      />
     </Navbar>
   );
 }

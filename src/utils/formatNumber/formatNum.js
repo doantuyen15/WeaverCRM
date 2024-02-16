@@ -10,14 +10,14 @@ const formatNum = (num = '', decimals = 0, formatType = 'number') => {
     
     // Check if formatType is 'number'
     if (formatType === 'number') {
-        return Number(num).toLocaleString('vi-VI', {
+        return Number(num).toLocaleString('en', {
             minimumFractionDigits: decimals,
             maximumFractionDigits: decimals
         });
     }
 
     if (formatType === 'price') {
-        return Number(num).toLocaleString('vi-VI', {style : 'currency', currency : 'VND'});
+        return Number(num).toLocaleString('en', {style : 'currency', currency : 'VND'});
     }
 
     return 'Invalid format type';
