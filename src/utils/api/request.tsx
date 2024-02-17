@@ -6,6 +6,7 @@ import { getAuth, signInWithCustomToken, updateProfile, Auth } from "firebase/au
 import useStorage from "../localStorageHook";
 import useRequest from './promise'
 import moment from "moment";
+import ClassInfo from "../../data/entities/classes";
 
 const controller = new AbortController();
 const timeout = setTimeout(() => controller.abort(), 10000);
@@ -35,6 +36,7 @@ export function useFirebase(service: string, params: any) {
         case 'get_staff_list': return getStaffList()
         case 'get_approval_list': return getApprovalList()
         case 'get_class_list': return getClassList()
+        case 'get_student_score': return getStudentScore()
         case 'add_student': return addStudent(params)
         case 'create_user': return createUser(params)
         case 'delete_user': return deleteUser(params)
@@ -45,13 +47,36 @@ export function useFirebase(service: string, params: any) {
     }
 }
 
-const getClassList = () => {
+const getStudentScore = () => {
     return new useRequest((resolve: any, reject: any) => {
         getDocs(collection(db, "classes"))
             .then(
                 (snap) => {
                     try {
                         const classList = snap.docs.map(doc => {
+                            return (
+                                doc.data()
+                            )
+                        })
+                        resolve(classList)
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            )
+            .catch(reject)
+            .finally(() => clearTimeout(timeoutId));
+    });
+}
+
+const getClassList = () => {
+    return new useRequest((resolve: any, reject: any) => {
+        getDocs(collection(db, "classes"))
+            .then(
+                (snap) => {
+                    try {
+                        const classList: Array<ClassInfo> = []
+                        snap.docs.forEach(doc => {
                             // const student = doc.data().student_list.map(
                             //     async (studentRef: any) => {
                             //         const data = await getDoc(studentRef)
@@ -59,9 +84,8 @@ const getClassList = () => {
                             //     })
                             // console.log('classList', student);
                             // .then((doc) => {return doc.data()})
-                            return (
-                                doc.data()
-                            )
+                            const classInfo = new ClassInfo(doc.data())
+                            classList.push(classInfo)
                         })
                         resolve(classList)
                     } catch (error) {

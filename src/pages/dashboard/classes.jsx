@@ -29,28 +29,9 @@ import useStorage from "../../utils/localStorageHook";
 import formatDate from "../../utils/formatNumber/formatDate";
 import { CreateClasses } from "../../widgets/modal/create-class";
 
-const Header = ['Mã HS', 'Tên', 'Ngày vào học', 'Ghi chú']
-const tempData = [
-    {
-        name: 'Toan',
-        class_id: 'LIFE_A2B1_200523',
-        date: Date.now()
-    },
-    {
-        name: 'Tuyen',
-        class_id: 'LIFE_A1A2_070823',
-        date: Date.now()
-    },
-    {
-        name: 'Test',
-        class_id: 'LIFE_A2B1_200523',
-        date: Date.now()
-    }
-]
+const Header = ['STT', 'Phone', 'Mã HS', 'Họ', 'Tên', 'Ngày sinh', "Email", 'Điểm', 'Ghi chú']
 
 export function Class() {
-    const [list, setList] = useState([])
-    const listRef = useRef(tempData)
     const [controller] = useController();
     const { userInfo } = controller;
     const [openModal, setOpenModal] = useState(false)
@@ -226,7 +207,7 @@ export function Class() {
                                                     >
                                                         {item.ta_teacher}
                                                     </Typography>
-                                                    <Tooltip content={item.sub_teacher_phone || 'No phone'}>
+                                                    <Tooltip content={item.ta_teacher_phone || 'No phone'}>
                                                         <PhoneIcon
                                                             strokeWidth={2}
                                                             className="h-2.5 w-2.5 ml-1"
@@ -336,7 +317,7 @@ export const ClassTable = ({ list }) => {
                                 }`;
                             return (
                                 <>
-                                    <tr key={key}>
+                                    <tr key={key} className="odd:bg-blue-gray-50/50">
                                         <td className={className}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
                                                 {id}

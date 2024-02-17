@@ -46,6 +46,7 @@ import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import InputMask from 'react-input-mask';
+import DefaultSkeleton from './../../widgets/skeleton/index'
 
 const TABLE_HEAD = [
     "Tình trạng đăng ký",
@@ -1159,14 +1160,32 @@ export const StudentRow = ({ classes, index, item, handleEdit = () => { }, handl
     const [controller] = useController();
     const { userInfo } = controller;
     const [openPopover, setOpenPopover] = React.useState(false);
+    const [scoreTable, setScoreTable] = useState([])
+    const [loading, setLoading] = useState(false)
+
+    const getStudentScore = () => {
+        const wait = setTimeout(() => {
+            setLoading(true)
+        }, 150);
+        useFirebase('get_student_score')
+            .then((data) => {
+                console.log('get_student_score', data);
+                setScoreTable(data)
+            })
+            .catch(err => toast.error(err))
+            .finally(() => {
+                clearTimeout(wait)
+                setLoading(false)
+            })
+    }
  
-    const triggers = {
-      onMouseEnter: () => {
-        console.log('onMouseEnter');
-        setOpenPopover(true)
-      },
-      onMouseLeave: () => setOpenPopover(false),
-    };
+    // const triggers = {
+    //   onMouseEnter: () => {
+    //     console.log('onMouseEnter');
+    //     setOpenPopover(true)
+    //   },
+    //   onMouseLeave: () => setOpenPopover(false),
+    // };
 
     return (
         <tr key={index} className="even:bg-blue-gray-50/50">
@@ -1247,80 +1266,87 @@ export const StudentRow = ({ classes, index, item, handleEdit = () => { }, handl
             </td>
             {item.has_score ? (
                 <td className={classes}>
-                    <Popover placement="top-start" open={openPopover} handler={setOpenPopover}>
-                        <PopoverHandler {...triggers}>
-                            <MagnifyingGlassIcon strokeWidth={2} className="w-3.5 h-3.5" />
+                    <Popover placement="top-start" open={openPopover} handler={() => {
+                        getStudentScore(item.id);
+                        setOpenPopover(prev => !prev);
+                    }}>
+                        <PopoverHandler>
+                            <MagnifyingGlassIcon strokeWidth={2} className="w-3.5 h-3.5 cursor-pointer" />
                         </PopoverHandler>
-                        <PopoverContent {...triggers} className="z-[999999]">
-                            <table className="text-left">
-                                <thead>
-                                    <tr>
-                                        {HeaderScore.map((head) => (
-                                            <th
-                                                key={head}
-                                                className="border-b p-4"
-                                            >
+                        <PopoverContent className="z-[999999]">
+                            {loading ? (
+                                <DefaultSkeleton />
+                            ) : (
+                                <table className="text-left">
+                                    <thead>
+                                        <tr>
+                                            {HeaderScore.map((head) => (
+                                                <th
+                                                    key={head}
+                                                    className="border-b p-4"
+                                                >
+                                                    <Typography
+                                                        variant="small"
+                                                        color="blue-gray"
+                                                        className="font-bold leading-none opacity-70"
+                                                    >
+                                                        {head}
+                                                    </Typography>
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr key={'scorebody' + index}>
+                                            <td className='p-4'>
                                                 <Typography
                                                     variant="small"
                                                     color="blue-gray"
-                                                    className="font-bold leading-none opacity-70"
+                                                    className="font-normal"
                                                 >
-                                                    {head}
+                                                    {item.listening}
                                                 </Typography>
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr key={'scorebody' + index}>
-                                        <td className='p-4'>
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-normal"
-                                            >
-                                                {item.listening}
-                                            </Typography>
-                                        </td>
-                                        <td className='p-4'>
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-normal"
-                                            >
-                                                {item.speaking}
-                                            </Typography>
-                                        </td>
-                                        <td className='p-4'>
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-medium"
-                                            >
-                                                {item.reading}
-                                            </Typography>
-                                        </td>
-                                        <td className='p-4'>
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-medium"
-                                            >
-                                                {item.writing}
-                                            </Typography>
-                                        </td>
-                                        <td className='p-4'>
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-medium"
-                                            >
-                                                {item.vocabulary}
-                                            </Typography>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                            </td>
+                                            <td className='p-4'>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {item.speaking}
+                                                </Typography>
+                                            </td>
+                                            <td className='p-4'>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-medium"
+                                                >
+                                                    {item.reading}
+                                                </Typography>
+                                            </td>
+                                            <td className='p-4'>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-medium"
+                                                >
+                                                    {item.writing}
+                                                </Typography>
+                                            </td>
+                                            <td className='p-4'>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-medium"
+                                                >
+                                                    {item.vocabulary}
+                                                </Typography>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            )}
                         </PopoverContent>
                     </Popover>
                 </td>
