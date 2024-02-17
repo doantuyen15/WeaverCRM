@@ -17,72 +17,58 @@ import formatNum from "../../utils/formatNumber/formatNum";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { MinusCircleIcon } from "@heroicons/react/24/outline";
 import useStorage from "../../utils/localStorageHook";
-import {useFetch} from "../../utils/api/request";
+import {useFetch, useFirebase} from "../../utils/api/request";
 import moment from "moment";
+import ClassInfo from "../../data/entities/classes";
 
-// const tuition = [
-//     {
-//         price: '5000000',
-//         classNm: 'TEENS1'
-//     },
-//     {
-//         price: '5300000',
-//         classNm: 'TEENS2'
-//     },
-//     {
-//         price: '5300000',
-//         classNm: 'TEENS3'
-//     },
-//     {
-//         price: '5600000',
-//         classNm: 'TEENS4'
-//     },
-//     {
-//         price: '5600000',
-//         classNm: 'TEENS5'
-//     },
-//     {
-//         price: '5900000',
-//         classNm: 'TEENS6'
-//     },
-//     {
-//         price: '5900000',
-//         classNm: 'TEENS7'
-//     }
-// ]
+const classType = [
+    'A1A1',
+    'A1A2',
+    'A2B1',
+    'A2B2',
+    'SILVERA',
+    'SILVERB',
+]
 
-export function CreateClasses({ studentList, open, handleCallback }) {
+const program = [
+    'LIFE',
+    'IELT',
+    'TEENS'
+]
+
+export function CreateClasses({  open, handleCallback }) {
     const [controller] = useController();
     const { userInfo } = controller;
     const [selectedClass, setSelectedClass] = useState({})
     const [loading, setLoading] = useState(false)
-    const [paymentList, setPaymentList] = useState([])
+    const [classList, setClassList] = useState([])
     const paymentListRef = useRef([])
     const [tuition, setTuition] = useState(useStorage('get', 'tuition') || [])
-    // const [studentList, setStudentList] = useState([])
+    const [studentList, setStudentList] = useState([])
 
 
-    // useEffect(() => {
-    //     const classListRef = useStorage('get', 'classList', [])
-    //     if (classListRef?.length === 0) getClassList()
-    //     else {
-    //     //   tableRef.current = classListRef
-    //       setClassList(classListRef)
-    //     }
-    //   }, [])
+    useEffect(() => {
+        const studentListRef = useStorage('get', 'studentInfo')
+        if (!studentListRef) getStudentList()
+        else {
+            setStudentList(studentListRef)
+            // tableRef.current = studentList
+        }
+        handleAdd()
+    }, [])
 
-    //   const getStudentList = () => {
-    //     setLoading(true)
-    //     useFirebase('get_student')
-    //       .then(data => {
-    //         setLoading(false)
-    //         // tableRef.current = data
-    //         setStudentList(data)
-    //         useStorage('set', 'studentInfo', data)
-    //       })
-    //       .catch(err => console.log(err))
-    //       .finally(() => setLoading(false))
-    //   }
+    const getStudentList = () => {
+        setLoading(true)
+        useFirebase('get_student')
+            .then(data => {
+                setLoading(false)
+                // tableRef.current = data
+                setStudentList(data)
+                useStorage('set', 'studentInfo', data)
+            })
+            .catch(err => console.log(err))
+            .finally(() => setLoading(false))
+    }
 
     // useEffect(() => {
     //     setPaymentList([{
@@ -103,45 +89,43 @@ export function CreateClasses({ studentList, open, handleCallback }) {
     }
 
     const handleAdd = () => {
-        const list = [...paymentList]
-        list.push({
-            student: '',
-            tuition: '',
-            class_name: '',
-            id_class: '',
-            id_class_type: '',
-            note: '',
-            date: moment(Date.now()).format('YYYY-MM-DD'),
-            id_student: ''
-        })
-        setPaymentList(list)
+        try {
+            const newClass = new ClassInfo({})
+            console.log('handleAdd', newClass);
+            const list = [...classList]
+            list.push(newClass)
+            setClassList(list)  
+        } catch (error) {
+            console.log(error);
+        }
+
     }
 
     const updateClassList = ({ key, index, value, mode = 'add' }) => {
         if (mode === 'delete') {
-            setPaymentList(paymentList.filter((item, i) => i !== index))
+            setClassList(classList.filter((item, i) => i !== index))
         }
         else {
-            const objectEdit = [...paymentList]
+            const objectEdit = [...classList]
             if (key === 'tuition') {
                 objectEdit[index].tuition = value.tuition
                 objectEdit[index].id_class = value.id_class
                 objectEdit[index].id_class_type = value.id_class_type
                 objectEdit[index].class_name = value.class_name
-                setPaymentList(objectEdit)
+                setClassList(objectEdit)
             } else {
                 objectEdit[index].student = value.full_name
                 objectEdit[index].id_student = value.id
-                setPaymentList(objectEdit)
+                setClassList(objectEdit)
             }
         }
-        paymentListRef.current = [...paymentList]
+        paymentListRef.current = [...classList]
     }
     
     return (
         <>
             <Dialog
-                size="md"
+                size="lg"
                 open={open}
                 handler={() => { 
                     handleCallback(false)
@@ -151,9 +135,45 @@ export function CreateClasses({ studentList, open, handleCallback }) {
             >
                 <Card className="mx-auto w-full">
                     <CardBody className="flex flex-col">
-                        {paymentList.map((info, index) => (
+                        {classList?.map((info, index) => (
                             <div className="flex py-4 border-b border-blue-gray-50 items-center">
                                 <div className="gap-6 flex w-full">
+                                    <Select
+                                        // disabled={!info.id_student}
+                                        label="Class level"
+                                        selected={(element) =>
+                                            element &&
+                                            React.cloneElement(element, {
+                                                disabled: true,
+                                                className:
+                                                    "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                            })
+                                        }
+                                    >
+                                        {classType?.map(item => (
+                                            <Option onClick={() => updateClassList({ key: 'classType', value: item, index: index })} key={item.class_name} value={item.class_name} className="flex items-center gap-2">
+                                                {item}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                    <Select
+                                        // disabled={!info.id_student}
+                                        label="Select Program"
+                                        selected={(element) =>
+                                            element &&
+                                            React.cloneElement(element, {
+                                                disabled: true,
+                                                className:
+                                                    "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                            })
+                                        }
+                                    >
+                                        {program?.map(item => (
+                                            <Option onClick={() => updateClassList({ key: 'program', value: item, index: index })} key={item.class_name} value={item.class_name} className="flex items-center gap-2">
+                                                {item}
+                                            </Option>
+                                        ))}
+                                    </Select>
                                     <Select
                                         label="Select Student"
                                         selected={(element) =>
@@ -165,27 +185,9 @@ export function CreateClasses({ studentList, open, handleCallback }) {
                                             })
                                         }
                                     >
-                                        {studentList?.map(item => (
+                                        {(studentList || []).map(item => (
                                             <Option onClick={() => updateClassList({ key: 'student', value: item, index: index })} key={item.id_student} value={item.id + ' - ' + item.class_name} className="flex items-center gap-2">
                                                 {item.id + ' - ' + item.full_name}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                    <Select
-                                        disabled={!info.id_student}
-                                        label="Select Class"
-                                        selected={(element) =>
-                                            element &&
-                                            React.cloneElement(element, {
-                                                disabled: true,
-                                                className:
-                                                    "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                            })
-                                        }
-                                    >
-                                        {tuition?.map(item => (
-                                            <Option onClick={() => updateClassList({ key: 'tuition', value: item, index: index })} key={item.class_name} value={item.class_name} className="flex items-center gap-2">
-                                                {item.class_name}
                                             </Option>
                                         ))}
                                     </Select>
@@ -214,14 +216,14 @@ export function CreateClasses({ studentList, open, handleCallback }) {
                             onClick={handleAdd}
                         >
                             <PlusIcon className="w-3.5 h-3.5 mr-2"/>
-                            Add
+                            Add more class
                         </Button>
                         <div className="pr-4">
                             <Button variant="text" color="blue-gray" onClick={() => handleCallback(false)}>
                                 Close
                             </Button>
                             <Button
-                                disabled={paymentList.findIndex(item => item.class_name === '') > -1}
+                                // disabled={classList?.findIndex(item => item.class_name === '') > -1}
                                 loading={loading} 
                                 variant="gradient" 
                                 onClick={() => handleCallback(true, paymentListRef.current)}

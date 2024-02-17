@@ -85,8 +85,11 @@ const getClassList = () => {
                             // console.log('classList', student);
                             // .then((doc) => {return doc.data()})
                             const classInfo = new ClassInfo(doc.data())
+
                             classList.push(classInfo)
                         })
+        console.log('classList', classList);
+
                         resolve(classList)
                     } catch (error) {
                         reject(error)

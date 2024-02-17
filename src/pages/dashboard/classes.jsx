@@ -15,6 +15,9 @@ import {
     Accordion,
     AccordionHeader,
     AccordionBody,
+    PopoverHandler,
+    PopoverContent,
+    Popover,
 } from "@material-tailwind/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { authorsTableData, projectsTableData } from "../../data";
@@ -23,13 +26,17 @@ import { useEffect, useRef, useState } from "react";
 import { orderBy } from 'lodash';
 import { useFetch, useFirebase } from "../../utils/api/request";
 import { useController } from "../../context";
-import { ArrowPathIcon, PhoneIcon, PlusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { ArrowPathIcon, MagnifyingGlassIcon, PhoneIcon, PlusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
 import { PaymentPopup } from "../../widgets/modal/payment";
 import useStorage from "../../utils/localStorageHook";
 import formatDate from "../../utils/formatNumber/formatDate";
 import { CreateClasses } from "../../widgets/modal/create-class";
+import { glb_sv } from "../../service";
+import FormatPhone from "../../utils/formatNumber/formatPhone";
+import DefaultSkeleton from "../../widgets/skeleton";
+import { TableScore } from "../../widgets/modal/table-score";
 
-const Header = ['STT', 'Phone', 'Mã HS', 'Họ', 'Tên', 'Ngày sinh', "Email", 'Điểm', 'Ghi chú']
+const Header = ['STT', 'Phone', 'Họ', 'Tên', 'Ngày sinh', "Email", 'Điểm', 'Ghi chú']
 
 export function Class() {
     const [controller] = useController();
@@ -41,18 +48,17 @@ export function Class() {
     const [openList, setOpenList] = useState([])
 
     useEffect(() => {
-        const classListRef = useStorage('get', 'classList', [])
-        if (classListRef?.length === 0) getClassList()
+        if (!glb_sv.classList) getClassList()
         else {
-            tableRef.current = classListRef
-            setClassList(classListRef)
+            tableRef.current = glb_sv.classList
+            setClassList(glb_sv.classList)
         }
     }, [])
 
     const getClassList = () => {
         setLoading(true)
         useFirebase('get_class_list')
-            .then(data => {
+            .then(async data => {
                 setLoading(false)
                 // const groupedData = data?.reduce((acc, item) => {
                 //     const id = item.id;
@@ -61,11 +67,12 @@ export function Class() {
                 //     return acc;
                 // }, {});
                 // setList(groupedData)
-                console.log('get_class_list', data);
+                // console.log('get_class_list', await data[0].getStudentList());
                 tableRef.current = data
                 setClassList(data)
                 // handleSort(1)
-                useStorage('set', 'classList', data)
+                glb_sv.classList = data
+                // useStorage('set', 'classList', data)
             })
             .catch(err => console.log(err))
             .finally(() => setLoading(false))
@@ -81,12 +88,19 @@ export function Class() {
         setOpenModal(false)
     }
 
-    const handleOpenTable = (index) => {
-        if (openList.includes(index)) setOpenList([...openList.filter(i => i !== index)])
-        else {
-            openList.push(index)
-            setOpenList([...openList])
-        }
+    const handleOpenTable = (item, index) => {
+        item?.getStudentList
+            .then(() => {
+                classList[index] = item
+                setClassList(classList)
+                console.log(item);
+                if (openList.includes(index)) setOpenList([...openList.filter(i => i !== index)])
+                else {
+                    openList.push(index)
+                    setOpenList([...openList])
+                }
+            })
+            .catch(e => console.error(e))
     }
 
     return (
@@ -99,7 +113,7 @@ export function Class() {
                         </Typography>
                     </div>
                 </CardHeader>
-                <CardBody className="overflow-x-scroll px-0 pt-0 pb-2 max-h-[55vh]">
+                <CardBody className="overflow-x-scroll px-0 pt-0 pb-2 max-h-[65vh]">
                     <div className="flex justify-end pr-4 gap-2">
                         <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenModal(true)}>
                             <PlusIcon strokeWidth={2} className="h-4 w-4" /> Create new class
@@ -114,12 +128,12 @@ export function Class() {
                     </div>
                     <List>
                         {classList.map((item, index) => (
-                            <ListItem>
+                            <ListItem className="hover:bg-transparent">
                                 <Accordion
                                     open={openList.includes(index)}
                                 >
                                     <AccordionHeader
-                                        onClick={() => handleOpenTable(index)}
+                                        onClick={() => handleOpenTable(item, index)}
                                     >
                                         <div className="flex justify-between items-center w-full">
                                             <Typography variant="h6" color="blue-gray">
@@ -310,39 +324,59 @@ export const ClassTable = ({ list }) => {
                 </thead>
                 <tbody>
                     {list?.map(
-                        ({ id, full_name, register_date, note }, key) => {
+                        ({ first_name, last_name, phone, register_date, email, note, score }, key) => {
                             const className = `py-3 px-5 ${key === authorsTableData.length - 1
                                 ? ""
                                 : "border-b border-blue-gray-50"
                                 }`;
                             return (
                                 <>
-                                    <tr key={key} className="odd:bg-blue-gray-50/50">
+                                    <tr key={key} className="hover:bg-blue-gray-50/50">
                                         <td className={className}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
-                                                {id}
+                                                {key + 1}
                                             </Typography>
                                         </td>
                                         <td className={className}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
-                                                {full_name}
+                                                {FormatPhone(phone)}
                                             </Typography>
                                         </td>
-                                        {/* <td className={className}>
-                                                <Typography className="text-xs font-normal text-blue-gray-500">
-                                                    {'LIFE'}
-                                                </Typography>
-                                                </td> */}
                                         <td className={className}>
-                                            <Typography className="text-xs font-semibold text-blue-gray-600">
+                                            <Typography className="text-xs font-normal text-blue-gray-500">
+                                                {first_name}
+                                            </Typography>
+                                        </td>
+                                        <td className={className}>
+                                            <Typography className="text-xs font-normal text-blue-gray-500">
+                                                {last_name}
+                                            </Typography>
+                                        </td>
+                                        <td className={className}>
+                                            <Typography className="text-xs font-normal text-blue-gray-500">
                                                 {formatDate(register_date)}
                                             </Typography>
                                         </td>
-                                        {/* <td className={className}>
+                                        <td className={className}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
-                                                {700.000}
+                                                {email}
                                             </Typography>
-                                        </td> */}
+                                        </td>
+                                        <td className={className}>
+                                            <Popover placement="top-start" 
+                                                // open={openPopover} handler={() => {
+                                                //     getStudentScore(item.id);
+                                                //     setOpenPopover(prev => !prev);
+                                                // }}
+                                            >
+                                                <PopoverHandler>
+                                                    <MagnifyingGlassIcon strokeWidth={2} className="w-3.5 h-3.5 text-blue-gray-500 cursor-pointer" />
+                                                </PopoverHandler>
+                                                <PopoverContent className="z-[999999]">
+                                                    <TableScore item={score} />
+                                                </PopoverContent>
+                                            </Popover>
+                                        </td>
                                         <td className={className}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
                                                 {note}
