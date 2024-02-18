@@ -1156,7 +1156,7 @@ export default function StudentTable() {
     );
 }
 
-export const StudentRow = ({ classes, index, item, handleEdit = () => { }, handleRemove = () => { }, isConfirm = false }) => {
+export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdit = () => { }, handleRemove = () => { }, isConfirm = false }) => {
     const [controller] = useController();
     const { userInfo } = controller;
     const [openPopover, setOpenPopover] = React.useState(false);
@@ -1189,7 +1189,7 @@ export const StudentRow = ({ classes, index, item, handleEdit = () => { }, handl
 
     return (
         <tr key={index} className="even:bg-blue-gray-50/50">
-            <td className={classes}>
+            <td className={classes} style={{ display: !hideColumn ? 'table-cell' : 'none'}}>
                 <div className="w-max">
                     <Menu placement="bottom-start" open={false}>
                         <MenuHandler>

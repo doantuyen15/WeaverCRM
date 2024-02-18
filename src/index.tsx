@@ -5,7 +5,7 @@ import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./styles/css/index.css";
 import "./styles/css/tailwind.css";
-import "./styles/css/titlebar.css";
+import "./styles/css/main.css";
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import { Router } from "./router";
@@ -32,7 +32,7 @@ root.render(
 					<CssBaseline />
 					<BackgroundService />
 					<Router />
-					<ToastContainer position="top-right" transition={Slide} autoClose={1500} hideProgressBar closeOnClick pauseOnHover draggable />
+					<ToastContainer className="z-40" position="top-right" transition={Slide} autoClose={1500} hideProgressBar closeOnClick pauseOnHover draggable />
 				</MUIThemeProvider>
 			</MaterialTailwindControllerProvider>
 		</ThemeProvider>

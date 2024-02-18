@@ -223,7 +223,6 @@ export function CreateClasses({ open, handleCallback }) {
                                                 </Option>
                                             )))}
                                         </Select>
-                                        {console.log(staffList?.filter(staff => staff.department_id == 4))}
                                         <Select
                                             label="CS"
                                             selected={(element) =>

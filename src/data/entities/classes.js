@@ -36,7 +36,6 @@ export default class ClassInfo {
                 })
                 // this.student_list = studentList
                 this.converted = true
-                console.log('this.student_list', this.student_list);
                 resolve(studentList)
                 // return studentList
             }

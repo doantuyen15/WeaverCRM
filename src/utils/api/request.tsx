@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import { getDocs, collection, getFirestore, doc, getDoc, query, deleteDoc, Firestore, updateDoc, addDoc, DocumentReference, writeBatch, setDoc } from "firebase/firestore";
+import { getDocs, collection, getFirestore, doc, getDoc, query, deleteDoc, Firestore, updateDoc, addDoc, DocumentReference, writeBatch, setDoc, arrayUnion } from "firebase/firestore";
 import glb_sv from '../../service/global-service'
 import { Functions, getFunctions, httpsCallable } from 'firebase/functions';
 import { getAuth, signInWithCustomToken, updateProfile, Auth } from "firebase/auth";
@@ -42,6 +42,7 @@ export function useFirebase(service: string, params: any) {
         case 'create_staff': return createStaff(params)
         case 'update_staff': return updateStaff(params)
         case 'add_classes': return addClasses(params)
+        case 'add_student_classes': return addStudentClasses(params)
         case 'create_user': return createUser(params)
         case 'delete_user': return deleteUser(params)
         case 'update_user': return updateUser(params)
@@ -49,6 +50,31 @@ export function useFirebase(service: string, params: any) {
         default:
             break;
     }
+}
+
+const addStudentClasses = (updateList: any[]) => {
+    return new useRequest((resolve: any, reject: any) => {
+        console.log('classes.id', updateList);
+        const batch = writeBatch(db);
+        updateList.forEach((classes) => {
+            console.log('classes.id', classes);
+            const classRef = doc(db, `classes/${classes.id}`);
+            classes.student.forEach((item: any) => {
+                batch.update(classRef, {
+                    student_list: arrayUnion(doc(db, `student/${item.id}`))
+                })
+            })
+        })
+
+        batch.commit()
+            .then(res => {
+                resolve(res)
+            })
+            .catch((error) => {
+                console.log(error);
+                reject(error)
+            })
+    })
 }
 
 const createStaff = (staffInfo: any) => {

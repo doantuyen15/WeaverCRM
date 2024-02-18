@@ -50,6 +50,11 @@ class globalService {
             'Tiến sĩ',
             'Giáo sư'
         ]
+        this.programs = [
+            'LIFE',
+            'IELTS',
+            'TEENS'
+        ]
     }
 }
 

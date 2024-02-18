@@ -63,14 +63,14 @@ export const routes = [
 			},
 			{
 				icon: <UserCircleIcon {...menu} />,
-				name: "roles",
+				name: "Tài khoản nhân viên",
 				path: "/roles",
 				element: <Roles />,
 				roles: ["1"]
 			},
 			{
 				icon: <UserCircleIcon {...menu} />,
-				name: "roles",
+				name: "Danh sách nhân viên",
 				path: "/staff",
 				element: <StaffList />,
 				roles: ["1"]
