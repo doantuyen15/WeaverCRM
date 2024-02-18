@@ -10,40 +10,45 @@ export default class ClassInfo {
         this.end_date = data?.end_date || '',
         this.student_list = data?.student_list || [],
         this.teacher = data?.teacher || '',
-        this.teacher_phone = data?.teacher_phone || ''
+        this.teacher_phone = data?.teacher_phone || '',
         this.sub_teacher = data?.sub_teacher || '',
-        this.sub_teacher_phone = data?.sub_teacher_phone || ''
-        this.ta_teacher_phone = data?.ta_teacher_phone || ''
+        this.sub_teacher_phone = data?.sub_teacher_phone || '',
+        this.ta_teacher_phone = data?.ta_teacher_phone || '',
         this.ta_teacher = data?.ta_teacher || '',
         this.cs_staff = data?.cs_staff || '',
-        this.class_schedule = data?.class_schedule || ''
+        this.class_schedule = data?.class_schedule || '',
+        this.class_schedule_id = data?.class_schedule_id || 0,
         this.converted = false,
         this.teacher_id = data?.teacher_id || '',
         this.sub_teacher_id = data?.sub_teacher_id || '',
         this.ta_teacher_id = data?.ta_teacher_id || '',
-        this.cs_staff_id = data?.cs_staff_id || ''
+        this.cs_staff_id = data?.cs_staff_id || '',
+        this.attendance = data?.attendance || []
     }
 
     getStudentList() {
         return new Promise((resolve, reject) => {
-            if (this.converted) return this.student_list
-            const studentList = []
-            if (this.student_list.length === 0) return []
+            if (this.converted) resolve(this.student_list)
+            if (this.student_list.length === 0) resolve([])
             else if (this.student_list.length > 0) {
-                this.student_list.forEach(async doc => {
-                    const student = await getDoc(doc)
-                    studentList.push(student.data())
-                })
-                // this.student_list = studentList
-                this.converted = true
-                resolve(studentList)
-                // return studentList
+                // this.student_list.forEach(async doc => {
+                //     const student = await getDoc(doc)
+                //     studentList.push(student.data())
+                // })
+                Promise.all(this.student_list.map(docRef => getDoc(docRef)))
+                    .then((res) => {
+                        const items = res.map(i => {
+                            return {
+                                ...i.data(),
+                                id: i.id
+                            }
+                        })
+                        this.student_list = items
+                        this.converted = true
+                        resolve(items)
+                    })
+                    .catch(err => console.log('err', err))
             }
-            // try {
-
-            // } catch (error) {
-            //     reject(error)
-            // }
         })
     }
 

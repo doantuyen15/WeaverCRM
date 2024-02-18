@@ -55,6 +55,12 @@ class globalService {
             'IELTS',
             'TEENS'
         ]
+        this.classSchedule = [
+            'Thứ 2 - 4',
+            'Thứ 3 - 5',
+            'Thứ 7 - CN',
+            'Thứ 6',
+        ]
     }
 }
 

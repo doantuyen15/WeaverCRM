@@ -21,6 +21,7 @@ import { useFetch, useFirebase } from "../../utils/api/request";
 import moment from "moment";
 import ClassInfo from "../../data/entities/classes";
 import formatDate from "../../utils/formatNumber/formatDate";
+import { glb_sv } from "../../service";
 
 // const classType = [
 //     'A1A1',
@@ -47,12 +48,7 @@ const classType = {
     ]
 }
 
-const classSchedule = [
-    'Thứ 2 - 4',
-    'Thứ 3 - 5',
-    'Thứ 7 - CN',
-    'Thứ 6',
-]
+const classSchedule = glb_sv.classSchedule
 
 export function CreateClasses({ open, handleCallback }) {
     const [controller] = useController();
@@ -110,9 +106,36 @@ export function CreateClasses({ open, handleCallback }) {
             .finally(() => setLoading(false))
     }
 
+    const generateCalendar = (classInfo, date) => {
+        const startDate = moment(date, 'DD/MM/YYYY').startOf('month');
+        const endDate = moment().endOf('month');
+        // Lấy mảng các ngày trong tháng
+        const days = [];
+        for (let i = 0; i < endDate.diff(startDate, 'days'); i++) {
+            days.push(startDate.clone().add(i, 'days'));
+        }
+        const schooldays = []
+
+        if (classInfo.class_schedule_id === 0) {
+             days.forEach(day => (day.day() === 1 || day.day() === 3) && schooldays.push({[moment(day).valueOf()]: []}));
+        } else if (classInfo.class_schedule_id === 1) {
+             days.forEach(day => (day.day() === 2 || day.day() === 4) && schooldays.push({[moment(day).valueOf()]: []}));
+        } else if (classInfo.class_schedule_id === 2) {
+             days.forEach(day => (day.day() === 6 || day.day() === 7) && schooldays.push({[moment(day).valueOf()]: []}));
+        } else if (classInfo.class_schedule_id === 3) {
+             days.forEach(day => day.day() === 5 && schooldays.push({[moment(day).valueOf()]: []}));
+        }
+
+        return({[moment().format('M')]: schooldays})
+    }
+
     const updateClassList = (index, key, value) => {
         classList[index].updateInfo(key, value)
-        setClassList([...classList])
+        if (key === 'start_date') {
+            const calendar = generateCalendar(classList[index], value)
+            classList[index].updateInfo('attendance', calendar)
+        }
+        setClassList(classList)
     }
 
     // useEffect(() => {
@@ -346,8 +369,12 @@ export function CreateClasses({ open, handleCallback }) {
                                                 })
                                             }
                                         >
-                                            {classSchedule.map(item => (
-                                                <Option onClick={() => updateClassList(index, 'class_schedule', item)} key={index} value={item} className="flex items-center gap-2">
+                                            {classSchedule.map((item, i) => (
+                                                <Option onClick={() => {
+                                                    console.log('item, index', item, i);
+                                                    updateClassList(index, 'class_schedule', item)
+                                                    updateClassList(index, 'class_schedule_id', i)
+                                                }} key={index} value={item} className="flex items-center gap-2">
                                                     {item}
                                                 </Option>
                                             ))}
