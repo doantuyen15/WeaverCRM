@@ -26,6 +26,30 @@ class globalService {
         this.showAlert = ({content, handleCallback}) => {
             this.commonEvent.next({ type: 'SHOW_ALERT', params: {content: content, handleCallback: handleCallback} })
         }
+        this.roles = [
+            'CEO',
+            'Kế toán',
+            'Giáo Vụ',
+            'Giáo viên',
+            'Trợ giảng',
+            'Nhân viên'
+        ]
+        this.department = [
+            "All",
+            "Đào tạo",
+            "Kế toán",
+            "Marketing",
+            "Sale"
+        ]
+        this.academic = [
+            'Chưa',
+            'Cao đẳng',
+            'Đại học',
+            'Cử nhân',
+            'Thạc sĩ',
+            'Tiến sĩ',
+            'Giáo sư'
+        ]
     }
 }
 

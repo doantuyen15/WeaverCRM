@@ -4,3 +4,7 @@ export * from "./tuition";
 export * from "./../dashboard/notifications";
 export * from "./../dashboard/approval";
 export * from "./classes";
+export * from "./programs";
+export * from "./staff";
+export * from "./student-table";
+export * from "./roles";

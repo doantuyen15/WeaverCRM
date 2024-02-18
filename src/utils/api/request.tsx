@@ -34,10 +34,14 @@ export function useFirebase(service: string, params: any) {
         case 'get_student': return getStudent()
         case 'get_account_info': return getAccountInfo()
         case 'get_staff_list': return getStaffList()
+        case 'get_staff_account': return getStaffAccount()
         case 'get_approval_list': return getApprovalList()
         case 'get_class_list': return getClassList()
         case 'get_student_score': return getStudentScore()
         case 'add_student': return addStudent(params)
+        case 'create_staff': return createStaff(params)
+        case 'update_staff': return updateStaff(params)
+        case 'add_classes': return addClasses(params)
         case 'create_user': return createUser(params)
         case 'delete_user': return deleteUser(params)
         case 'update_user': return updateUser(params)
@@ -45,6 +49,54 @@ export function useFirebase(service: string, params: any) {
         default:
             break;
     }
+}
+
+const createStaff = (staffInfo: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        const staffRef = doc(db, 'staff', staffInfo.id)
+        setDoc(staffRef, staffInfo)
+            .then(resolve)
+            .catch(reject)
+    });
+}
+
+const updateStaff = (staff: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        updateDoc(doc(db, `staff/${staff.id}`), { ...staff })
+            .then(res => {
+                resolve(res)
+            })
+            .catch((error) => {
+                reject(error)
+                // An error occurred
+                // ...
+            })
+            .finally(() => {
+                console.log('updateUser clear tm', timeoutId);
+                clearTimeout(timeoutId)
+            }
+            );
+    })
+}
+
+const addClasses = (list: any[]) => {
+    return new useRequest((resolve: any, reject: any) => {
+        let classList = []
+        try {
+            classList = list.map(item => { return {...item}})
+        } catch (error) {
+            reject(error)
+        }
+        addDoc(collection(db, 'approval'), {
+            add_classes: {
+                'data': classList,
+                'requesting_username': userInfo.displayName,
+                'created_at': moment(Date.now()).format('DD.MM.YYYY')
+            }
+        })
+            .then(resolve)
+            .catch(reject)
+    });
 }
 
 const getStudentScore = () => {
@@ -104,12 +156,12 @@ const getClassList = () => {
 const updateApproval = ({approval, ok}: any) => {
     return new useRequest(async (resolve: any, reject: any) => {
         const approvalRef = doc(db, 'approval', approval?.id)
+        const batch = writeBatch(db);
         if (!ok) {
             deleteDoc(approvalRef).then(resolve).catch(reject)
         }
         else {
             if (approval.type === 'add_student') {
-                const batch = writeBatch(db);
                 if (approval?.data?.length === 0) {
                     reject(('No data provided'));
                     return
@@ -121,6 +173,22 @@ const updateApproval = ({approval, ok}: any) => {
                     const docId = 'WE' + ('00000' + id).slice(-5)
                     const studentRef = doc(db, 'student', docId)
                     batch.set(studentRef, student)
+                })
+                batch.delete(approvalRef)
+                batch.commit()
+                    .then(resolve)
+                    .catch(reject)
+            } else if (approval.type === 'add_classes') {
+                if (approval?.data?.length === 0) {
+                    reject(('No data provided'));
+                    return
+                }
+                // let id = 0
+                // await getDocs(collection(db, 'classes')).then(snap => id = snap.docs.length);
+                approval?.data?.forEach((classInfo: ClassInfo) => {
+                    const docId = classInfo.id
+                    const studentRef = doc(db, 'classes', docId)
+                    batch.set(studentRef, classInfo)
                 })
                 batch.delete(approvalRef)
                 batch.commit()
@@ -143,7 +211,6 @@ const getApprovalList = () => {
                             Object.values(item)[0].id = docRef.id
                             data.push(item)
                         })
-                        console.log(snap);
                         resolve(data)
                     } catch (error) {
                         reject(error)
@@ -248,6 +315,22 @@ const createUser = (account: Account) => {
 
 const getStaffList = () => {
     return new useRequest((resolve: any, reject: any) => {
+        getDocs(collection(db, "staff"))
+            .then(
+                (snap) => {
+                    resolve(snap.docs.map(doc => doc.data()))
+                    // snap.forEach((doc) => {
+                    //     console.log(doc.id, "=>", doc.data());
+                    // });
+                }
+            )
+            .catch(reject)
+            .finally(() => clearTimeout(timeoutId));
+    });
+}
+
+const getStaffAccount = () => {
+    return new useRequest((resolve: any, reject: any) => {
         getDocs(collection(db, "account"))
             .then(
                 (snap) => {
@@ -261,6 +344,7 @@ const getStaffList = () => {
             .finally(() => clearTimeout(timeoutId));
     });
 }
+
 
 const deleteUser = (account: Account) => {
     return new useRequest((resolve: any, reject: any) => {

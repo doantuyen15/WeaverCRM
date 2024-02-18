@@ -67,7 +67,7 @@ export function Roles() {
 
     const getStaffList = () => {
         setLoading(true)
-        useFirebase('get_staff_list')
+        useFirebase('get_staff_account')
         .then((list) => {
             console.log('list', list);
             setLoading(false)

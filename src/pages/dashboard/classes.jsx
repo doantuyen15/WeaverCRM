@@ -83,22 +83,23 @@ export function Class() {
         setLoading(true)
 
         if (ok) {
-            //
+            useFirebase('add_classes', classList)
         }
         setOpenModal(false)
     }
 
     const handleOpenTable = (item, index) => {
-        item?.getStudentList
-            .then(() => {
-                classList[index] = item
-                setClassList(classList)
-                console.log(item);
-                if (openList.includes(index)) setOpenList([...openList.filter(i => i !== index)])
-                else {
-                    openList.push(index)
-                    setOpenList([...openList])
-                }
+        // console.log('handleOpenTable', item?.getStudentList());
+        if (openList.includes(index)) setOpenList([...openList.filter(i => i !== index)])
+        else {
+            openList.push(index)
+            setOpenList([...openList])
+            return
+        }
+        item?.getStudentList()
+            .then((student_list) => {
+                classList[index].updateInfo('student_list', student_list)
+                setClassList([...classList])
             })
             .catch(e => console.error(e))
     }
@@ -128,7 +129,7 @@ export function Class() {
                     </div>
                     <List>
                         {classList.map((item, index) => (
-                            <ListItem className="hover:bg-transparent">
+                            <ListItem ripple={false} className="hover:bg-transparent focus:bg-transparent active:bg-transparent">
                                 <Accordion
                                     open={openList.includes(index)}
                                 >
