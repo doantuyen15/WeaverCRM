@@ -32,7 +32,7 @@ root.render(
 					<CssBaseline />
 					<BackgroundService />
 					<Router />
-					<ToastContainer className="z-40" position="top-right" transition={Slide} autoClose={1500} hideProgressBar closeOnClick pauseOnHover draggable />
+					<ToastContainer style={{ zIndex: 99999999 }} className="z-40" position="top-right" transition={Slide} autoClose={1500} hideProgressBar closeOnClick pauseOnHover draggable />
 				</MUIThemeProvider>
 			</MaterialTailwindControllerProvider>
 		</ThemeProvider>

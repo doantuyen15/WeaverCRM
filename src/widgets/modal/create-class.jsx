@@ -117,13 +117,13 @@ export function CreateClasses({ open, handleCallback }) {
         const schooldays = []
 
         if (classInfo.class_schedule_id === 0) {
-             days.forEach(day => (day.day() === 1 || day.day() === 3) && schooldays.push({[moment(day).valueOf()]: []}));
+             days.forEach(day => (day.day() === 1 || day.day() === 3) && schooldays.push({[moment(day).valueOf()]: new Object()}));
         } else if (classInfo.class_schedule_id === 1) {
-             days.forEach(day => (day.day() === 2 || day.day() === 4) && schooldays.push({[moment(day).valueOf()]: []}));
+             days.forEach(day => (day.day() === 2 || day.day() === 4) && schooldays.push({[moment(day).valueOf()]: new Object()}));
         } else if (classInfo.class_schedule_id === 2) {
-             days.forEach(day => (day.day() === 6 || day.day() === 7) && schooldays.push({[moment(day).valueOf()]: []}));
+             days.forEach(day => (day.day() === 6 || day.day() === 7) && schooldays.push({[moment(day).valueOf()]: new Object()}));
         } else if (classInfo.class_schedule_id === 3) {
-             days.forEach(day => day.day() === 5 && schooldays.push({[moment(day).valueOf()]: []}));
+             days.forEach(day => day.day() === 5 && schooldays.push({[moment(day).valueOf()]: new Object()}));
         }
 
         return({[moment().format('M')]: schooldays})
@@ -229,7 +229,7 @@ export function CreateClasses({ open, handleCallback }) {
                                             ))}
                                         </Select>
                                         <Select
-                                            disabled={!info.program}
+                                            // disabled={!info.program}
                                             label="Class level"
                                             selected={(element) =>
                                                 element &&

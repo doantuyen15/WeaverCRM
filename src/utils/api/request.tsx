@@ -46,10 +46,35 @@ export function useFirebase(service: string, params: any) {
         case 'create_user': return createUser(params)
         case 'delete_user': return deleteUser(params)
         case 'update_user': return updateUser(params)
+        case 'update_attendance': return updateAttendance(params)
         case 'update_approval': return updateApproval(params)
         default:
             break;
     }
+}
+
+const updateAttendance = (data: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        console.log('data', data);
+        
+        updateDoc(doc(db, `classes/${data.id}`), {
+            'attendance': {
+                [data.month]: data.data
+            }
+        })
+            .then(res => {
+                resolve(res)
+            })
+            .catch((error) => {
+                reject(error)
+                // An error occurred
+                // ...
+            })
+            .finally(() => {
+                console.log('updateUser clear tm', timeoutId);
+                clearTimeout(timeoutId)
+            });
+    })
 }
 
 const addStudentClasses = (updateList: any[]) => {

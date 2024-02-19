@@ -26,6 +26,9 @@ import moment from "moment";
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import IndeterminateCheckBoxIcon from '@mui/icons-material/IndeterminateCheckBox';
+import { useFirebase } from "../../utils/api/request";
+import { toast } from "react-toastify";
+import { AddStudentToClass } from "./add-student-class";
 
 const TABLE_HEAD = [
     // "Tình trạng đăng ký",
@@ -42,6 +45,16 @@ const TABLE_HEAD = [
     "Người giới thiệu",
     "Advisor"
 ];
+
+const HEADER_SCORE = [
+    "Listening",
+    "Reading",
+    "Writing",
+    "Speaking",
+    "Grammar Vocabulary",
+    "Tổng điểm",
+];
+
 
 const Header = [
     // 'status_res',
@@ -63,8 +76,9 @@ const Header = [
     'listening',
     'test_input_score'
 ]
+const currentMonth = moment().format('M')
 
-export function ModalClassInfo({ open, data, handleOpen }) {
+export function ModalClassInfo({ open, data, handleOpen, classList }) {
     const [controller] = useController();
     const { userInfo } = controller;
     const [loading, setLoading] = useState(false)
@@ -74,7 +88,10 @@ export function ModalClassInfo({ open, data, handleOpen }) {
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
     const [openAttendance, setOpenAttendance] = useState(false)
+    const [openAddStudent, setOpenAddStudent] = useState(false)
+    const [openInputScore, setOpenInputScore] = useState(false)
     const [mode, setMode] = useState('normal')
+    const [calendar, setCalendar] = useState([])
 
     useEffect(() => {
         getStudent()
@@ -109,26 +126,63 @@ export function ModalClassInfo({ open, data, handleOpen }) {
     }
 
     const changeMode = (mode) => {
+        if (mode === "addStudent") {
+            setOpenAddStudent(true)
+            setMode('addStudent')
+        }
         if (mode === "attendance") {
             setOpenAttendance(true)
             setMode('attendance')
         }
         if (mode === 'normal') {
             setOpenAttendance(false)
+            setOpenAddStudent(false)
+            setOpenInputScore(false)
             setMode('normal')
+        }
+        if (mode === 'score') {
+            setOpenInputScore(true)
+            setMode('score')
+        }
+    }
+
+    const handleUpdateAttendance = () => {
+        useFirebase('update_attendance', {
+            id: data.id,
+            month: currentMonth,
+            data: calendar
+        })
+            .then(() => {
+                toast.success(`Điểm danh lớp ${data.id} thành công!`)
+            })
+    }
+
+    const handleAddStudent = (ok, studentList) => {
+        if (!ok) {
+            changeMode('normal')
+            setOpenAddStudent(false)
+        } else {
+            setLoading(true)
+            useFirebase('add_student_classes', studentList)
+                .then(() => {
+                    setLoading(false)
+                    changeMode('normal')
+                    toast.success("Add Success!")
+                })
+                .catch((error) => toast.error(error))
         }
     }
 
     return (
-        <>
+        <div>
             <Dialog
                 size="lg"
                 open={open}
                 handler={() => {
                     // handleCallback(false)
-                    handleOpen()
+                    if (mode === 'normal') handleOpen()
                 }}
-                className="bg-transparent shadow-none min-w-[80vw]"
+                className={"bg-transparent shadow-none min-w-[80vw]"}
             >
                 <Card className="mx-auto w-full">
                     <CardHeader floated={false} shadow={false} className="rounded-none pb-6 relative">
@@ -166,13 +220,20 @@ export function ModalClassInfo({ open, data, handleOpen }) {
                             <div className="p-4">
                                 <TableSkeleton />
                             </div>
-                        ) :
-                            openAttendance ? (
-                                <Attendance open={openAttendance} handleCallback={handleAttendance} studentList={studentList} classInfo={data}/>
-                            ) : (
-                                <TableStudent setStudentList={setStudentList} studentList={studentList} />
-                            )
-                        }
+                        ) : openAttendance ? (
+                            <Attendance
+                                open={openAttendance}
+                                handleCallback={handleAttendance}
+                                studentList={studentList}
+                                classInfo={data}
+                                calendar={calendar}
+                                setCalendar={setCalendar}
+                            />
+                        ) : openInputScore ? (
+                            <ScoreTable setStudentList={setStudentList} studentList={studentList} />
+                        ) : (
+                            <TableStudent setStudentList={setStudentList} studentList={studentList} />
+                        )}
                     </CardBody>
                     <CardFooter className="pt-0 flex justify-end">
                         <div className="flex pt-4 gap-2">
@@ -184,20 +245,24 @@ export function ModalClassInfo({ open, data, handleOpen }) {
                                 </Button>
                             ) : null}
                             <Button variant="text" size="sm"
-                            // onClick={() => handleCallback(false)}
+                                onClick={() => {mode === 'addStudent' ? handleUpdateAttendance() : changeMode('addStudent')}}
                             >
-                                Thêm học sinh
+                                {mode !== 'addStudent' ? 'Thêm học sinh' : 'Xác nhận thêm học sinh'}
                             </Button>
                             <Button
                                 disabled={(newStaff.department_id === '' || newStaff.roles_id?.length === 0)}
                                 variant="text"
                                 size="sm"
-                                // onClick={() => handleCallback(true, newStaff)}
+                                onClick={() => {
+                                    mode === 'score' ? () => {} : changeMode('score')
+                                }}
                             >
                                 Nhập điểm
                             </Button>
                             <Button variant="gradient" size="sm"
-                                onClick={() => changeMode('attendance')}
+                                onClick={() => {
+                                    mode === 'attendance' ? handleUpdateAttendance() : changeMode('attendance')
+                                }}
                             >
                                 {mode !== 'attendance' ? 'Điểm danh' : 'Xác nhận điểm danh'}
                             </Button>
@@ -205,8 +270,9 @@ export function ModalClassInfo({ open, data, handleOpen }) {
                     </CardFooter>
                 </Card>
             </Dialog>
+            <AddStudentToClass loading={loading} classList={classList} open={openAddStudent} handleCallback={handleAddStudent}/>
             {/* <Attendance open={openAttendance} handleCallback={handleAttendance}/> */}
-        </>
+        </div>
     );
 }
 
@@ -280,14 +346,14 @@ const TableStudent = ({ studentList, setStudentList }) => {
     )
 }
 
-const Attendance = ({open, handleCallback, studentList, classInfo}) => {
-    const [calendar, setCalendar] = useState([])
+const Attendance = ({open, handleCallback, studentList, classInfo, calendar, setCalendar}) => {
     const calendarRef = useRef({})
 
     useEffect(() => {
-        const currentMonth = moment().format('M')
-        console.log((moment(1707066000000) === moment()));
-        if (classInfo.attendance?.currentMonth?.length > 0) setCalendar(classInfo.attendance[currentMonth])
+        if (classInfo.attendance[currentMonth]?.length > 0) {
+            setCalendar(classInfo.attendance[currentMonth])
+            calendarRef.current = classInfo.attendance[currentMonth]
+        }
         else generateCalendar()
     }, [])
 
@@ -306,13 +372,13 @@ const Attendance = ({open, handleCallback, studentList, classInfo}) => {
         const schooldays = []
 
         if (classInfo.class_schedule_id === 0) {
-             days.forEach(day => (day.day() === 1 || day.day() === 3) && schooldays.push({[moment(day).valueOf()]: []}));
+             days.forEach(day => (day.day() === 1 || day.day() === 3) && schooldays.push({[moment(day).valueOf()]: new Object()}));
         } else if (classInfo.class_schedule_id === 1) {
-             days.forEach(day => (day.day() === 2 || day.day() === 4) && schooldays.push({[moment(day).valueOf()]: []}));
+             days.forEach(day => (day.day() === 2 || day.day() === 4) && schooldays.push({[moment(day).valueOf()]: new Object()}));
         } else if (classInfo.class_schedule_id === 2) {
-             days.forEach(day => (day.day() === 6 || day.day() === 7) && schooldays.push({[moment(day).valueOf()]: []}));
+             days.forEach(day => (day.day() === 6 || day.day() === 7) && schooldays.push({[moment(day).valueOf()]: new Object()}));
         } else if (classInfo.class_schedule_id === 3) {
-             days.forEach(day => day.day() === 5 && schooldays.push({[moment(day).valueOf()]: []}));
+             days.forEach(day => day.day() === 5 && schooldays.push({[moment(day).valueOf()]: new Object()}));
         }
         calendarRef.current = [{[moment().format('M')]: schooldays}]
         setCalendar(schooldays)
@@ -329,18 +395,17 @@ const Attendance = ({open, handleCallback, studentList, classInfo}) => {
                             key={index}
                             className="odd:bg-blue-gray-50/50 z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 p-4 transition-colors"
                         >
-                            {console.log(moment(Number(Object.keys(day)[0])).format('DDMMYYYY') == moment().format('DDMMYYYY'))}
                             <Typography
                                 variant="small"
                                 color="blue-gray"
-                                className={"flex items-center justify-between gap-2 leading-none " + ((moment(Number(Object.keys(day)[0])).format('DDMMYYYY') == moment().format('DDMMYYYY')) ? ' font-bold' : 'opacity-70')}
+                                className={"text-center pb-1 gap-2 leading-none " + ((moment(Number(Object.keys(day)[0])).format('DDMMYYYY') == moment().format('DDMMYYYY')) ? ' font-bold' : 'opacity-70')}
                             >
                                 {moment(Number(Object.keys(day)[0])).format('dddd')}
                             </Typography>
                             <Typography
                                 variant="small"
                                 color="blue-gray"
-                                className={"flex items-center justify-between gap-2 leading-none " + ((moment(Number(Object.keys(day)[0])).format('DDMMYYYY') == moment().format('DDMMYYYY')) ? ' font-bold' : 'opacity-70')}
+                                className={"text-center gap-2 leading-none " + ((moment(Number(Object.keys(day)[0])).format('DDMMYYYY') == moment().format('DDMMYYYY')) ? ' font-bold' : 'opacity-70')}
                             >
                                 {moment(Number(Object.keys(day)[0])).format('DD/MM/YYYY')}
                             </Typography>
@@ -350,7 +415,7 @@ const Attendance = ({open, handleCallback, studentList, classInfo}) => {
             </thead>
             <tbody>
                 {studentList?.map(
-                    (item, index) => {
+                    (student, index) => {
                         const isLast = index === studentList.length - 1;
                         const classes = isLast
                             ? "py-2 px-4 odd:bg-blue-gray-50/50"
@@ -363,25 +428,116 @@ const Attendance = ({open, handleCallback, studentList, classInfo}) => {
                                         color="blue-gray"
                                         className="font-normal"
                                     >
-                                        {item.full_name}
+                                        {student.full_name}
                                     </Typography>
                                 </td>
-                                {calendar.map((day, key) => (
-                                    <td className={classes}>
-                                        <Typography
-                                            variant="small"
-                                            color="blue-gray"
-                                            className="font-normal"
-                                        >
-                                            {/* {moment(day)} */}
-                                            {}
-                                            <CheckBoxOutlineBlankIcon />
-                                            <CheckBoxIcon />
-                                            <IndeterminateCheckBoxIcon />
-                                        </Typography>
-                                    </td>
-                                ))}
+                                {calendar.map((info, key) => {
+                                    const dayAttendance = Object.values(info)[0]
+                                    const handleAttendance = (option) => {
+                                        dayAttendance[student.id] = option
+                                        setCalendar([...calendar]);
+                                    } 
+                                    return (
+                                        <td className={classes + ' text-center'}>
+                                            {dayAttendance[student.id] === 1 ? (
+                                                <CheckBoxIcon onClick={() => handleAttendance(2)} />
+                                            ) : dayAttendance[student.id] === 2 ? (
+                                                <IndeterminateCheckBoxIcon onClick={() => handleAttendance(0)} />
+                                            ) : (
+                                                <CheckBoxOutlineBlankIcon onClick={() => handleAttendance(1)} />
+                                            )}
+                                        </td>
+                                    )
+                                })}
                             </tr>
+                        )
+                    }
+                )}
+            </tbody>
+        </table>
+    )
+}
+
+const ScoreTable = ({ studentList, setStudentList }) => {
+    const [keySort, setKeySort] = useState('')
+    const [isAsc, setIsAsc] = useState(true)
+    const tableRef = useRef(studentList)
+    const [attendanceList, setAttendanceList] = useState([{}])
+
+    const handleSort = (indexCol) => {
+        let sorted
+        sorted = orderBy(tableRef.current, [Header[indexCol]], [isAsc ? 'asc' : 'desc'])
+        setStudentList([...sorted])
+        setKeySort(indexCol)
+        setIsAsc(prev => !prev)
+    }
+    return (
+        <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
+            <thead>
+                <tr>
+                    <th className="z-10 sticky top-0 cursor-pointer border-y border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"/>
+                    <th
+                        colSpan={6}
+                        className="z-10 sticky top-0 cursor-pointer border-y border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"
+                    >
+                        <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="text-center font-normal leading-none opacity-70"
+                        >
+                            {'Giữa kỳ'}{" "}
+                        </Typography>
+                    </th>
+                    <th
+                        colSpan={6}
+                        className="z-10 sticky top-0 cursor-pointer border-y border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"
+                    >
+                        <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="text-center font-normal leading-none opacity-70"
+                        >
+                            {"Cuối kỳ"}{" "}
+                        </Typography>
+                    </th>
+                </tr>
+                <tr>
+                    {HEADER_SCORE.map((head, index) => (
+                        <th
+                            onClick={() => handleSort(index)}
+                            key={head}
+                            className="z-10 sticky top-0 cursor-pointer border-y border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"
+                        >
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
+                            >
+                                {head}{" "}
+                            </Typography>
+                        </th>
+                    ))}
+                    <th
+                        className="z-10 sticky top-0 cursor-pointer border-y border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-gray-200"
+                    />
+                </tr>
+            </thead>
+            <tbody>
+                {studentList?.map(
+                    (item, index) => {
+                        const isLast = index === studentList.length - 1;
+                        const classes = isLast
+                            ? "py-2 px-4"
+                            : "py-2 px-4 border-b border-blue-gray-50";
+                        return (
+                            <StudentRow
+                                classes={classes}
+                                item={item}
+                                index={index}
+                                hideColumn={true}
+                            // handleEdit={handleEdit}
+                            // handleRemove={handleRemove}
+                            />
                         )
                     }
                 )}

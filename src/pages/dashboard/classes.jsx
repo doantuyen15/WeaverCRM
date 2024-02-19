@@ -201,8 +201,7 @@ export function Class() {
                     </Button>
                 </CardFooter> */}
             </Card>
-            {openModalClass ? <ModalClassInfo handleOpen={setOpenModalClass} open={openModalClass} data={dataClass} /> : null}
-            <AddStudentToClass loading={loading} classList={classList} open={openModal} handleOpen={setOpenModal} handleCallback={handleUpdateClass}/>
+            {openModalClass ? <ModalClassInfo classList={classList} handleOpen={setOpenModalClass} open={openModalClass} data={dataClass} /> : null}
             {/* <CreateClasses open={openModal} handleOpen={setOpenModal} handleCallback={handleUpdateClass} /> */}
         </div>
     );
