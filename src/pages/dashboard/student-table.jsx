@@ -100,7 +100,7 @@ const Header = [
     'reading',
     'speaking',
     'listening',
-    'test_input_score'
+    'total'
 ]
 
 const HeaderScore = [
@@ -109,7 +109,7 @@ const HeaderScore = [
     'Speaking',
     'Reading',
     'Writing',
-    'Score',
+    'Total',
 ]
 
 export default function StudentTable() {
@@ -145,7 +145,7 @@ export default function StudentTable() {
                 console.log('getStudentList', data);
                 tableRef.current = data
                 setStudentList(data)
-                useStorage('set', 'studentInfo', data)
+                // useStorage('set', 'studentInfo', data)
             })
             .catch(err => console.log(err))
             .finally(() => setLoading(false))
@@ -204,11 +204,10 @@ export default function StudentTable() {
     }
 
     const updateObjectEdit = (key, value, index) => {
-        console.log('currentEditKey.current', currentEditKey.current);
         try {
             const editIndex = currentEditKey.current[index]
-            objectEdit[editIndex][key] = value
-            setObjectEdit([...objectEdit])
+            objectEdit[editIndex].updateInfo(key, value)
+            setObjectEdit(objectEdit)
         } catch (error) {
             console.log(error);
         }
@@ -218,7 +217,7 @@ export default function StudentTable() {
         try {
             // objectNew[index][key] = value
             objectNew[index].updateInfo(key, value)
-            setObjectNew([...objectNew]) 
+            setObjectNew(objectNew) 
         } catch (error) {
             console.log(error);
         }
@@ -242,7 +241,7 @@ export default function StudentTable() {
             ...currentEditKey.current,
             [index]: objectEdit?.length - 1
         }
-        setObjectEdit([...objectEdit])
+        setObjectEdit(objectEdit)
         editKey.push(index)
         setEditKey([...editKey])
         setEditMode(true)
@@ -259,24 +258,39 @@ export default function StudentTable() {
         forceUpdate()
         setEditMode(false)
     }
-    console.log('objectEdit', objectEdit);
 
     const sendRequestAddStudent = () => {
         setLoading(true)
-        useFirebase('add_student', objectNew)
-            .then(() => {
-                toast.success("Thêm sinh viên thành công! Yêu cầu đang chờ duyệt")
-            })
-            .catch((err) => {
-                console.log(err);
-                toast.error(`Thêm sinh viên không thành công! Lỗi: ${err}`)
-            })
-            .finally(() => {
-                setObjectEdit([])
-                setObjectNew([])
-                setLoading(false)
-                setOpenModalConfirm(false)
-            })
+        if (objectNew.length > 0) {
+            useFirebase('add_student', objectNew)
+                .then(() => {
+                    toast.success("Thêm học viên thành công! Yêu cầu đang chờ duyệt")
+                })
+                .catch((err) => {
+                    console.log(err);
+                    toast.error(`Thêm học viên không thành công! Lỗi: ${err}`)
+                })
+                .finally(() => {
+                    setObjectNew([])
+                    setLoading(false)
+                    setOpenModalConfirm(false)
+                })
+        }
+        if (objectEdit.length > 0) {
+            useFirebase('update_student', objectEdit)
+                .then(() => {
+                    toast.success("Sửa thông tin học viên thành công! Yêu cầu đang chờ duyệt")
+                })
+                .catch((err) => {
+                    console.log(err);
+                    toast.error(`Sửa thông tin học viên không thành công! Lỗi: ${err}`)
+                })
+                .finally(() => {
+                    setObjectEdit([])
+                    setLoading(false)
+                    setOpenModalConfirm(false)
+                })
+        }
     }
 
     const handleRemove = () => {
@@ -701,7 +715,7 @@ export default function StudentTable() {
                                                                         }}
                                                                         value={item[Header[13]]}
                                                                         onChange={(e) => {
-                                                                            updateObjectNew(index, Header[13], e.target.value)
+                                                                            updateObjectEdit(Header[13], e.target.value, index)
                                                                         }}
                                                                     />
                                                                 </div>
@@ -721,7 +735,7 @@ export default function StudentTable() {
                                                                         }}
                                                                         value={item[Header[14]]}
                                                                         onChange={(e) => {
-                                                                            updateObjectNew(index, Header[14], e.target.value)
+                                                                            updateObjectEdit(Header[14], e.target.value, index)
                                                                         }}
                                                                     />
                                                                 </div>
@@ -741,7 +755,7 @@ export default function StudentTable() {
                                                                         }}
                                                                         value={item[Header[15]]}
                                                                         onChange={(e) => {
-                                                                            updateObjectNew(index, Header[15], e.target.value)
+                                                                            updateObjectEdit(Header[15], e.target.value, index)
                                                                         }}
                                                                     />
                                                                 </div>
@@ -761,7 +775,7 @@ export default function StudentTable() {
                                                                         }}
                                                                         value={item[Header[16]]}
                                                                         onChange={(e) => {
-                                                                            updateObjectNew(index, Header[16], e.target.value)
+                                                                            updateObjectEdit(Header[16], e.target.value, index)
                                                                         }}
                                                                     />
                                                                 </div>

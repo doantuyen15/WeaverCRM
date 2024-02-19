@@ -7,6 +7,7 @@ import useStorage from "../localStorageHook";
 import useRequest from './promise'
 import moment from "moment";
 import ClassInfo from "../../data/entities/classes";
+import StudentInfo from "../../data/entities/studentInfo";
 
 const controller = new AbortController();
 const timeout = setTimeout(() => controller.abort(), 10000);
@@ -39,6 +40,7 @@ export function useFirebase(service: string, params: any) {
         case 'get_class_list': return getClassList()
         case 'get_student_score': return getStudentScore()
         case 'add_student': return addStudent(params)
+        case 'update_student': return updateStudent(params)
         case 'create_staff': return createStaff(params)
         case 'update_staff': return updateStaff(params)
         case 'add_classes': return addClasses(params)
@@ -51,6 +53,26 @@ export function useFirebase(service: string, params: any) {
         default:
             break;
     }
+}
+
+const updateStudent = (list: any[]) => {
+    return new useRequest((resolve: any, reject: any) => {
+        let studentList = []
+        try {
+            studentList = list.map(item => { return {...item}})
+        } catch (error) {
+            reject(error)
+        }
+        addDoc(collection(db, 'approval'), {
+            update_student: {
+                'data': studentList,
+                'requesting_username': userInfo.displayName,
+                'created_at': moment(Date.now()).format('DD.MM.YYYY')
+            }
+        })
+            .then(resolve)
+            .catch(reject)
+    })
 }
 
 const updateAttendance = (data: any) => {
@@ -212,11 +234,11 @@ const updateApproval = ({approval, ok}: any) => {
             deleteDoc(approvalRef).then(resolve).catch(reject)
         }
         else {
+            if (approval?.data?.length === 0) {
+                reject(('No data provided'));
+                return
+            }
             if (approval.type === 'add_student') {
-                if (approval?.data?.length === 0) {
-                    reject(('No data provided'));
-                    return
-                }
                 let id = 0
                 await getDocs(collection(db, 'student')).then(snap => id = snap.docs.length);
                 approval?.data?.forEach((student: any) => {
@@ -229,11 +251,17 @@ const updateApproval = ({approval, ok}: any) => {
                 batch.commit()
                     .then(resolve)
                     .catch(reject)
-            } else if (approval.type === 'add_classes') {
-                if (approval?.data?.length === 0) {
-                    reject(('No data provided'));
-                    return
-                }
+            } else if (approval.type === 'update_student') {
+                approval?.data?.forEach((student: any) => {
+                    const studentRef = doc(db, 'student', student.id)
+                    batch.update(studentRef, student)
+                })
+                batch.delete(approvalRef)
+                batch.commit()
+                    .then(resolve)
+                    .catch(reject)
+            } 
+            else if (approval.type === 'add_classes') {
                 // let id = 0
                 // await getDocs(collection(db, 'classes')).then(snap => id = snap.docs.length);
                 approval?.data?.forEach((classInfo: ClassInfo) => {
@@ -427,7 +455,7 @@ const getStudent = () => {
                     // if (version) useStorage('set', 'studentTable', JSON.stringify({length: map?.length, ver: version}))
                     // resolve(map)
                     const data = snap.docs.map((doc) => {
-                        const map = doc.data()
+                        const map = new StudentInfo(doc.data())
                         map.id = doc.id
                         return map
                     });

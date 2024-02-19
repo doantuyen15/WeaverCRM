@@ -51,9 +51,16 @@ const HEADER_SCORE = [
     "Reading",
     "Writing",
     "Speaking",
-    "Grammar Vocabulary",
     "Tổng điểm",
 ];
+
+const SCORE_FIELD = [
+    "listening",
+    "reading",
+    "writing",
+    "speaking",
+    "total"
+]
 
 
 const Header = [
@@ -230,7 +237,7 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
                                 setCalendar={setCalendar}
                             />
                         ) : openInputScore ? (
-                            <ScoreTable setStudentList={setStudentList} studentList={studentList} />
+                            <ScoreTable setStudentList={setStudentList} studentList={studentList} data={data} />
                         ) : (
                             <TableStudent setStudentList={setStudentList} studentList={studentList} />
                         )}
@@ -422,7 +429,7 @@ const Attendance = ({open, handleCallback, studentList, classInfo, calendar, set
                             : "py-2 px-4 odd:bg-blue-gray-50/50 border-b border-blue-gray-50";
                         return (
                             <tr>
-                                <td className={classes}>
+                                <td className={classes} style={{}}>
                                     <Typography
                                         variant="small"
                                         color="blue-gray"
@@ -458,7 +465,7 @@ const Attendance = ({open, handleCallback, studentList, classInfo, calendar, set
     )
 }
 
-const ScoreTable = ({ studentList, setStudentList }) => {
+const ScoreTable = ({ studentList, setStudentList, classInfo }) => {
     const [keySort, setKeySort] = useState('')
     const [isAsc, setIsAsc] = useState(true)
     const tableRef = useRef(studentList)
@@ -475,69 +482,113 @@ const ScoreTable = ({ studentList, setStudentList }) => {
         <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
             <thead>
                 <tr>
-                    <th className="z-10 sticky top-0 cursor-pointer border-y border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"/>
+                    <th className=" min-w-max z-10 sticky top-0 border-t border-r border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors" />
                     <th
-                        colSpan={6}
-                        className="z-10 sticky top-0 cursor-pointer border-y border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"
+                        colSpan={HEADER_SCORE.length}
+                        className="z-10 max-w-min sticky top-0 border-y border-r border-blue-100 bg-orange-500 p-4 transition-colors hover:bg-blue-200"
                     >
                         <Typography
-                            variant="small"
+                            variant="h6"
                             color="blue-gray"
-                            className="text-center font-normal leading-none opacity-70"
+                            className="text-center font-bold leading-none"
                         >
-                            {'Giữa kỳ'}{" "}
+                            {'Giữa kỳ'}
                         </Typography>
                     </th>
                     <th
-                        colSpan={6}
-                        className="z-10 sticky top-0 cursor-pointer border-y border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"
+                        colSpan={HEADER_SCORE.length}
+                        className="z-10 sticky top-0 border-y border-blue-100 bg-orange-500 p-4 transition-colors hover:bg-blue-200"
                     >
                         <Typography
-                            variant="small"
+                            variant="h6"
+                            className="text-center font-bold leading-none"
                             color="blue-gray"
-                            className="text-center font-normal leading-none opacity-70"
                         >
-                            {"Cuối kỳ"}{" "}
+                            {"Cuối kỳ"}
                         </Typography>
                     </th>
                 </tr>
                 <tr>
+                    <th className=" min-w-max z-10 sticky top-0 border-r border-b bg-blue-gray-50 border-blue-gray-100 transition-colors" />
                     {HEADER_SCORE.map((head, index) => (
                         <th
-                            onClick={() => handleSort(index)}
+                            // onClick={() => handleSort(index)}
                             key={head}
-                            className="z-10 sticky top-0 cursor-pointer border-y border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"
+                            className="z-10 sticky top-0 border-y border-r border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"
                         >
                             <Typography
                                 variant="small"
                                 color="blue-gray"
-                                className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
+                                className={"text-center gap-2 leading-none opacity-70" + ((HEADER_SCORE.length - 1) === index ? ' font-bold' : ' font-normal')}
                             >
-                                {head}{" "}
+                                {head}
                             </Typography>
                         </th>
                     ))}
-                    <th
-                        className="z-10 sticky top-0 cursor-pointer border-y border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-gray-200"
-                    />
+                    {HEADER_SCORE.map((head, index) => (
+                        <th
+                            // onClick={() => handleSort(index)}
+                            key={head}
+                            className="z-10 sticky top-0 border-y border-r border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"
+                        >
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className={"text-center gap-2 leading-none opacity-70" + ((HEADER_SCORE.length - 1) === index ? ' font-bold' : ' font-normal')}
+                            >
+                                {head}
+                            </Typography>
+                        </th>
+                    ))}
                 </tr>
             </thead>
             <tbody>
                 {studentList?.map(
-                    (item, index) => {
-                        const isLast = index === studentList.length - 1;
+                    (student, studentIndex) => {
+                        const isLast = studentIndex === studentList.length - 1;
                         const classes = isLast
-                            ? "py-2 px-4"
-                            : "py-2 px-4 border-b border-blue-gray-50";
+                            ? "px-4 odd:bg-blue-gray-50 text-center hover:bg-blue-50"
+                            : "px-4 odd:bg-blue-gray-50 text-center border-b border-blue-gray-50 hover:bg-blue-50";
                         return (
-                            <StudentRow
-                                classes={classes}
-                                item={item}
-                                index={index}
-                                hideColumn={true}
-                            // handleEdit={handleEdit}
-                            // handleRemove={handleRemove}
-                            />
+                            <tr>
+                                <td className={classes + ' min-w-max py-2 bg-blue-50 sticky left-0 border-r z-20'}>{student.full_name}</td>
+                                {SCORE_FIELD.map((field, index) => (
+                                    <td
+                                        // onClick={() => handleSort(index)}
+                                        key={field}
+                                        className={classes}
+                                    >
+                                        <Typography
+                                            contentEditable={true}
+                                            onInput={(e) => console.log('====', e.currentTarget.innerText)}
+                                            className={"focus:outline-none" + ((HEADER_SCORE.length - 1) === index && ' font-bold')}
+                                            color="blue-gray"
+                                        >
+                                            {/* {student.score_table[classInfo.id][field]} */}
+                                        </Typography>
+                                    </td>
+                                ))}
+                                {SCORE_FIELD.map((field, index) => (
+                                    <td
+                                        // onClick={() => handleSort(index)}
+                                        key={field}
+                                        className={classes}
+                                    >
+                                        <Typography
+                                            contentEditable={true}
+                                            // contentEditable={HEADER_SCORE.length - 1 !== index}
+                                            onInput={(e) => console.log('====', e.currentTarget.innerText)}
+                                            className={"focus:outline-none" + ((HEADER_SCORE.length - 1) === index && ' font-bold')}
+                                            color="blue-gray"
+                                        >
+                                            {"--"}
+                                        </Typography>
+                                    </td>
+                                ))}
+                                {/* <th
+                                        className="z-10 sticky top-0 cursor-pointer border-y border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-gray-200"
+                                    /> */}
+                            </tr>
                         )
                     }
                 )}
