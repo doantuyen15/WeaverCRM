@@ -1,5 +1,7 @@
 import { getDoc } from "firebase/firestore"
 import moment from "moment"
+import StudentInfo from "./studentInfo"
+import formatDate from "../../utils/formatNumber/formatDate"
 
 export default class ClassInfo {
     constructor(data) {
@@ -38,10 +40,10 @@ export default class ClassInfo {
                 Promise.all(this.student_list.map(docRef => getDoc(docRef)))
                     .then((res) => {
                         const items = res.map(i => {
-                            return {
+                            return new StudentInfo ({
                                 ...i.data(),
                                 id: i.id
-                            }
+                            })
                         })
                         this.student_list = items
                         this.converted = true
@@ -56,7 +58,7 @@ export default class ClassInfo {
         if (this[key] !== undefined) {
             this[key] = value
             if (key === 'program' || key === 'level') 
-                this.id = this.program.toUpperCase() + '_' + this.level.toUpperCase() + '_' + moment().format('DDMMYY')
+                this.id = this.program.toUpperCase() + '_' + this.level.toUpperCase() + '_' + formatDate(this.start_date, 'DDMMYY')
         }
     }
 }

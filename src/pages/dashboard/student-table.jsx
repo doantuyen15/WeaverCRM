@@ -104,12 +104,13 @@ const Header = [
 ]
 
 const HeaderScore = [
-    // 'Chương trình học',
+    '',
     'Listening',
     'Speaking',
     'Reading',
     'Writing',
     'Total',
+    'Time'
 ]
 
 export default function StudentTable() {
@@ -205,9 +206,15 @@ export default function StudentTable() {
 
     const updateObjectEdit = (key, value, index) => {
         try {
+            console.log('updateObjectEdit', key, value, index, objectEdit);
             const editIndex = currentEditKey.current[index]
-            objectEdit[editIndex].updateInfo(key, value)
-            setObjectEdit(objectEdit)
+            if (['listening', 'speaking', 'reading', 'writing'].includes(key)) {
+                objectEdit[editIndex].updateScore({key: key, score: value, classId: 'test'})
+                setObjectEdit(objectEdit)
+            } else {
+                objectEdit[editIndex].updateInfo(key, value)
+                setObjectEdit(objectEdit)
+            }
         } catch (error) {
             console.log(error);
         }
@@ -277,6 +284,7 @@ export default function StudentTable() {
                 })
         }
         if (objectEdit.length > 0) {
+            console.log('objectEdit', objectEdit);
             useFirebase('update_student', objectEdit)
                 .then(() => {
                     toast.success("Sửa thông tin học viên thành công! Yêu cầu đang chờ duyệt")
@@ -1178,19 +1186,19 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
     const [loading, setLoading] = useState(false)
 
     const getStudentScore = () => {
-        const wait = setTimeout(() => {
-            setLoading(true)
-        }, 150);
-        useFirebase('get_student_score')
-            .then((data) => {
-                console.log('get_student_score', data);
-                setScoreTable(data)
-            })
-            .catch(err => toast.error(err))
-            .finally(() => {
-                clearTimeout(wait)
-                setLoading(false)
-            })
+        // const wait = setTimeout(() => {
+        //     setLoading(true)
+        // }, 150);
+        // useFirebase('get_student_score')
+        //     .then((data) => {
+        //         console.log('get_student_score', data);
+        //         setScoreTable(data)
+        //     })
+        //     .catch(err => toast.error(err))
+        //     .finally(() => {
+        //         clearTimeout(wait)
+        //         setLoading(false)
+        //     })
     }
  
     // const triggers = {
@@ -1200,6 +1208,101 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
     //   },
     //   onMouseLeave: () => setOpenPopover(false),
     // };
+
+    const TableScore = ({data = {}}) => {
+        const tableScore = Object.values(data)
+        return (
+            <table className="text-left">
+                <thead>
+                    <tr>
+                        {HeaderScore.map((head) => (
+                            <th
+                                key={head}
+                                className="border-b p-4"
+                            >
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="font-bold leading-none opacity-70"
+                                >
+                                    {head}
+                                </Typography>
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {tableScore.map((item, index) => (
+                        <tr key={'scorebody' + item.id}>
+                            <td className='p-4'>
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="font-normal"
+                                >
+                                    {item.class_id ? ('Lóp ' + item.class_id.toUpperCase()) : ''}
+                                </Typography>
+                            </td>
+                            <td className='p-4'>
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="font-normal"
+                                >
+                                    {item.listening}
+                                </Typography>
+                            </td>
+                            <td className='p-4'>
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="font-normal"
+                                >
+                                    {item.speaking}
+                                </Typography>
+                            </td>
+                            <td className='p-4'>
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="font-medium"
+                                >
+                                    {item.reading}
+                                </Typography>
+                            </td>
+                            <td className='p-4'>
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="font-medium"
+                                >
+                                    {item.writing}
+                                </Typography>
+                            </td>
+                            <td className='p-4'>
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="font-medium"
+                                >
+                                    {item.total}
+                                </Typography>
+                            </td>
+                            <td className='p-4'>
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="font-medium"
+                                >
+                                    {formatDate(item.update_time, 'DD/MM/YYYY')}
+                                </Typography>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        )
+    }
 
     return (
         <tr key={index} className="even:bg-blue-gray-50/50">
@@ -1281,7 +1384,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
             {item.has_score ? (
                 <td className={classes}>
                     <Popover placement="top-start" open={openPopover} handler={() => {
-                        getStudentScore(item.id);
+                        // getStudentScore(item.id);
                         setOpenPopover(prev => !prev);
                     }}>
                         <PopoverHandler>
@@ -1291,75 +1394,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                             {loading ? (
                                 <DefaultSkeleton />
                             ) : (
-                                <table className="text-left">
-                                    <thead>
-                                        <tr>
-                                            {HeaderScore.map((head) => (
-                                                <th
-                                                    key={head}
-                                                    className="border-b p-4"
-                                                >
-                                                    <Typography
-                                                        variant="small"
-                                                        color="blue-gray"
-                                                        className="font-bold leading-none opacity-70"
-                                                    >
-                                                        {head}
-                                                    </Typography>
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr key={'scorebody' + index}>
-                                            <td className='p-4'>
-                                                <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-normal"
-                                                >
-                                                    {item.listening}
-                                                </Typography>
-                                            </td>
-                                            <td className='p-4'>
-                                                <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-normal"
-                                                >
-                                                    {item.speaking}
-                                                </Typography>
-                                            </td>
-                                            <td className='p-4'>
-                                                <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-medium"
-                                                >
-                                                    {item.reading}
-                                                </Typography>
-                                            </td>
-                                            <td className='p-4'>
-                                                <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-medium"
-                                                >
-                                                    {item.writing}
-                                                </Typography>
-                                            </td>
-                                            <td className='p-4'>
-                                                <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-medium"
-                                                >
-                                                    {item.vocabulary}
-                                                </Typography>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <TableScore data={item.score_table}/>
                             )}
                         </PopoverContent>
                     </Popover>

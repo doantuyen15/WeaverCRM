@@ -237,7 +237,7 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
                                 setCalendar={setCalendar}
                             />
                         ) : openInputScore ? (
-                            <ScoreTable setStudentList={setStudentList} studentList={studentList} data={data} />
+                            <ScoreTable setStudentList={setStudentList} studentList={studentList} data={data} classId={data.id} />
                         ) : (
                             <TableStudent setStudentList={setStudentList} studentList={studentList} />
                         )}
@@ -465,7 +465,7 @@ const Attendance = ({open, handleCallback, studentList, classInfo, calendar, set
     )
 }
 
-const ScoreTable = ({ studentList, setStudentList, classInfo }) => {
+const ScoreTable = ({ studentList, setStudentList, classId }) => {
     const [keySort, setKeySort] = useState('')
     const [isAsc, setIsAsc] = useState(true)
     const tableRef = useRef(studentList)
@@ -478,6 +478,13 @@ const ScoreTable = ({ studentList, setStudentList, classInfo }) => {
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
     }
+
+    const handleUpdateScore = (index, type, key, score) => {
+        studentList[index].updateScore({classId, type, key, score})
+        setStudentList(studentList)
+        console.log('handleUpdateScore', studentList, classId);
+    }
+
     return (
         <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
             <thead>
@@ -545,10 +552,12 @@ const ScoreTable = ({ studentList, setStudentList, classInfo }) => {
             <tbody>
                 {studentList?.map(
                     (student, studentIndex) => {
+                        const midScore = (student.score_table?.[classId] || {}).mid || {};
+                        const finalScore = (student.score_table?.[classId] || {}).final || {};
                         const isLast = studentIndex === studentList.length - 1;
                         const classes = isLast
-                            ? "px-4 odd:bg-blue-gray-50 text-center hover:bg-blue-50"
-                            : "px-4 odd:bg-blue-gray-50 text-center border-b border-blue-gray-50 hover:bg-blue-50";
+                            ? "px-4 text-center border-r border-blue-gray-50 hover:bg-blue-gray-50"
+                            : "px-4 text-center border-r border-b border-blue-gray-50 hover:bg-blue-gray-50";
                         return (
                             <tr>
                                 <td className={classes + ' min-w-max py-2 bg-blue-50 sticky left-0 border-r z-20'}>{student.full_name}</td>
@@ -559,12 +568,12 @@ const ScoreTable = ({ studentList, setStudentList, classInfo }) => {
                                         className={classes}
                                     >
                                         <Typography
-                                            contentEditable={true}
-                                            onInput={(e) => console.log('====', e.currentTarget.innerText)}
+                                            contentEditable={field !== 'total'}
+                                            onInput={(e) => handleUpdateScore(studentIndex, 'mid', field, e.currentTarget.innerText)}
                                             className={"focus:outline-none" + ((HEADER_SCORE.length - 1) === index && ' font-bold')}
                                             color="blue-gray"
                                         >
-                                            {/* {student.score_table[classInfo.id][field]} */}
+                                            {midScore[field]}
                                         </Typography>
                                     </td>
                                 ))}
@@ -575,13 +584,12 @@ const ScoreTable = ({ studentList, setStudentList, classInfo }) => {
                                         className={classes}
                                     >
                                         <Typography
-                                            contentEditable={true}
-                                            // contentEditable={HEADER_SCORE.length - 1 !== index}
-                                            onInput={(e) => console.log('====', e.currentTarget.innerText)}
+                                            contentEditable={field !== 'total'}
+                                            onInput={(e) => handleUpdateScore(studentIndex, 'final', field, e.currentTarget.innerText)}
                                             className={"focus:outline-none" + ((HEADER_SCORE.length - 1) === index && ' font-bold')}
                                             color="blue-gray"
                                         >
-                                            {"--"}
+                                            {finalScore[field]}
                                         </Typography>
                                     </td>
                                 ))}

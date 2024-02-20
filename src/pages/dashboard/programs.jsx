@@ -147,7 +147,7 @@ export function Programs() {
                                                         variant="small"
                                                         className="text-[11px] font-bold text-blue-gray-400 flex-1"
                                                     >
-                                                        Create at: 
+                                                        Start at: 
                                                     </Typography>
                                                     <Typography
                                                         variant="small"
