@@ -83,8 +83,8 @@ const ListStatus = [
 ]
 
 const Header = [
-    'status_res',
-    'id',
+    'status_res', //0
+    'id', //1
     "first_name",
     "last_name",
     'register_date',
@@ -93,12 +93,12 @@ const Header = [
     'dob',
     'parent_phone',
     'address',
-    'email',
+    'email', //10
     'referrer',
     'advisor',
     'writing',
     'reading',
-    'speaking',
+    'speaking',//15
     'listening',
     'grammar',
     'total'
@@ -210,9 +210,10 @@ export default function StudentTable() {
         try {
             console.log('updateObjectEdit', key, value, index, objectEdit);
             const editIndex = currentEditKey.current[index]
-            if (['listening', 'speaking', 'reading', 'writing'].includes(key)) {
+            if (['listening', 'speaking', 'reading', 'writing', 'grammar'].includes(key)) {
                 objectEdit[editIndex].updateScore({key: key, score: value, classId: 'test'})
                 setObjectEdit(objectEdit)
+                forceUpdate()
             } else {
                 objectEdit[editIndex].updateInfo(key, value)
                 setObjectEdit(objectEdit)
@@ -723,7 +724,7 @@ export default function StudentTable() {
                                                                         labelProps={{
                                                                             className: "before:content-none after:content-none",
                                                                         }}
-                                                                        value={item[Header[13]]}
+                                                                        value={item.score_table.test[Header[13]]}
                                                                         onChange={(e) => {
                                                                             updateObjectEdit(Header[13], e.target.value, index)
                                                                         }}
@@ -743,7 +744,7 @@ export default function StudentTable() {
                                                                         labelProps={{
                                                                             className: "before:content-none after:content-none",
                                                                         }}
-                                                                        value={item[Header[14]]}
+                                                                        value={item.score_table.test[Header[14]]}
                                                                         onChange={(e) => {
                                                                             updateObjectEdit(Header[14], e.target.value, index)
                                                                         }}
@@ -763,7 +764,7 @@ export default function StudentTable() {
                                                                         labelProps={{
                                                                             className: "before:content-none after:content-none",
                                                                         }}
-                                                                        value={item[Header[15]]}
+                                                                        value={item.score_table.test[Header[15]]}
                                                                         onChange={(e) => {
                                                                             updateObjectEdit(Header[15], e.target.value, index)
                                                                         }}
@@ -783,9 +784,30 @@ export default function StudentTable() {
                                                                         labelProps={{
                                                                             className: "before:content-none after:content-none",
                                                                         }}
-                                                                        value={item[Header[16]]}
+                                                                        value={item.score_table.test[Header[16]]}
                                                                         onChange={(e) => {
                                                                             updateObjectEdit(Header[16], e.target.value, index)
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                                <div className="flex items-center">
+                                                                    <Typography color="gray" className="mr-2 font-normal">
+                                                                        Grammar
+                                                                        Vocabulary
+                                                                    </Typography>
+                                                                    <Input
+                                                                        maxLength={5}
+                                                                        type="tel"
+                                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900 rounded-none"
+                                                                        containerProps={{
+                                                                            className: "min-w-[72px] max-w-[72px]"
+                                                                        }}
+                                                                        labelProps={{
+                                                                            className: "before:content-none after:content-none",
+                                                                        }}
+                                                                        value={item.score_table.test[Header[17]]}
+                                                                        onChange={(e) => {
+                                                                            updateObjectEdit(Header[17], e.target.value, index)
                                                                         }}
                                                                     />
                                                                 </div>
@@ -1233,6 +1255,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
 
     const TableScore = ({data = {}}) => {
         const score = data.test
+        console.log('TableScore', score);
         return (
             <table className="text-left">
                 <thead>
@@ -1261,7 +1284,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                                 color="blue-gray"
                                 className="font-normal"
                             >
-                                {score.class_id ? ('Lóp ' + score.class_id.toUpperCase()) : ''}
+                                {score.class_id?.toUpperCase() || 'Test'}
                             </Typography>
                         </td>
                         <td className='p-4'>
@@ -1271,15 +1294,6 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                                 className="font-normal"
                             >
                                 {score.grammar}
-                            </Typography>
-                        </td>
-                        <td className='p-4'>
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-normal"
-                            >
-                                {score.listening}
                             </Typography>
                         </td>
                         <td className='p-4'>

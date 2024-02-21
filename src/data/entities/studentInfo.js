@@ -44,10 +44,10 @@ export default class StudentInfo {
             this.score_table[classId][key] = score
             this.score_table[classId]['class_id'] = 'test'
             this.score_table[classId]['total'] = formatNum((
-                Number(this.score_table[classId][type].listening) +
-                Number(this.score_table[classId][type].reading) +
-                Number(this.score_table[classId][type].speaking) +
-                Number(this.score_table[classId][type].writing)
+                Number(this.score_table[classId].listening) +
+                Number(this.score_table[classId].reading) +
+                Number(this.score_table[classId].speaking) +
+                Number(this.score_table[classId].writing)
             ) / 4, 1, 'overall')
             this.score_table[classId]['update_time'] = moment().format('DDMMYYYYHHmmss')
         }
@@ -66,7 +66,6 @@ export default class StudentInfo {
                     }
                 }
             }
-            console.log('score_table', this.score_table);
             this.score_table[classId][type][key] = score
             this.score_table[classId][type]['class_id'] = classId
             this.score_table[classId][type]['total'] = formatNum((
