@@ -9,6 +9,7 @@ const formatNum = (num = '', decimals = 0, formatType = 'number') => {
     }
 
     if (formatType === 'overall') {
+        if (Number(num) >= 10) return Number(10).toFixed(1)
         const score = Number(String(num).slice(0, 1));
         const decimalPart = Number(String(num).slice(1, -1));
         if (decimalPart >= 0.25 && decimalPart < 0.75) {

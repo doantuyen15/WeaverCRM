@@ -49,10 +49,29 @@ export function useFirebase(service: string, params: any) {
         case 'delete_user': return deleteUser(params)
         case 'update_user': return updateUser(params)
         case 'update_attendance': return updateAttendance(params)
+        case 'update_student_score': return updateStudentScore(params)
         case 'update_approval': return updateApproval(params)
         default:
             break;
     }
+}
+
+const updateStudentScore = (studentList: any[]) => {
+    return new useRequest((resolve: any, reject: any) => {
+        const batch = writeBatch(db);
+        console.log('student.student_score', studentList);
+        
+        studentList.forEach(student => {
+            const studentRef = doc(db, 'student', student.id)
+
+            batch.update(studentRef, {
+                score_table: student.score_table
+            })
+        })
+        batch.commit()
+            .then(resolve)
+            .catch(reject)
+    })
 }
 
 const updateStudent = (list: any[]) => {

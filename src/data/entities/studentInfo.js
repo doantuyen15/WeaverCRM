@@ -23,6 +23,7 @@ export default class StudentInfo {
                     reading: '',
                     writing: '',
                     total: '',
+                    grammar: '',
                     update_time: ''
                 }
             }
@@ -42,27 +43,19 @@ export default class StudentInfo {
         if (classId === 'test') {
             this.score_table[classId][key] = score
             this.score_table[classId]['class_id'] = 'test'
-            this.score_table[classId]['total'] = String(Math.round(((
-                (
-                    (Number(this.score_table[classId].listening) + Number(this.score_table[classId].reading)) / 2 +
-                    (Number(this.score_table[classId].speaking) + Number(this.score_table[classId].writing)) / 2
-                ) / 2
-            ) * 2) / 2))
+            this.score_table[classId]['total'] = formatNum((
+                Number(this.score_table[classId][type].listening) +
+                Number(this.score_table[classId][type].reading) +
+                Number(this.score_table[classId][type].speaking) +
+                Number(this.score_table[classId][type].writing)
+            ) / 4, 1, 'overall')
             this.score_table[classId]['update_time'] = moment().format('DDMMYYYYHHmmss')
         }
         else {
-            if (!this.score_table[classId]) {
+            if (!(this.score_table[classId] || {})[type]) {
                 this.score_table[classId] = {
-                    mid: {
-                        class_id: classId,
-                        listening: '',
-                        speaking: '',
-                        reading: '',
-                        writing: '',
-                        total: '',
-                        update_time: ''
-                    },
-                    final: {
+                    ...this.score_table[classId],
+                    [type]: {
                         class_id: classId,
                         listening: '',
                         speaking: '',
@@ -73,7 +66,7 @@ export default class StudentInfo {
                     }
                 }
             }
-
+            console.log('score_table', this.score_table);
             this.score_table[classId][type][key] = score
             this.score_table[classId][type]['class_id'] = classId
             this.score_table[classId][type]['total'] = formatNum((

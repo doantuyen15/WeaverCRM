@@ -17,7 +17,7 @@ import { useController } from "../../context";
 import useStorage from "../../utils/localStorageHook";
 import StaffInfo from "../../data/entities/staffInfo";
 import { orderBy } from 'lodash'
-import { ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
+import { ArrowsPointingInIcon, ArrowsPointingOutIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 import DefaultSkeleton, { TableSkeleton } from "../skeleton";
 import { doc, getDoc } from "firebase/firestore";
 import { StudentRow } from "../../pages/dashboard";
@@ -45,6 +45,31 @@ const TABLE_HEAD = [
     "Người giới thiệu",
     "Advisor"
 ];
+
+const semester = {
+    LIFE: [
+        'Kỳ I',
+        'Kỳ II',
+        'Kỳ III',
+        'Cuối Kỳ'
+    ],
+    NORMAL: [
+        'Giữa kỳ',
+        'Cuối Kỳ'   
+    ],
+    VALUE: {
+        LIFE: [
+            'mid',
+            'mid_ii',
+            'mid_iii',
+            'final'
+        ],
+        NORMAL: [
+            'mid',
+            'final'
+        ],
+    }
+}
 
 const HEADER_SCORE = [
     "Listening",
@@ -99,6 +124,7 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
     const [openInputScore, setOpenInputScore] = useState(false)
     const [mode, setMode] = useState('normal')
     const [calendar, setCalendar] = useState([])
+    const [zoom, setZoom] = useState(false)
 
     useEffect(() => {
         getStudent()
@@ -111,21 +137,6 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
                 setStudentList(res)
                 setLoading(false)
             })
-    }
-
-    const updateStaffList = (key, value) => {
-        if (key === 'roles' || key === 'roles_id') {
-            if (newStaff[key]?.includes(value)) {
-                const newRoles = newStaff[key]?.filter(item => item !== value)
-                newStaff.updateInfo(key, newRoles)
-            } else {
-                newStaff.updateInfo(key, [...newStaff[key], value])
-            }
-        } else {
-            newStaff.updateInfo(key, value)
-            setNewStaff(newStaff)
-        }
-        forceUpdate()
     }
 
     const handleAttendance = () => {
@@ -167,7 +178,6 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
     const handleAddStudent = (ok, studentList) => {
         if (!ok) {
             changeMode('normal')
-            setOpenAddStudent(false)
         } else {
             setLoading(true)
             useFirebase('add_student_classes', studentList)
@@ -180,25 +190,55 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
         }
     }
 
+    const handleUpdateScore = () => {
+        setLoading(true)
+        useFirebase('update_student_score', studentList)
+            .then(() => {
+                setLoading(false)
+                // changeMode('normal')
+                toast.success("Success!")
+            })
+            .catch((error) => toast.error(error))
+    }
+
+    const handleConfirm = () => {
+        mode === 'attendance' ? handleUpdateAttendance()
+        : mode === 'score' ? handleUpdateScore()
+        : mode === 'normal' && changeMode('attendance')
+        // : mode === 'addStudent' ? handleAddStudent(ok, studentList)
+    }
+
     return (
         <div>
             <Dialog
-                size="lg"
+                size={zoom ? 'xl' : 'lg'}
                 open={open}
                 handler={() => {
                     // handleCallback(false)
                     if (mode === 'normal') handleOpen()
                 }}
-                className={"bg-transparent shadow-none min-w-[80vw]"}
+                className={"bg-transparent shadow-none"}
             >
-                <Card className="mx-auto w-full">
-                    <CardHeader floated={false} shadow={false} className="rounded-none pb-6 relative">
+                <Card className="mx-auto h-full w-full">
+                    <CardHeader floated={false} shadow={false} className="rounded-none pb-6">
                         <div className="flex justify-center">
                             <Typography variant="h4" color="black">
                                 Danh sách lớp {data.id}
                             </Typography>
                         </div>
                         <div className="absolute right-0 top-0">
+                       
+                            <IconButton
+                                color="blue-gray"
+                                size="sm"
+                                variant="text"
+                                onClick={() => setZoom(!zoom)}
+                            >
+                                {zoom ?
+                                    <ArrowsPointingInIcon className="h-5 w-5" /> :
+                                    <ArrowsPointingOutIcon className="h-5 w-5" />
+                                }
+                            </IconButton>
                             <IconButton
                                 color="blue-gray"
                                 size="sm"
@@ -251,27 +291,34 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
                                     Trở lại
                                 </Button>
                             ) : null}
-                            <Button variant="text" size="sm"
-                                onClick={() => {mode === 'addStudent' ? handleUpdateAttendance() : changeMode('addStudent')}}
-                            >
-                                {mode !== 'addStudent' ? 'Thêm học sinh' : 'Xác nhận thêm học sinh'}
-                            </Button>
-                            <Button
-                                disabled={(newStaff.department_id === '' || newStaff.roles_id?.length === 0)}
-                                variant="text"
-                                size="sm"
-                                onClick={() => {
-                                    mode === 'score' ? () => {} : changeMode('score')
-                                }}
-                            >
-                                Nhập điểm
-                            </Button>
+                            {mode === 'normal' && (
+                                <>
+                                    <Button variant="text" size="sm"
+                                        onClick={() => { mode === 'addStudent' ? handleUpdateAttendance() : changeMode('addStudent') }}
+                                    >
+                                        {mode !== 'addStudent' ? 'Thêm học sinh' : 'Xác nhận thêm học sinh'}
+                                    </Button>
+                                    <Button
+                                        variant="text"
+                                        size="sm"
+                                        onClick={() => {
+                                            mode === 'score' ? () => { } : changeMode('score')
+                                        }}
+                                    >
+                                        {mode !== 'score' ? 'Nhập điểm' : 'Xác nhận'}
+                                    </Button>
+                                </>
+                            )}
+
                             <Button variant="gradient" size="sm"
-                                onClick={() => {
-                                    mode === 'attendance' ? handleUpdateAttendance() : changeMode('attendance')
-                                }}
+                                loading={loading}
+                                onClick={() => handleConfirm()}
                             >
-                                {mode !== 'attendance' ? 'Điểm danh' : 'Xác nhận điểm danh'}
+                                {mode === 'attendance' ? 'Xác nhận điểm danh'
+                                    : mode === 'score' ? 'Xác nhận nhập điểm'
+                                        : mode === 'addStudent' ? 'Xác nhận thêm học sinh'
+                                            : 'Điểm danh'
+                                }
                             </Button>
                         </div>
                     </CardFooter>
@@ -470,7 +517,8 @@ const ScoreTable = ({ studentList, setStudentList, classId }) => {
     const [isAsc, setIsAsc] = useState(true)
     const tableRef = useRef(studentList)
     const [attendanceList, setAttendanceList] = useState([{}])
-
+    const [, updateState] = React.useState();
+    const forceUpdate = React.useCallback(() => updateState({}), []);
     const handleSort = (indexCol) => {
         let sorted
         sorted = orderBy(tableRef.current, [Header[indexCol]], [isAsc ? 'asc' : 'desc'])
@@ -482,7 +530,7 @@ const ScoreTable = ({ studentList, setStudentList, classId }) => {
     const handleUpdateScore = (index, type, key, score) => {
         studentList[index].updateScore({classId, type, key, score})
         setStudentList(studentList)
-        console.log('handleUpdateScore', studentList, classId);
+        console.log('handleUpdateScore', studentList, type);
     }
 
     return (
@@ -490,108 +538,73 @@ const ScoreTable = ({ studentList, setStudentList, classId }) => {
             <thead>
                 <tr>
                     <th className=" min-w-max z-10 sticky top-0 border-t border-r border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors" />
-                    <th
-                        colSpan={HEADER_SCORE.length}
-                        className="z-10 max-w-min sticky top-0 border-y border-r border-blue-100 bg-orange-500 p-4 transition-colors hover:bg-blue-200"
-                    >
-                        <Typography
-                            variant="h6"
-                            color="blue-gray"
-                            className="text-center font-bold leading-none"
+                    {semester[classId.includes('LIFE') ? 'LIFE' : 'NORMAL'].map((sem) => (
+                        <th
+                            colSpan={5}
+                            className="z-10 sticky top-0 border-y border-r border-blue-100 bg-orange-500 p-4 transition-colors hover:bg-blue-200"
                         >
-                            {'Giữa kỳ'}
-                        </Typography>
-                    </th>
-                    <th
-                        colSpan={HEADER_SCORE.length}
-                        className="z-10 sticky top-0 border-y border-blue-100 bg-orange-500 p-4 transition-colors hover:bg-blue-200"
-                    >
-                        <Typography
-                            variant="h6"
-                            className="text-center font-bold leading-none"
-                            color="blue-gray"
-                        >
-                            {"Cuối kỳ"}
-                        </Typography>
-                    </th>
+                            <Typography
+                                type="number"
+                                variant="h6"
+                                className="text-center font-bold leading-none"
+                                color="blue-gray"
+                            >
+                                {sem}
+                            </Typography>
+                        </th>
+                    ))}
                 </tr>
                 <tr>
                     <th className=" min-w-max z-10 sticky top-0 border-r border-b bg-blue-gray-50 border-blue-gray-100 transition-colors" />
-                    {HEADER_SCORE.map((head, index) => (
-                        <th
-                            // onClick={() => handleSort(index)}
-                            key={head}
-                            className="z-10 sticky top-0 border-y border-r border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"
-                        >
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className={"text-center gap-2 leading-none opacity-70" + ((HEADER_SCORE.length - 1) === index ? ' font-bold' : ' font-normal')}
+                    {semester[classId.includes('LIFE') ? 'LIFE' : 'NORMAL'].map(() => (
+                        HEADER_SCORE.map((head, index) => (
+                            <th
+                                // onClick={() => handleSort(index)}
+                                key={head}
+                                className="z-10 sticky top-0 border-y border-r border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"
                             >
-                                {head}
-                            </Typography>
-                        </th>
-                    ))}
-                    {HEADER_SCORE.map((head, index) => (
-                        <th
-                            // onClick={() => handleSort(index)}
-                            key={head}
-                            className="z-10 sticky top-0 border-y border-r border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-200"
-                        >
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className={"text-center gap-2 leading-none opacity-70" + ((HEADER_SCORE.length - 1) === index ? ' font-bold' : ' font-normal')}
-                            >
-                                {head}
-                            </Typography>
-                        </th>
-                    ))}
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className={"text-center gap-2 leading-none opacity-70" + ((HEADER_SCORE.length - 1) === index ? ' font-bold' : ' font-normal')}
+                                >
+                                    {head}
+                                </Typography>
+                            </th>
+                        )))
+                    )}
                 </tr>
             </thead>
             <tbody>
                 {studentList?.map(
                     (student, studentIndex) => {
-                        const midScore = (student.score_table?.[classId] || {}).mid || {};
-                        const finalScore = (student.score_table?.[classId] || {}).final || {};
                         const isLast = studentIndex === studentList.length - 1;
                         const classes = isLast
-                            ? "px-4 text-center border-r border-blue-gray-50 hover:bg-blue-gray-50"
+                            ? "px-4 text-center border-r border-b border-blue-gray-50 hover:bg-blue-gray-50"
                             : "px-4 text-center border-r border-b border-blue-gray-50 hover:bg-blue-gray-50";
                         return (
                             <tr>
                                 <td className={classes + ' min-w-max py-2 bg-blue-50 sticky left-0 border-r z-20'}>{student.full_name}</td>
-                                {SCORE_FIELD.map((field, index) => (
-                                    <td
-                                        // onClick={() => handleSort(index)}
-                                        key={field}
-                                        className={classes}
-                                    >
-                                        <Typography
-                                            contentEditable={field !== 'total'}
-                                            onInput={(e) => handleUpdateScore(studentIndex, 'mid', field, e.currentTarget.innerText)}
-                                            className={"focus:outline-none" + ((HEADER_SCORE.length - 1) === index && ' font-bold')}
-                                            color="blue-gray"
-                                        >
-                                            {midScore[field]}
-                                        </Typography>
-                                    </td>
-                                ))}
-                                {SCORE_FIELD.map((field, index) => (
-                                    <td
-                                        // onClick={() => handleSort(index)}
-                                        key={field}
-                                        className={classes}
-                                    >
-                                        <Typography
-                                            contentEditable={field !== 'total'}
-                                            onInput={(e) => handleUpdateScore(studentIndex, 'final', field, e.currentTarget.innerText)}
-                                            className={"focus:outline-none" + ((HEADER_SCORE.length - 1) === index && ' font-bold')}
-                                            color="blue-gray"
-                                        >
-                                            {finalScore[field]}
-                                        </Typography>
-                                    </td>
+                                {semester.VALUE[classId.includes('LIFE') ? 'LIFE' : 'NORMAL'].map((sem, semIndex) => (
+                                    SCORE_FIELD.map((field, index) => {
+                                        const score = (student.score_table?.[classId] || {})[sem] || {};
+                                        return (
+                                            <td
+                                                onBlur={() => forceUpdate()}
+                                                key={field}
+                                                className={classes}
+                                            >
+                                                <Typography
+                                                    contentEditable={field !== 'total'}
+                                                    onInput={(e) => handleUpdateScore(studentIndex, sem, field, e.currentTarget.innerText)}
+                                                    className={"focus:outline-none" + ((HEADER_SCORE.length - 1) === index && ' font-bold')}
+                                                    color="blue-gray"
+                                                >
+                                                    {score[field]}
+                                                </Typography>
+                                            </td>
+                                        )
+                                    })
                                 ))}
                                 {/* <th
                                         className="z-10 sticky top-0 cursor-pointer border-y border-blue-100 bg-blue-50 p-4 transition-colors hover:bg-blue-gray-200"

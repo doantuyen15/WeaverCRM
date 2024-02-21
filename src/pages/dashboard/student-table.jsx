@@ -100,11 +100,13 @@ const Header = [
     'reading',
     'speaking',
     'listening',
+    'grammar',
     'total'
 ]
 
 const HeaderScore = [
     '',
+    'Grammar',
     'Listening',
     'Speaking',
     'Reading',
@@ -1138,6 +1140,26 @@ export default function StudentTable() {
                                                                     }}
                                                                 />
                                                             </div>
+                                                            <div className="flex items-center">
+                                                                <Typography color="gray" className="mr-2 font-normal">
+                                                                    Grammar Vocabulary
+                                                                </Typography>
+                                                                <Input
+                                                                    maxLength={5}
+                                                                    type="tel"
+                                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900 rounded-none"
+                                                                    containerProps={{
+                                                                        className: "min-w-[72px] max-w-[72px]"
+                                                                    }}
+                                                                    labelProps={{
+                                                                        className: "before:content-none after:content-none",
+                                                                    }}
+                                                                    value={item[Header[17]]}
+                                                                    onChange={(e) => {
+                                                                        updateObjectNew(index, Header[17], e.target.value)
+                                                                    }}
+                                                                />
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -1210,7 +1232,9 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
     // };
 
     const TableScore = ({data = {}}) => {
-        const tableScore = Object.values(data)
+        const term = Object.keys(data) || []
+        const tableScore = Object.values(data) || []
+        console.log('tableScore', tableScore);
         return (
             <table className="text-left">
                 <thead>
@@ -1232,15 +1256,24 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                     </tr>
                 </thead>
                 <tbody>
-                    {tableScore.map((item, index) => (
-                        <tr key={'scorebody' + item.id}>
+                    {term.map((item, index) => (
+                        <tr key={'scorebody' + index}>
                             <td className='p-4'>
                                 <Typography
                                     variant="small"
                                     color="blue-gray"
                                     className="font-normal"
                                 >
-                                    {item.class_id ? ('Lóp ' + item.class_id.toUpperCase()) : ''}
+                                    {data[item].class_id === 'test' ? 'Test' : !item.class_id ? 'No Class' : ('Lóp ' + item.class_id.toUpperCase())}
+                                </Typography>
+                            </td>
+                            <td className='p-4'>
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="font-medium"
+                                >
+                                    {item[index].grammar}
                                 </Typography>
                             </td>
                             <td className='p-4'>
@@ -1249,7 +1282,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                                     color="blue-gray"
                                     className="font-normal"
                                 >
-                                    {item.listening}
+                                    {item[index].listening}
                                 </Typography>
                             </td>
                             <td className='p-4'>
