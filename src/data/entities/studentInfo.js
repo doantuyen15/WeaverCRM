@@ -18,6 +18,7 @@ export default class StudentInfo {
             this.score_table = data?.score_table || {
                 test: {
                     class_id: 'test',
+                    gramar: '',
                     listening: '',
                     speaking: '',
                     reading: '',

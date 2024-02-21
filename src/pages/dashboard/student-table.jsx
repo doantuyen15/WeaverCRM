@@ -1210,7 +1210,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
     // };
 
     const TableScore = ({data = {}}) => {
-        const tableScore = Object.values(data)
+        const score = data.test
         return (
             <table className="text-left">
                 <thead>
@@ -1232,73 +1232,80 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                     </tr>
                 </thead>
                 <tbody>
-                    {tableScore.map((item, index) => (
-                        <tr key={'scorebody' + item.id}>
-                            <td className='p-4'>
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="font-normal"
-                                >
-                                    {item.class_id ? ('Lóp ' + item.class_id.toUpperCase()) : ''}
-                                </Typography>
-                            </td>
-                            <td className='p-4'>
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="font-normal"
-                                >
-                                    {item.listening}
-                                </Typography>
-                            </td>
-                            <td className='p-4'>
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="font-normal"
-                                >
-                                    {item.speaking}
-                                </Typography>
-                            </td>
-                            <td className='p-4'>
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="font-medium"
-                                >
-                                    {item.reading}
-                                </Typography>
-                            </td>
-                            <td className='p-4'>
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="font-medium"
-                                >
-                                    {item.writing}
-                                </Typography>
-                            </td>
-                            <td className='p-4'>
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="font-medium"
-                                >
-                                    {item.total}
-                                </Typography>
-                            </td>
-                            <td className='p-4'>
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="font-medium"
-                                >
-                                    {formatDate(item.update_time, 'DD/MM/YYYY')}
-                                </Typography>
-                            </td>
-                        </tr>
-                    ))}
+                    <tr key={'scorebody'}>
+                        <td className='p-4'>
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-normal"
+                            >
+                                {score.class_id ? ('Lóp ' + score.class_id.toUpperCase()) : ''}
+                            </Typography>
+                        </td>
+                        <td className='p-4'>
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-normal"
+                            >
+                                {score.listening}
+                            </Typography>
+                        </td>
+                        <td className='p-4'>
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-normal"
+                            >
+                                {score.listening}
+                            </Typography>
+                        </td>
+                        <td className='p-4'>
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-normal"
+                            >
+                                {score.speaking}
+                            </Typography>
+                        </td>
+                        <td className='p-4'>
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-medium"
+                            >
+                                {score.reading}
+                            </Typography>
+                        </td>
+                        <td className='p-4'>
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-medium"
+                            >
+                                {score.writing}
+                            </Typography>
+                        </td>
+                        <td className='p-4'>
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-medium"
+                            >
+                                {score.total}
+                            </Typography>
+                        </td>
+                        <td className='p-4'>
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-medium"
+                            >
+                                {formatDate(score.update_time, 'DD/MM/YYYY')}
+                            </Typography>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         )
