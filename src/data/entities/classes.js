@@ -25,7 +25,18 @@ export default class ClassInfo {
         this.sub_teacher_id = data?.sub_teacher_id || '',
         this.ta_teacher_id = data?.ta_teacher_id || '',
         this.cs_staff_id = data?.cs_staff_id || '',
-        this.attendance = data?.attendance || []
+        this.attendance = data?.attendance || [],
+            this.lesson_diary = data?.lesson_diary || [{
+                lesson_id: '',
+                day: '',
+                teacher: '',
+                unit: '',
+                unit_lesson: '',
+                content: '',
+                homeword: '',
+                performance: '',
+                checked: false,
+            }]
     }
 
     getStudentList() {
@@ -60,5 +71,24 @@ export default class ClassInfo {
             if (key === 'program' || key === 'level') 
                 this.id = this.program.toUpperCase() + '_' + this.level.toUpperCase() + '_' + formatDate(this.start_date, 'DDMMYY')
         }
+    }
+
+    updateDiary(index, key, value) {
+        this.lesson_diary[index][key] = value
+        console.log('info', this.lesson_diary[index]);
+    }
+
+    addDiary() {
+        this.lesson_diary.push({
+            lesson_id: '',
+            day: '',
+            teacher: '',
+            unit: '',
+            unit_lesson: '',
+            content: '',
+            homeword: '',
+            performance: '',
+            checked: false,
+        })
     }
 }

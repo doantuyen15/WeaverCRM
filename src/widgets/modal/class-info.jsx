@@ -12,6 +12,7 @@ import {
     Select,
     Option,
     IconButton,
+    Textarea,
 } from "@material-tailwind/react";
 import { useController } from "../../context";
 import useStorage from "../../utils/localStorageHook";
@@ -108,6 +109,20 @@ const Header = [
     'listening',
     'test_input_score'
 ]
+
+const HEADER_DIARY = [
+    'SESSION',
+    'DATE',
+    'TEACHER',
+    'UNIT',
+    'Unit lesson',
+    'CONTENT',
+    'HOMEWORK',
+    'DAILY PERFOMANCE',
+    `ADMIN'S RESPONSE`,
+
+]
+
 const currentMonth = moment().format('M')
 
 export function ModalClassInfo({ open, data, handleOpen, classList }) {
@@ -117,14 +132,13 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
     const [newStaff, setNewStaff] = useState({})
     const [tuition, setTuition] = useState(useStorage('get', 'tuition') || [])
     const [studentList, setStudentList] = useState([])
-    const [, updateState] = React.useState();
-    const forceUpdate = React.useCallback(() => updateState({}), []);
     const [openAttendance, setOpenAttendance] = useState(false)
     const [openAddStudent, setOpenAddStudent] = useState(false)
     const [openInputScore, setOpenInputScore] = useState(false)
     const [mode, setMode] = useState('normal')
     const [calendar, setCalendar] = useState([])
     const [zoom, setZoom] = useState(false)
+    const [openDiary, setOpenDiary] = useState(false)
 
     useEffect(() => {
         getStudent()
@@ -190,6 +204,22 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
         }
     }
 
+    const handleDiaryCallback = (ok, studentList) => {
+        if (!ok) {
+            setOpenDiary(false)
+        }
+        // } else {
+        //     setLoading(true)
+        //     useFirebase('add_student_classes', studentList)
+        //         .then(() => {
+        //             setLoading(false)
+        //             changeMode('normal')
+        //             toast.success("Add Success!")
+        //         })
+        //         .catch((error) => toast.error(error))
+        // }
+    }
+
     const handleUpdateScore = () => {
         setLoading(true)
         useFirebase('update_student_score', studentList)
@@ -215,7 +245,7 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
                 open={open}
                 handler={() => {
                     // handleCallback(false)
-                    if (mode === 'normal') handleOpen()
+                    if (mode === 'normal' && !openDiary) handleOpen()
                 }}
                 className={"bg-transparent shadow-none"}
             >
@@ -227,7 +257,6 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
                             </Typography>
                         </div>
                         <div className="absolute right-0 top-0">
-                       
                             <IconButton
                                 color="blue-gray"
                                 size="sm"
@@ -282,8 +311,13 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
                             <TableStudent setStudentList={setStudentList} studentList={studentList} />
                         )}
                     </CardBody>
-                    <CardFooter className="pt-0 flex justify-end">
-                        <div className="flex pt-4 gap-2">
+                    <CardFooter className="pt-4 flex justify-between">
+                        <Button variant="gradient" color="deep-orange" size="sm"
+                            onClick={() => setOpenDiary(prev => !prev)}
+                        >
+                            LESSON DIARY
+                        </Button>
+                        <div className="flex gap-2">
                             {mode !== 'normal' ? (
                                 <Button variant="text" size="sm"
                                     onClick={() => changeMode('normal')}
@@ -325,9 +359,364 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
                 </Card>
             </Dialog>
             <AddStudentToClass loading={loading} classList={classList} open={openAddStudent} handleCallback={handleAddStudent}/>
+            <LessonDiary open={openDiary} handleCallback={handleDiaryCallback} data={data}/>
             {/* <Attendance open={openAttendance} handleCallback={handleAttendance}/> */}
         </div>
     );
+}
+
+const LessonDiary = ({ open, handleCallback, data = {} }) => {
+    const makeData = [
+        {
+            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
+            content: `• identify topic sentences
+            • identify main and supporting ideas 
+            • match headings with paragraphs
+            • use will and going to.
+            `,
+            homeword: 'Exam skills',
+            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
+            checked: false
+        },
+        {
+            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
+            content: `
+            • identify topic sentences
+            • identify main and supporting ideas 
+            • match headings with paragraphs
+            • use will and going to.
+            `,
+            homeword: 'Exam skills',
+            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
+            checked: false
+        },
+        {
+            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
+            content: `
+            • identify topic sentences
+            • identify main and supporting ideas 
+            • match headings with paragraphs
+            • use will and going to.
+            `,
+            homeword: 'Exam skills',
+            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
+            checked: false
+        },
+        {
+            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
+            content: `
+            • identify topic sentences
+            • identify main and supporting ideas 
+            • match headings with paragraphs
+            • use will and going to.
+            `,
+            homeword: 'Exam skills',
+            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
+            checked: false
+        },
+        {
+            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
+            content: `
+            • identify topic sentences
+            • identify main and supporting ideas 
+            • match headings with paragraphs
+            • use will and going to.
+            `,
+            homeword: 'Exam skills',
+            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
+            checked: false
+        },
+        {
+            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
+            content: `
+            • identify topic sentences
+            • identify main and supporting ideas 
+            • match headings with paragraphs
+            • use will and going to.
+            `,
+            homeword: 'Exam skills',
+            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
+            checked: false
+        },
+        {
+            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
+            content: `
+            • identify topic sentences
+            • identify main and supporting ideas 
+            • match headings with paragraphs
+            • use will and going to.
+            `,
+            homeword: 'Exam skills',
+            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
+            checked: false
+        }
+    ]
+    const [, updateState] = React.useState();
+    const forceUpdate = React.useCallback(() => updateState({}), []);
+
+    const updateDiary = (index, key, value) => {
+        data.updateDiary(index, key, value)
+        console.log('index, key, value', index, key, value);
+        // forceUpdate()
+    }
+    // console.log('lesson_diary', data.lesson_diary);
+
+    const addRowDiary = () => {
+        data.addDiary()
+        forceUpdate()
+    }
+
+    function CustomHTMLElement(props) {
+        return <div dangerouslySetInnerHTML={{ __html: props.customHtml }} />
+    }
+
+    return (
+        <Dialog
+            size={'xl'}
+            // size={zoom ? 'xl' : 'lg'}
+            open={open}
+            handler={() => {
+                handleCallback(false)
+                // if (mode === 'normal' || !openDiary) handleOpen()
+            }}
+            className={"bg-transparent shadow-none"}
+        >
+            <Card className="mx-auto h-full w-full">
+                <CardHeader floated={false} shadow={false} className="rounded-none">
+                    <div className="flex flex-col text-center pb-6">
+                        <Typography variant="h4" color="black">
+                            LESSON DIARY
+                        </Typography>
+                        <Typography variant="h4" color="black">
+                            {data.id || '---'}
+                        </Typography>
+                    </div>
+                    <div className="flex flex-row gap-2 justify-center">
+                        <div className="flex flex-row items-center gap-1">
+                            <Typography
+                                variant="small"
+                                color="orange"
+                            >
+                                {'CLASS CODE'}{': '}
+                            </Typography>
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                            >
+                                {data.textbooks}
+                            </Typography>
+                        </div>
+                        <div className="flex flex-row items-center gap-1">
+                            <Typography
+                                variant="small"
+                                color="orange"
+                            >
+                                {'TEXTBOOKS'}{': '}
+                            </Typography>
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                            >
+                                {data.textbooks}
+                            </Typography>
+                        </div>
+                    </div>
+                    <div className="absolute right-0 top-0">
+                        <IconButton
+                            color="blue-gray"
+                            size="sm"
+                            variant="text"
+                            onClick={() => handleCallback(false)}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                className="h-5 w-5"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </IconButton>
+                    </div>
+                </CardHeader>
+                <CardBody className="flex flex-col p-0 px-0 overflow-auto max-h-[70vh]">
+                    <table className="w-full min-w-max table-auto text-left">
+                        <thead>
+                            <tr>
+                                {HEADER_DIARY.map((head, index) => (
+                                    <th
+                                        // onClick={() => handleSort(index)}
+                                        key={index}
+                                        style={{ border: '2px solid black' }}
+                                        className="bg-orange-500 z-10 sticky top-0 cursor-pointer p-4 transition-colors"
+                                    >
+                                        <Typography
+                                            variant="small"
+                                            color="white"
+                                            className={"text-center gap-2 leading-none font-bold"}
+                                        >
+                                            {head}
+                                        </Typography>
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {makeData?.map(
+                                (diary, index) => {
+                                    // const isLast = index === makeData.length - 1;
+                                    const classes = 'py-2 px-4 border text-center'
+                                    const style={ border: '2px solid black' }
+                                    return (
+                                        <tr>
+                                            <td className={classes} style={style}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {diary.lesson_id}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes} style={style}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {diary.day}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes} style={style}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="orange"
+                                                    className="font-normal"
+                                                >
+                                                    {diary.teacher}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes} style={style}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {diary.unit}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes} style={style}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {diary.unit_lesson}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes} style={style}>
+                                                <Typography
+                                                    contentEditable={true}
+                                                    onBlur={() => forceUpdate()}
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal min-w-[15vw] whitespace-pre-wrap"
+                                                    onInput={(e) => {
+                                                        updateDiary(index, 'content', e.currentTarget.innerText)
+                                                    }}
+                                                // onInput={}
+                                                >
+                                                    {diary.content}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes} style={style}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {diary.homeword}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes} style={style}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {diary.performance}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes} style={style}>
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal"
+                                                >
+                                                    {diary.checked ? 'checked' : ''}
+                                                </Typography>
+                                            </td>
+                                        </tr>
+                                    )
+                                }
+                            )}
+                        </tbody>
+                    </table>
+                </CardBody>
+                <CardFooter className="pt-4 flex justify-between">
+                    <Button variant="gradient" color="deep-orange" size="sm"
+                        onClick={() => addRowDiary()}
+                    >
+                        Add row
+                    </Button>
+                    {/* <div className="flex gap-2">
+                        {mode !== 'normal' ? (
+                            <Button variant="text" size="sm"
+                                onClick={() => changeMode('normal')}
+                            >
+                                Trở lại
+                            </Button>
+                        ) : null}
+                        {mode === 'normal' && (
+                            <>
+                                <Button variant="text" size="sm"
+                                    onClick={() => { mode === 'addStudent' ? handleUpdateAttendance() : changeMode('addStudent') }}
+                                >
+                                    {mode !== 'addStudent' ? 'Thêm học sinh' : 'Xác nhận thêm học sinh'}
+                                </Button>
+                                <Button
+                                    variant="text"
+                                    size="sm"
+                                    onClick={() => {
+                                        mode === 'score' ? () => { } : changeMode('score')
+                                    }}
+                                >
+                                    {mode !== 'score' ? 'Nhập điểm' : 'Xác nhận'}
+                                </Button>
+                            </>
+                        )}
+
+                        <Button variant="gradient" size="sm"
+                            loading={loading}
+                            onClick={() => handleConfirm()}
+                        >
+                            {mode === 'attendance' ? 'Xác nhận điểm danh'
+                                : mode === 'score' ? 'Xác nhận nhập điểm'
+                                    : mode === 'addStudent' ? 'Xác nhận thêm học sinh'
+                                        : 'Điểm danh'
+                            }
+                        </Button>
+                    </div> */}
+                </CardFooter>
+            </Card>
+        </Dialog>
+    )
 }
 
 const TableStudent = ({ studentList, setStudentList }) => {
