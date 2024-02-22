@@ -31,6 +31,7 @@ export default class StudentInfo {
             this.note = data?.note || '',
             this.has_score = data?.has_score || false,
             this.full_name = data?.full_name || ''
+            this.class_id = data?.class_id || ''
     }
     updateInfo(key, value) {
         if (this[key] !== undefined) {

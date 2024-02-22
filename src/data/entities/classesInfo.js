@@ -25,8 +25,9 @@ export default class ClassInfo {
         this.sub_teacher_id = data?.sub_teacher_id || '',
         this.ta_teacher_id = data?.ta_teacher_id || '',
         this.cs_staff_id = data?.cs_staff_id || '',
-        this.class_code = '',
-        this.textbooks = '',
+        this.class_code = data?.class_code || '',
+        this.textbooks = data?.textbooks ||'',
+        this.tuition = data?.tuition || []
         // this.attendance = data?.attendance || [],
         // this.lesson_diary = data?.lesson_diary || [{
         //         lesson_id: 1,
@@ -51,12 +52,14 @@ export default class ClassInfo {
                 lesson_id: 1,
                 day: '',
                 teacher: '',
+                teacher_id: '',
                 unit: '',
                 unit_lesson: '',
                 content: '',
                 homework: '',
                 performance: '',
                 checked: false,
+                admin_note: ''
             },
             attendance: {}
         }]
@@ -97,8 +100,11 @@ export default class ClassInfo {
     }
 
     updateDiary(index, key, value) {
-        this.timetable[index].lesson_diary[key] = value
-        console.log('info', this.timetable[index].lesson_diary[key]);
+        if (key === 'class_code' || key === 'textbooks') {
+            this.timetable[key] = value
+        } else {
+            this.timetable[index].lesson_diary[key] = value
+        }
     }
 
     addDiary() {
@@ -118,6 +124,7 @@ export default class ClassInfo {
                 homework: '',
                 performance: '',
                 checked: false,
+                admin_note: ''
             },
             attendance: {}
         })

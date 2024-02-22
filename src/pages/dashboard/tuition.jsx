@@ -23,12 +23,13 @@ import { useEffect, useRef, useState } from "react";
 import { orderBy } from 'lodash';
 import { useFetch, useFirebase } from "../../utils/api/request";
 import { useController } from "../../context";
-import { ArrowPathIcon, PlusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { ArrowPathIcon, ChevronDownIcon, ChevronUpIcon, PlusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
 import { PaymentPopup } from "../../widgets/modal/payment";
 import useStorage from "../../utils/localStorageHook";
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import formatNum from "../../utils/formatNumber/formatNum";
 import formatDate from "../../utils/formatNumber/formatDate";
+import { glb_sv } from "../../service";
 
 const Header = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền', 'Ghi chú']
 const tempData = [
@@ -59,6 +60,7 @@ export function Tuition() {
   const tableRef = useRef([])
   const [classList, setClassList] = useState([])
   const [openList, setOpenList] = useState([])
+  const [openSubList, setOpenSubList] = useState([])
 
   useEffect(() => {
     const studentList = useStorage('get', 'studentInfo', [])
@@ -112,11 +114,19 @@ export function Tuition() {
     setOpenPayment(false)
   }
 
-  const handleOpenTable = (index) => {
+  const handleOpenList = (index) => {
     if (openList.includes(index)) setOpenList([...openList.filter(i => i !== index)])
     else {
       openList.push(index)
       setOpenList([...openList])
+    }
+  }
+
+  const handleOpenSubList = (index) => {
+    if (openSubList.includes(index)) setOpenSubList([...openSubList.filter(i => i !== index)])
+    else {
+      openSubList.push(index)
+      setOpenSubList([...openSubList])
     }
   }
 
@@ -130,7 +140,7 @@ export function Tuition() {
             </Typography>
           </div>
         </CardHeader>
-        <CardBody className="overflow-x-scroll px-0 pt-0 pb-2 max-h-[60vh]">
+        <CardBody className="overflow-x-scroll px-0 pt-0 pb-2 max-h-[65vh]">
           <div className="flex justify-end pr-4 gap-2">
             <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
               <PriceCheckIcon style={{ fontSize: '1rem' }} /> Make a tuition payment
@@ -143,48 +153,82 @@ export function Tuition() {
               <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
             </Button>
           </div>
-          <List>
-            {classList.map((item, index) => (
-              <ListItem>
-                <Accordion
-                  open={!openList.includes(index)}
+          {glb_sv.programs.map((item, index) => (
+            <ListItem ripple={false} className="hover:bg-transparent focus:bg-transparent active:bg-transparent">
+              <Accordion
+                open={!openList.includes(index)}
+              >
+                <AccordionHeader
+                  onClick={() => handleOpenList(index)}
                 >
-                  <AccordionHeader
-                    onClick={() => handleOpenTable(index)}
-                  >
-                    <div className="flex justify-between items-center w-full">
-                      <Typography variant="h6" color="blue-gray">
-                        {item.id}
-                      </Typography>
-                      <div className="flex gap-4">
-                        <Typography
-                          variant="small"
-                          className="text-[11px] font-bold text-blue-gray-400"
-                        >
-                          Start at: {formatDate(item.start_date)}
-                        </Typography>
-                        <Typography
-                          variant="small"
-                          className="text-[11px] font-bold text-blue-gray-400"
-                        >
-                          Teacher: {item.teacher}
-                        </Typography>
-                        <Typography
-                          variant="small"
-                          className="text-[11px] font-bold text-blue-gray-400"
-                        >
-                          Total student: {item.student_list?.length || 0}
-                        </Typography>
-                      </div>
-                    </div>
-                  </AccordionHeader>
-                  <AccordionBody>
-                    <TuitionTable list={item.student_list} />
-                  </AccordionBody>
-                </Accordion>
-              </ListItem>
-            ))}
-          </List>
+                  <div className="flex gap-2 items-center">
+                    <Typography variant="h6" color="blue-gray">
+                      {item}
+                    </Typography>
+                    {openList.includes(index) ? (
+                      <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
+                    ) : (
+                      <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
+                    )}
+                  </div>
+                </AccordionHeader>
+                <AccordionBody>
+                  <List>
+                    {classList.map((classInfo, index) => (
+                      classInfo.id.includes(item) ? (
+                        <ListItem>
+                          <Accordion
+                            open={!openSubList.includes(index)}
+                          >
+                            <AccordionHeader
+                              onClick={() => handleOpenSubList(index)}
+                            >
+                              <div className="flex justify-between items-center w-full">
+                                <div className="flex gap-2 items-center">
+                                  <Typography variant="h6" color="blue-gray">
+                                    {classInfo.id}
+                                  </Typography>
+                                  {openSubList.includes(index) ? (
+                                    <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
+                                  )}
+                                </div>
+                                <div className="flex gap-4">
+                                  <Typography
+                                    variant="small"
+                                    className="text-[11px] font-bold text-blue-gray-400"
+                                  >
+                                    Start at: {formatDate(classInfo.start_date)}
+                                  </Typography>
+                                  <Typography
+                                    variant="small"
+                                    className="text-[11px] font-bold text-blue-gray-400"
+                                  >
+                                    Teacher: {classInfo.teacher}
+                                  </Typography>
+                                  <Typography
+                                    variant="small"
+                                    className="text-[11px] font-bold text-blue-gray-400"
+                                  >
+                                    Total student: {classInfo.student_list?.length || 0}
+                                  </Typography>
+                                </div>
+                              </div>
+                            </AccordionHeader>
+                            <AccordionBody>
+                              <TuitionTable list={classInfo.student_list} />
+                            </AccordionBody>
+                          </Accordion>
+                        </ListItem>
+                      ) : null
+                    ))}
+                  </List>
+                </AccordionBody>
+              </Accordion>
+            </ListItem>
+          ))}
+
         </CardBody>
         {/* <CardFooter className="pt-0 gap-2 flex justify-end">
                     <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
@@ -199,7 +243,7 @@ export function Tuition() {
                     </Button>
                 </CardFooter> */}
       </Card>
-      <PaymentPopup studentList={tableRef.current} open={openPayment} handleCallback={handleMakePayment} />
+      <PaymentPopup classList={classList} studentList={tableRef.current} open={openPayment} handleCallback={handleMakePayment} />
     </div>
   );
 }

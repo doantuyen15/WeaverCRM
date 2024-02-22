@@ -51,7 +51,7 @@ import moment from "moment";
 //     }
 // ]
 
-export function PaymentPopup({ studentList, open, handleCallback }) {
+export function PaymentPopup({ studentList, open, handleCallback, classList }) {
     const [controller] = useController();
     const { userInfo } = controller;
     const [selectedClass, setSelectedClass] = useState({})
@@ -65,76 +65,76 @@ export function PaymentPopup({ studentList, open, handleCallback }) {
     //     if (!tuition?.length) getTuition()
     // }, [])
 
-    useEffect(() => {
-        setPaymentList([{
-            student: '',
-            tuition: '',
-            class_name: '',
-            id_class: '',
-            id_class_type: '',
-            note: '',
-            date: moment(Date.now()).format('YYYY-MM-DD'),
-            id_student: ''
-        }])
-    }, [open])
+    // useEffect(() => {
+    //     setPaymentList([{
+    //         student: '',
+    //         tuition: '',
+    //         class_name: '',
+    //         id_class: '',
+    //         id_class_type: '',
+    //         note: '',
+    //         date: moment(Date.now()).format('YYYY-MM-DD'),
+    //         id_student: ''
+    //     }])
+    // }, [open])
     
-    const getTuition = () => {
-        console.log('getTuition');
-        // const requestInfo = {
-        //     headers: {
-        //         "authorization": `${userInfo.token}`,
-        //     },
-        //     method: 'get',
-        //     service: 'getAllClassRoom',
-        //     callback: (data) => {
-        //         console.log('getAllClassRoom', data);
-        //         setLoading(false)
-        //         setTuition(data)
-        //         useStorage('set', 'tuition', data)
-        //     },
-        //     handleError: (error) => {
-        //         console.log('error', error)
-        //         setLoading(false)
-        //     }
-        // }
-        // useFetch(requestInfo)
-    }
+    // const getTuition = () => {
+    //     console.log('getTuition');
+    //     // const requestInfo = {
+    //     //     headers: {
+    //     //         "authorization": `${userInfo.token}`,
+    //     //     },
+    //     //     method: 'get',
+    //     //     service: 'getAllClassRoom',
+    //     //     callback: (data) => {
+    //     //         console.log('getAllClassRoom', data);
+    //     //         setLoading(false)
+    //     //         setTuition(data)
+    //     //         useStorage('set', 'tuition', data)
+    //     //     },
+    //     //     handleError: (error) => {
+    //     //         console.log('error', error)
+    //     //         setLoading(false)
+    //     //     }
+    //     // }
+    //     // useFetch(requestInfo)
+    // }
 
-    const handleAdd = () => {
-        const list = [...paymentList]
-        list.push({
-            student: '',
-            tuition: '',
-            class_name: '',
-            id_class: '',
-            id_class_type: '',
-            note: '',
-            date: moment(Date.now()).format('YYYY-MM-DD'),
-            id_student: ''
-        })
-        setPaymentList(list)
-    }
+    // const handleAdd = () => {
+    //     const list = [...paymentList]
+    //     list.push({
+    //         student: '',
+    //         tuition: '',
+    //         class_name: '',
+    //         id_class: '',
+    //         id_class_type: '',
+    //         note: '',
+    //         date: moment(Date.now()).format('YYYY-MM-DD'),
+    //         id_student: ''
+    //     })
+    //     setPaymentList(list)
+    // }
 
-    const updateListPayment = ({ key, index, value, mode = 'add' }) => {
-        if (mode === 'delete') {
-            setPaymentList(paymentList.filter((item, i) => i !== index))
-        }
-        else {
-            const objectEdit = [...paymentList]
-            if (key === 'tuition') {
-                objectEdit[index].tuition = value.tuition
-                objectEdit[index].id_class = value.id_class
-                objectEdit[index].id_class_type = value.id_class_type
-                objectEdit[index].class_name = value.class_name
-                setPaymentList(objectEdit)
-            } else {
-                objectEdit[index].student = value.full_name
-                objectEdit[index].id_student = value.id
-                setPaymentList(objectEdit)
-            }
-        }
-        paymentListRef.current = [...paymentList]
-    }
+    // const updateListPayment = ({ key, index, value, mode = 'add' }) => {
+    //     if (mode === 'delete') {
+    //         setPaymentList(paymentList.filter((item, i) => i !== index))
+    //     }
+    //     else {
+    //         const objectEdit = [...paymentList]
+    //         if (key === 'tuition') {
+    //             objectEdit[index].tuition = value.tuition
+    //             objectEdit[index].id_class = value.id_class
+    //             objectEdit[index].id_class_type = value.id_class_type
+    //             objectEdit[index].class_name = value.class_name
+    //             setPaymentList(objectEdit)
+    //         } else {
+    //             objectEdit[index].student = value.full_name
+    //             objectEdit[index].id_student = value.id
+    //             setPaymentList(objectEdit)
+    //         }
+    //     }
+    //     paymentListRef.current = [...paymentList]
+    // }
     
     return (
         <>
@@ -153,24 +153,6 @@ export function PaymentPopup({ studentList, open, handleCallback }) {
                             <div className="flex py-4 border-b border-blue-gray-50 items-center">
                                 <div className="gap-6 flex w-full">
                                     <Select
-                                        label="Select Student"
-                                        selected={(element) =>
-                                            element &&
-                                            React.cloneElement(element, {
-                                                disabled: true,
-                                                className:
-                                                    "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                            })
-                                        }
-                                    >
-                                        {studentList?.map(item => (
-                                            <Option onClick={() => updateListPayment({ key: 'student', value: item, index: index })} key={item.id_student} value={item.id + ' - ' + item.class_name} className="flex items-center gap-2">
-                                                {item.id + ' - ' + item.full_name}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                    <Select
-                                        disabled={!info.id_student}
                                         label="Select Class"
                                         selected={(element) =>
                                             element &&
@@ -187,6 +169,26 @@ export function PaymentPopup({ studentList, open, handleCallback }) {
                                             </Option>
                                         ))}
                                     </Select>
+
+                                    <Select
+                                        disabled={!info.class_name}
+                                        label="Select Student"
+                                        selected={(element) =>
+                                            element &&
+                                            React.cloneElement(element, {
+                                                disabled: true,
+                                                className:
+                                                    "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                            })
+                                        }
+                                    >
+                                        {studentList?.map(item => (
+                                            <Option onClick={() => updateListPayment({ key: 'student', value: item, index: index })} key={item.id_student} value={item.id + ' - ' + item.class_name} className="flex items-center gap-2">
+                                                {item.id + ' - ' + item.full_name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                    
                                     <Input
                                         readOnly
                                         variant="outlined"

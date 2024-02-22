@@ -180,26 +180,12 @@ export function Class() {
                                         {classList.map((classInfo, index) => (
                                             classInfo.id.includes(item) ? <ClassInfo openModal={() => handleOpenModal(index)} item={classInfo} /> : null
                                         ))}
-
-                                        {/* <ClassTable list={item.student_list} /> */}
                                     </AccordionBody>
                                 </Accordion>
                             </ListItem>
                         ))}
                     </List>
                 </CardBody>
-                {/* <CardFooter className="pt-0 gap-2 flex justify-end">
-                    <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
-                        <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Make a tuition payment
-                    </Button>
-                    <Button
-                        className="flex items-center gap-3"
-                        size="sm"
-                        onClick={() => getStudentList()}
-                    >
-                        <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
-                    </Button>
-                </CardFooter> */}
             </Card>
             {openModalClass ? <ModalClassInfo getClassList={getClassList} classList={classList} handleOpen={setOpenModalClass} open={openModalClass} data={classList[dataClassIndex]} /> : null}
             {/* <CreateClasses open={openModal} handleOpen={setOpenModal} handleCallback={handleUpdateClass} /> */}
