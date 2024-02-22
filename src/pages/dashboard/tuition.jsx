@@ -59,36 +59,39 @@ export function Tuition() {
   const [loading, setLoading] = useState(false)
   const tableRef = useRef([])
   const [classList, setClassList] = useState([])
+  // const [studentList, setStudentList] = useState([])
   const [openList, setOpenList] = useState([])
   const [openSubList, setOpenSubList] = useState([])
 
   useEffect(() => {
-    const studentList = useStorage('get', 'studentInfo', [])
-    if (studentList?.length === 0) getStudentList()
-    else {
-      tableRef.current = studentList
-    }
-    const classListRef = useStorage('get', 'classList', [])
-    if (classListRef?.length === 0) getClassList()
-    else {
-      tableRef.current = classListRef
-      setClassList(classListRef)
-    }
+    getClassList()
+    // const studentList = useStorage('get', 'studentInfo', [])
+    // if (studentList?.length === 0) getStudentList()
+    // else {
+    //   tableRef.current = studentList
+    // }
+
+    // const classListRef = useStorage('get', 'classList', [])
+    // if (classListRef?.length === 0) getClassList()
+    // else {
+    //   tableRef.current = classListRef
+    //   setClassList(classListRef)
+    // }
   }, [])
 
-  const getStudentList = () => {
-    setLoading(true)
-    useFirebase('get_student')
-      .then(data => {
-        setLoading(false)
-        tableRef.current = data
-        // setStudentList(data)
-        // handleSort(1)
-        useStorage('set', 'studentInfo', data)
-      })
-      .catch(err => console.log(err))
-      .finally(() => setLoading(false))
-  }
+  // const getStudentList = () => {
+  //   setLoading(true)
+  //   useFirebase('get_student')
+  //     .then(data => {
+  //       setLoading(false)
+  //       tableRef.current = data
+  //       setStudentList(data)
+  //       // handleSort(1)
+  //       useStorage('set', 'studentInfo', data)
+  //     })
+  //     .catch(err => console.log(err))
+  //     .finally(() => setLoading(false))
+  // }
 
   const getClassList = () => {
     setLoading(true)
@@ -217,7 +220,7 @@ export function Tuition() {
                               </div>
                             </AccordionHeader>
                             <AccordionBody>
-                              <TuitionTable list={classInfo.student_list} />
+                              <TuitionTable classInfo={classInfo}/>
                             </AccordionBody>
                           </Accordion>
                         </ListItem>
@@ -243,14 +246,21 @@ export function Tuition() {
                     </Button>
                 </CardFooter> */}
       </Card>
-      <PaymentPopup classList={classList} studentList={tableRef.current} open={openPayment} handleCallback={handleMakePayment} />
+      <PaymentPopup classList={classList} open={openPayment} handleCallback={handleMakePayment} />
     </div>
   );
 }
 
 export default Tuition;
 
-export const TuitionTable = ({ list }) => {
+export const TuitionTable = ({ classInfo }) => {
+  const [classStudentList, setClassStudentList] = useState([])
+  
+  useEffect(async () => {
+    const list = await classInfo.getStudentList()
+    setClassStudentList(list)
+  }, [classInfo])
+  
   return (
     <>
       <table className="w-full min-w-[640px] table-auto" >
@@ -272,7 +282,7 @@ export const TuitionTable = ({ list }) => {
           </tr>
         </thead>
         <tbody>
-          {list?.map(({ id, full_name, tuition_fee, tuition_date, note }, index) => {
+          {classStudentList?.map(({ id, full_name, tuition_fee, tuition_date, note }, index) => {
             const className = `py-3 px-5 ${index === authorsTableData.length - 1
               ? ""
               : "border-b border-blue-gray-50"

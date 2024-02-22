@@ -100,20 +100,20 @@ export function PaymentPopup({ studentList, open, handleCallback, classList }) {
     //     // useFetch(requestInfo)
     // }
 
-    // const handleAdd = () => {
-    //     const list = [...paymentList]
-    //     list.push({
-    //         student: '',
-    //         tuition: '',
-    //         class_name: '',
-    //         id_class: '',
-    //         id_class_type: '',
-    //         note: '',
-    //         date: moment(Date.now()).format('YYYY-MM-DD'),
-    //         id_student: ''
-    //     })
-    //     setPaymentList(list)
-    // }
+    const handleAdd = () => {
+        const list = [...paymentList]
+        list.push({
+            student: '',
+            tuition: '',
+            class_name: '',
+            id_class: '',
+            id_class_type: '',
+            note: '',
+            date: moment(Date.now()).format('YYYY-MM-DD'),
+            id_student: ''
+        })
+        setPaymentList(list)
+    }
 
     // const updateListPayment = ({ key, index, value, mode = 'add' }) => {
     //     if (mode === 'delete') {
@@ -163,11 +163,11 @@ export function PaymentPopup({ studentList, open, handleCallback, classList }) {
                                             })
                                         }
                                     >
-                                        {tuition?.map(item => (
+                                        {/* {tuition?.map(item => (
                                             <Option onClick={() => updateListPayment({ key: 'tuition', value: item, index: index })} key={item.class_name} value={item.class_name} className="flex items-center gap-2">
                                                 {item.class_name}
                                             </Option>
-                                        ))}
+                                        ))} */}
                                     </Select>
 
                                     <Select
@@ -182,11 +182,11 @@ export function PaymentPopup({ studentList, open, handleCallback, classList }) {
                                             })
                                         }
                                     >
-                                        {studentList?.map(item => (
+                                        {/* {studentList?.map(item => (
                                             <Option onClick={() => updateListPayment({ key: 'student', value: item, index: index })} key={item.id_student} value={item.id + ' - ' + item.class_name} className="flex items-center gap-2">
                                                 {item.id + ' - ' + item.full_name}
                                             </Option>
-                                        ))}
+                                        ))} */}
                                     </Select>
                                     
                                     <Input
@@ -202,7 +202,7 @@ export function PaymentPopup({ studentList, open, handleCallback, classList }) {
                                 <MinusCircleIcon
                                     style={{ visibility: index == 0 ? 'hidden' : 'visible' }}
                                     className="w-7 h-7 ml-3 text-blue-gray-200 cursor-pointer"
-                                    onClick={() => updateListPayment({index: index, mode: 'delete'})}
+                                    // onClick={() => updateListPayment({index: index, mode: 'delete'})}
                                 />
                             </div>
                         ))}
