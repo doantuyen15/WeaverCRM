@@ -19,7 +19,7 @@ import { MinusCircleIcon } from "@heroicons/react/24/outline";
 import useStorage from "../../utils/localStorageHook";
 import { useFetch, useFirebase } from "../../utils/api/request";
 import moment from "moment";
-import ClassInfo from "../../data/entities/classes";
+import ClassInfo from "../../data/entities/classesInfo";
 import formatDate from "../../utils/formatNumber/formatDate";
 import StaffInfo from "../../data/entities/staffInfo";
 import { glb_sv } from "../../service";

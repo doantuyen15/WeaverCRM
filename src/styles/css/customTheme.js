@@ -5,7 +5,23 @@ const custom = {
                 container: {
                     position: "relative",
                     width: "w-full",
-                    minWidth: "min-w-[100px]",
+                    minWidth: "min-w-0",
+                },
+            },
+            // variants: {
+            //     static: {
+                    
+            //     }
+            // }
+        }
+    },
+    select: {
+        styles: {
+            base: {
+                container: {
+                    position: "relative",
+                    width: "w-full",
+                    minWidth: "min-w-0",
                 },
             }
         }

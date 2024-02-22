@@ -30,6 +30,7 @@ import IndeterminateCheckBoxIcon from '@mui/icons-material/IndeterminateCheckBox
 import { useFirebase } from "../../utils/api/request";
 import { toast } from "react-toastify";
 import { AddStudentToClass } from "./add-student-class";
+import formatDate from "../../utils/formatNumber/formatDate";
 
 const TABLE_HEAD = [
     // "Tình trạng đăng ký",
@@ -51,8 +52,7 @@ const semester = {
     LIFE: [
         'Kỳ I',
         'Kỳ II',
-        'Kỳ III',
-        'Cuối Kỳ'
+        'Kỳ III'
     ],
     NORMAL: [
         'Giữa kỳ',
@@ -62,8 +62,7 @@ const semester = {
         LIFE: [
             'mid',
             'mid_ii',
-            'mid_iii',
-            'final'
+            'mid_iii'
         ],
         NORMAL: [
             'mid',
@@ -125,7 +124,7 @@ const HEADER_DIARY = [
 
 const currentMonth = moment().format('M')
 
-export function ModalClassInfo({ open, data, handleOpen, classList }) {
+export function ModalClassInfo({ open, data, handleOpen, classList, getClassList }) {
     const [controller] = useController();
     const { userInfo } = controller;
     const [loading, setLoading] = useState(false)
@@ -139,10 +138,12 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
     const [calendar, setCalendar] = useState([])
     const [zoom, setZoom] = useState(false)
     const [openDiary, setOpenDiary] = useState(false)
+    const [, updateState] = React.useState();
+    const forceUpdate = React.useCallback(() => updateState({}), []);
 
     useEffect(() => {
         getStudent()
-    }, [])
+    }, [classList])
 
     const getStudent = () => {
         setLoading(true)
@@ -150,6 +151,9 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
             .then((res) => {
                 setStudentList(res)
                 setLoading(false)
+                forceUpdate()
+        console.log('changeeeeee', res);
+
             })
     }
 
@@ -199,14 +203,24 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
                     setLoading(false)
                     changeMode('normal')
                     toast.success("Add Success!")
+                    getClassList()
                 })
                 .catch((error) => toast.error(error))
         }
     }
 
-    const handleDiaryCallback = (ok, studentList) => {
+    const handleDiaryCallback = (ok, classData) => {
         if (!ok) {
             setOpenDiary(false)
+        } else {
+            setLoading(true)
+            useFirebase('update_lessondiary', classData)
+                .then(() => {
+                    setLoading(false)
+                    toast.success("Update Lesson diary successed!")
+                    getClassList()
+                })
+                .catch((error) => toast.error(error))
         }
         // } else {
         //     setLoading(true)
@@ -302,7 +316,7 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
                                 handleCallback={handleAttendance}
                                 studentList={studentList}
                                 classInfo={data}
-                                calendar={calendar}
+                                calendar={data.timetable}
                                 setCalendar={setCalendar}
                             />
                         ) : openInputScore ? (
@@ -359,13 +373,14 @@ export function ModalClassInfo({ open, data, handleOpen, classList }) {
                 </Card>
             </Dialog>
             <AddStudentToClass loading={loading} classList={classList} open={openAddStudent} handleCallback={handleAddStudent}/>
-            <LessonDiary open={openDiary} handleCallback={handleDiaryCallback} data={data}/>
-            {/* <Attendance open={openAttendance} handleCallback={handleAttendance}/> */}
+            <LessonDiary loading={loading} open={openDiary} handleCallback={handleDiaryCallback} data={data}/>
         </div>
     );
 }
 
-const LessonDiary = ({ open, handleCallback, data = {} }) => {
+const LessonDiary = ({ loading, open, handleCallback, data }) => {
+    const [controller] = useController();
+    const { userInfo } = controller;
     const makeData = [
         {
             lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
@@ -453,21 +468,23 @@ const LessonDiary = ({ open, handleCallback, data = {} }) => {
     ]
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
+    const [classData, setClassData] = useState(data)
+    const [editMode, setEditMode] = useState(false)
+
+    useEffect(() => {
+      if (!open) setEditMode(false)
+    }, [open])
+    
 
     const updateDiary = (index, key, value) => {
-        data.updateDiary(index, key, value)
-        console.log('index, key, value', index, key, value);
+        classData.updateDiary(index, key, value)
+        setClassData(classData)
         // forceUpdate()
     }
-    // console.log('lesson_diary', data.lesson_diary);
 
     const addRowDiary = () => {
-        data.addDiary()
+        classData.addDiary()
         forceUpdate()
-    }
-
-    function CustomHTMLElement(props) {
-        return <div dangerouslySetInnerHTML={{ __html: props.customHtml }} />
     }
 
     return (
@@ -483,15 +500,15 @@ const LessonDiary = ({ open, handleCallback, data = {} }) => {
         >
             <Card className="mx-auto h-full w-full">
                 <CardHeader floated={false} shadow={false} className="rounded-none">
-                    <div className="flex flex-col text-center pb-6">
+                    <div className="flex flex-col text-center pb-1">
                         <Typography variant="h4" color="black">
                             LESSON DIARY
                         </Typography>
-                        <Typography variant="h4" color="black">
+                        {/* <Typography variant="h4" color="black">
                             {data.id || '---'}
-                        </Typography>
+                        </Typography> */}
                     </div>
-                    <div className="flex flex-row gap-2 justify-center">
+                    <div className="flex flex-row gap-2 justify-center pb-4">
                         <div className="flex flex-row items-center gap-1">
                             <Typography
                                 variant="small"
@@ -503,7 +520,7 @@ const LessonDiary = ({ open, handleCallback, data = {} }) => {
                                 variant="small"
                                 color="blue-gray"
                             >
-                                {data.textbooks}
+                                {classData.class_code || classData.id}
                             </Typography>
                         </div>
                         <div className="flex flex-row items-center gap-1">
@@ -517,7 +534,7 @@ const LessonDiary = ({ open, handleCallback, data = {} }) => {
                                 variant="small"
                                 color="blue-gray"
                             >
-                                {data.textbooks}
+                                {classData.textbooks}
                             </Typography>
                         </div>
                     </div>
@@ -546,15 +563,15 @@ const LessonDiary = ({ open, handleCallback, data = {} }) => {
                     </div>
                 </CardHeader>
                 <CardBody className="flex flex-col p-0 px-0 overflow-auto max-h-[70vh]">
-                    <table className="w-full min-w-max table-auto text-left">
-                        <thead>
+                    <table className="w-full min-w-max border-separate border-spacing-0 text-left">
+                        <thead className="">
                             <tr>
                                 {HEADER_DIARY.map((head, index) => (
                                     <th
                                         // onClick={() => handleSort(index)}
                                         key={index}
                                         style={{ border: '2px solid black' }}
-                                        className="bg-orange-500 z-10 sticky top-0 cursor-pointer p-4 transition-colors"
+                                        className="bg-orange-500 p-4 transition-colors sticky top-0 z-10"
                                     >
                                         <Typography
                                             variant="small"
@@ -568,11 +585,12 @@ const LessonDiary = ({ open, handleCallback, data = {} }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {makeData?.map(
-                                (diary, index) => {
+                            {classData.timetable?.map(
+                                (data, index) => {
+                                    const diary = data.lesson_diary
                                     // const isLast = index === makeData.length - 1;
-                                    const classes = 'py-2 px-4 border text-center'
-                                    const style={ border: '2px solid black' }
+                                    const classes = editMode ? 'p-1 border text-center' : 'py-2 px-4 border text-center'
+                                    const style={ borderBottom: '2px solid black', borderLeft: '2px solid black', borderRight: '2px solid black' }
                                     return (
                                         <tr>
                                             <td className={classes} style={style}>
@@ -580,33 +598,88 @@ const LessonDiary = ({ open, handleCallback, data = {} }) => {
                                                     variant="small"
                                                     color="blue-gray"
                                                     className="font-normal"
+                                                    onBlur={() => forceUpdate()}
                                                 >
                                                     {diary.lesson_id}
                                                 </Typography>
                                             </td>
                                             <td className={classes} style={style}>
-                                                <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-normal"
-                                                >
-                                                    {diary.day}
-                                                </Typography>
+                                                {editMode ? (
+                                                    <Input
+                                                        type="date"
+                                                        size="md"
+                                                        variant="standard"
+                                                        // label="Start Date"
+                                                        value={formatDate(diary.day, 'YYYY-MM-DD')}
+                                                        onChange={(e) => {
+                                                            updateDiary(index, 'day', formatDate(e.target.value))
+                                                            forceUpdate()
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <Typography
+                                                        variant="small"
+                                                        color="blue-gray"
+                                                        className="font-normal p-0"
+                                                        onBlur={() => forceUpdate()}
+                                                        onInput={(e) => {
+                                                            updateDiary(index, 'day', e.currentTarget.innerText)
+                                                        }}
+                                                    >
+                                                        {diary.day}
+                                                    </Typography>
+                                                )}
+                                            </td>
+                                            <td className={classes + ' w-[10rem]'} style={style}>
+                                                {editMode ? (
+                                                    <Select
+                                                        variant="standard"
+                                                        value={diary.teacher ? diary.teacher : undefined}
+                                                    >
+                                                        {classData.teacher ?
+                                                            <Option
+                                                                onClick={() => { updateDiary(index, 'teacher', classData.teacher) }} className="flex items-center gap-2">
+                                                                {classData.teacher}
+                                                            </Option>
+                                                            : <></>}
+                                                        {classData.sub_teacher ?
+                                                            <Option
+                                                                onClick={() => { updateDiary(index, 'teacher', classData.sub_teacher) }} className="flex items-center gap-2">
+                                                                {classData.sub_teacher}
+                                                            </Option>
+                                                            : <></>}
+                                                        {classData.ta_teacher ?
+                                                            <Option
+                                                                onClick={() => { updateDiary(index, 'teacher', classData.ta_teacher) }} className="flex items-center gap-2">
+                                                                {classData.ta_teacher}
+                                                            </Option>
+                                                            : <></>}
+                                                    </Select>
+                                                ) : (
+                                                    <Typography
+                                                        variant="small"
+                                                        color="orange"
+                                                        className="font-normal"
+                                                        contentEditable={true}
+                                                        onBlur={() => forceUpdate()}
+                                                        onInput={(e) => {
+                                                            updateDiary(index, 'teacher', e.currentTarget.innerText)
+                                                        }}
+                                                    >
+                                                        {diary.teacher}
+                                                    </Typography>
+                                                )}
                                             </td>
                                             <td className={classes} style={style}>
                                                 <Typography
                                                     variant="small"
-                                                    color="orange"
-                                                    className="font-normal"
-                                                >
-                                                    {diary.teacher}
-                                                </Typography>
-                                            </td>
-                                            <td className={classes} style={style}>
-                                                <Typography
-                                                    variant="small"
                                                     color="blue-gray"
                                                     className="font-normal"
+                                                    onBlur={() => forceUpdate()}
+                                                    contentEditable={editMode}
+                                                    onInput={(e) => {
+                                                        updateDiary(index, 'unit', e.currentTarget.innerText)
+                                                    }}
                                                 >
                                                     {diary.unit}
                                                 </Typography>
@@ -616,21 +689,25 @@ const LessonDiary = ({ open, handleCallback, data = {} }) => {
                                                     variant="small"
                                                     color="blue-gray"
                                                     className="font-normal"
+                                                    contentEditable={editMode}
+                                                    onBlur={() => forceUpdate()}
+                                                    onInput={(e) => {
+                                                        updateDiary(index, 'unit_lesson', e.currentTarget.innerText)
+                                                    }}
                                                 >
                                                     {diary.unit_lesson}
                                                 </Typography>
                                             </td>
                                             <td className={classes} style={style}>
                                                 <Typography
-                                                    contentEditable={true}
-                                                    onBlur={() => forceUpdate()}
                                                     variant="small"
                                                     color="blue-gray"
-                                                    className="font-normal min-w-[15vw] whitespace-pre-wrap"
+                                                    className="font-normal min-w-[15vw] whitespace-pre-wrap text-left"
+                                                    contentEditable={editMode}
+                                                    onBlur={() => forceUpdate()}
                                                     onInput={(e) => {
                                                         updateDiary(index, 'content', e.currentTarget.innerText)
                                                     }}
-                                                // onInput={}
                                                 >
                                                     {diary.content}
                                                 </Typography>
@@ -640,8 +717,13 @@ const LessonDiary = ({ open, handleCallback, data = {} }) => {
                                                     variant="small"
                                                     color="blue-gray"
                                                     className="font-normal"
+                                                    contentEditable={editMode}
+                                                    onBlur={() => forceUpdate()}
+                                                    onInput={(e) => {
+                                                        updateDiary(index, 'homework', e.currentTarget.innerText)
+                                                    }}
                                                 >
-                                                    {diary.homeword}
+                                                    {diary.homework}
                                                 </Typography>
                                             </td>
                                             <td className={classes} style={style}>
@@ -649,17 +731,28 @@ const LessonDiary = ({ open, handleCallback, data = {} }) => {
                                                     variant="small"
                                                     color="blue-gray"
                                                     className="font-normal"
+                                                    contentEditable={editMode}
+                                                    onBlur={() => forceUpdate()}
+                                                    onInput={(e) => {
+                                                        updateDiary(index, 'performance', e.currentTarget.innerText)
+                                                    }}
                                                 >
                                                     {diary.performance}
                                                 </Typography>
                                             </td>
-                                            <td className={classes} style={style}>
+                                            <td className={classes + ' cursor-pointer'} style={style} onClick={() => {
+                                                if (userInfo.roles === '1' && editMode) {
+                                                    updateDiary(index, 'checked', !diary.checked)
+                                                    forceUpdate()
+                                                }
+                                            }}>
                                                 <Typography
                                                     variant="small"
-                                                    color="blue-gray"
+                                                    color="blue"
                                                     className="font-normal"
+                                                    onBlur={() => forceUpdate()}
                                                 >
-                                                    {diary.checked ? 'checked' : ''}
+                                                    {diary.checked ? 'Checked' : ''}
                                                 </Typography>
                                             </td>
                                         </tr>
@@ -669,12 +762,44 @@ const LessonDiary = ({ open, handleCallback, data = {} }) => {
                         </tbody>
                     </table>
                 </CardBody>
-                <CardFooter className="pt-4 flex justify-between">
-                    <Button variant="gradient" color="deep-orange" size="sm"
-                        onClick={() => addRowDiary()}
+                <CardFooter className="pt-4 flex justify-between items-center">
+                    <Typography
+                        variant="small"
+                        color="red"
+                        className="font-normal"
                     >
-                        Add row
-                    </Button>
+                        {data.lesson_diary_note}
+                    </Typography>
+                    {userInfo.roles === '1' && (
+                        <div className="flex item-center justify-end gap-2">
+                            {editMode ? (
+                                <>
+                                    <Button variant="gradient" color="deep-orange" size="sm"
+                                        onClick={() => addRowDiary()}
+                                    >
+                                        Add Row
+                                    </Button>
+                                    <Button variant="gradient" color="deep-orange" size="sm"
+                                        onClick={() => setEditMode(false)}
+                                    >
+                                        Hủy sửa
+                                    </Button>
+                                    <Button variant="gradient" color="deep-orange" size="sm"
+                                        loading={loading}
+                                        onClick={() => handleCallback(true, classData)}
+                                    >
+                                        Save
+                                    </Button>
+                                </>
+                            ) : (
+                                <Button variant="gradient" color="deep-orange" size="sm"
+                                    onClick={() => setEditMode(prev => !prev)}
+                                >
+                                    Edit
+                                </Button>
+                            )}
+                        </div>
+                    )}
                     {/* <div className="flex gap-2">
                         {mode !== 'normal' ? (
                             <Button variant="text" size="sm"
@@ -728,7 +853,7 @@ const TableStudent = ({ studentList, setStudentList }) => {
     const handleSort = (indexCol) => {
         let sorted
         sorted = orderBy(tableRef.current, [Header[indexCol]], [isAsc ? 'asc' : 'desc'])
-        setStudentList([...sorted])
+        setStudentList([sorted])
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
     }
@@ -791,13 +916,16 @@ const TableStudent = ({ studentList, setStudentList }) => {
 
 const Attendance = ({open, handleCallback, studentList, classInfo, calendar, setCalendar}) => {
     const calendarRef = useRef({})
+    const [, updateState] = React.useState();
+    const forceUpdate = React.useCallback(() => updateState({}), []);
 
     useEffect(() => {
-        if (classInfo.attendance[currentMonth]?.length > 0) {
-            setCalendar(classInfo.attendance[currentMonth])
-            calendarRef.current = classInfo.attendance[currentMonth]
-        }
-        else generateCalendar()
+
+        // if (classInfo.attendance[currentMonth]?.length > 0) {
+        //     setCalendar(classInfo.attendance[currentMonth])
+        //     calendarRef.current = classInfo.attendance[currentMonth]
+        // }
+        // else generateCalendar()
     }, [])
 
     const updateAttendanceList = () => {
@@ -824,7 +952,7 @@ const Attendance = ({open, handleCallback, studentList, classInfo, calendar, set
              days.forEach(day => day.day() === 5 && schooldays.push({[moment(day).valueOf()]: new Object()}));
         }
         calendarRef.current = [{[moment().format('M')]: schooldays}]
-        setCalendar(schooldays)
+        // setCalendar(schooldays)
     }
     
     return (
@@ -832,7 +960,7 @@ const Attendance = ({open, handleCallback, studentList, classInfo, calendar, set
             <thead>
                 <tr>
                     <th className="bg-blue-gray-50/50 z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 p-4 transition-colors" />
-                    {calendar.map((day, index) => (
+                    {calendar.map((item, index) => (
                         <th
                             // onClick={() => handleSort(index)}
                             key={index}
@@ -841,16 +969,16 @@ const Attendance = ({open, handleCallback, studentList, classInfo, calendar, set
                             <Typography
                                 variant="small"
                                 color="blue-gray"
-                                className={"text-center pb-1 gap-2 leading-none " + ((moment(Number(Object.keys(day)[0])).format('DDMMYYYY') == moment().format('DDMMYYYY')) ? ' font-bold' : 'opacity-70')}
+                                className={"text-center pb-1 gap-2 leading-none " + ((moment(item.day, 'DD/MM/YYYY').format('DDMMYYYY') == moment().format('DDMMYYYY')) ? ' font-bold' : 'opacity-70')}
                             >
-                                {moment(Number(Object.keys(day)[0])).format('dddd')}
+                                {moment(item.day, 'DD/MM/YYYY').format('dddd')}
                             </Typography>
                             <Typography
                                 variant="small"
                                 color="blue-gray"
-                                className={"text-center gap-2 leading-none " + ((moment(Number(Object.keys(day)[0])).format('DDMMYYYY') == moment().format('DDMMYYYY')) ? ' font-bold' : 'opacity-70')}
+                                className={"text-center gap-2 leading-none " + ((moment(item.day, 'DD/MM/YYYY').format('DDMMYYYY') == moment().format('DDMMYYYY')) ? ' font-bold' : 'opacity-70')}
                             >
-                                {moment(Number(Object.keys(day)[0])).format('DD/MM/YYYY')}
+                                {item.day}
                             </Typography>
                         </th>
                     ))}
@@ -875,13 +1003,15 @@ const Attendance = ({open, handleCallback, studentList, classInfo, calendar, set
                                     </Typography>
                                 </td>
                                 {calendar.map((info, key) => {
-                                    const dayAttendance = Object.values(info)[0]
+                                    const dayAttendance = info.attendance || {}
                                     const handleAttendance = (option) => {
                                         dayAttendance[student.id] = option
+                                        // forceUpdate()
                                         setCalendar([...calendar]);
+                                        console.log(dayAttendance[student.id]);
                                     } 
                                     return (
-                                        <td className={classes + ' text-center'}>
+                                        <td className={classes + ' text-center cursor-pointer'}>
                                             {dayAttendance[student.id] === 1 ? (
                                                 <CheckBoxIcon onClick={() => handleAttendance(2)} />
                                             ) : dayAttendance[student.id] === 2 ? (

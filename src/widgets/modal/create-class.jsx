@@ -19,9 +19,10 @@ import { MinusCircleIcon } from "@heroicons/react/24/outline";
 import useStorage from "../../utils/localStorageHook";
 import { useFetch, useFirebase } from "../../utils/api/request";
 import moment from "moment";
-import ClassInfo from "../../data/entities/classes";
+import ClassInfo from "../../data/entities/classesInfo";
 import formatDate from "../../utils/formatNumber/formatDate";
 import { glb_sv } from "../../service";
+import { toast } from "react-toastify";
 
 // const classType = [
 //     'A1A1',
@@ -60,11 +61,17 @@ export function CreateClasses({ open, handleCallback }) {
     const [tuition, setTuition] = useState(useStorage('get', 'tuition') || [])
     const [studentList, setStudentList] = useState([])
     const [staffList, setStaffList] = useState([])
+    const [, updateState] = React.useState();
+    const forceUpdate = React.useCallback(() => updateState({}), []);
 
     useEffect(() => {
-        getStudentList()
-        getStaffList()
-        handleAdd()
+        if (open) {
+            getStudentList()
+            getStaffList()
+            handleAdd()
+        } else {
+            setClassList([])
+        }
         // const studentListRef = useStorage('get', 'studentInfo')
         // if (!studentListRef) getStudentList()
         // else {
@@ -77,7 +84,7 @@ export function CreateClasses({ open, handleCallback }) {
         //     setStaffList(staffListRef)
         //     // tableRef.current = studentList
         // }
-    }, [])
+    }, [open])
 
     const getStudentList = () => {
         setLoading(true)
@@ -106,54 +113,71 @@ export function CreateClasses({ open, handleCallback }) {
             .finally(() => setLoading(false))
     }
 
-    const generateCalendar = (classInfo, date) => {
-        const startDate = moment(date, 'DD/MM/YYYY').startOf('month');
-        const endDate = moment().endOf('month');
+    const generateCalendar = (classInfo) => {
+        const startDate = moment(classInfo.start_date, 'DD/MM/YYYY');
+        const endDate = moment(classInfo.end_date, 'DD/MM/YYYY');
         // Lấy mảng các ngày trong tháng
         const days = [];
-        for (let i = 0; i < endDate.diff(startDate, 'days'); i++) {
+        for (let i = 0; i <= endDate.diff(startDate, 'days'); i++) {
             days.push(startDate.clone().add(i, 'days'));
         }
-        const schooldays = []
+        const timetable = []
+        days.forEach(day => {
+            if (glb_sv.offday.includes(moment(day).format('DD/MM'))) {
+                // nghỉ
+            } else if (
+                (classInfo.class_schedule_id === 0 && (day.day() === 1 || day.day() === 3)) || // thú 2 4
+                (classInfo.class_schedule_id === 1 && (day.day() === 2 || day.day() === 4)) || // thú 3 5
+                (classInfo.class_schedule_id === 2 && (day.day() === 6 || day.day() === 7)) || // thú 7 cn
+                (classInfo.class_schedule_id === 3 && (day.day() === 5)) // thú 6
+            ) {
+                timetable.push({
+                    session: timetable.length + 1,
+                    status: 0, //0 active, 1 nghỉ, 2 lý do khác
+                    reason: '',
+                    day: formatDate(day),
+                    lesson_diary: {
+                        lesson_id: timetable.length + 1,
+                        day: formatDate(day),
+                        teacher: '',
+                        unit: '',
+                        unit_lesson: '',
+                        content: '',
+                        homework: '',
+                        performance: '',
+                        checked: false,
+                    },
+                    attendance: {}
+                })
+                //         days.forEach(day => () && timetable.push({[moment(day).valueOf()]: new Object()}));
+                //    } else if (classInfo.class_schedule_id === 1) {
+                //         days.forEach(day => (day.day() === 2 || day.day() === 4) && timetable.push({[moment(day).valueOf()]: new Object()}));
+                //    } else if (classInfo.class_schedule_id === 2) {
+                //         days.forEach(day => (day.day() === 6 || day.day() === 7) && timetable.push({[moment(day).valueOf()]: new Object()}));
+                //    } else if (classInfo.class_schedule_id === 3) {
+                //         days.forEach(day => day.day() === 5 && timetable.push({[moment(day).valueOf()]: new Object()}));
+            }
+        })
 
-        if (classInfo.class_schedule_id === 0) {
-             days.forEach(day => (day.day() === 1 || day.day() === 3) && schooldays.push({[moment(day).valueOf()]: new Object()}));
-        } else if (classInfo.class_schedule_id === 1) {
-             days.forEach(day => (day.day() === 2 || day.day() === 4) && schooldays.push({[moment(day).valueOf()]: new Object()}));
-        } else if (classInfo.class_schedule_id === 2) {
-             days.forEach(day => (day.day() === 6 || day.day() === 7) && schooldays.push({[moment(day).valueOf()]: new Object()}));
-        } else if (classInfo.class_schedule_id === 3) {
-             days.forEach(day => day.day() === 5 && schooldays.push({[moment(day).valueOf()]: new Object()}));
-        }
-
-        return({[moment().format('M')]: schooldays})
+        return(timetable)
     }
 
     const updateClassList = (index, key, value) => {
+        // if (moment(classList[index].end_date, 'DD/MM/YYYY') <= moment(classList[index].start_date, 'DD/MM/YYYY')) {
+        //     toast.error('Kiểm tra lại ngày bắt đầu và ngày kết thúc!')
+        //     return
+        // }
         classList[index].updateInfo(key, value)
-        if (key === 'start_date') {
-            const calendar = generateCalendar(classList[index], value)
-            classList[index].updateInfo('attendance', calendar)
+        if ((key === 'end_date' || key === 'start_date' || key === 'class_schedule_id') && !!classList[index].start_date && !!classList[index].end_date) {
+            if (moment(classList[index].start_date, 'DD/MM/YYYY').isValid() || moment(classList[index].end_date, 'DD/MM/YYYY').isValid()) {
+                const timetable = generateCalendar(classList[index])
+                classList[index].updateInfo('timetable', timetable)
+            } else {
+                toast.error('Ngày không hợp lệ!')
+            }
         }
         setClassList(classList)
-    }
-
-    // useEffect(() => {
-    //     setPaymentList([{
-    //         student: '',
-    //         tuition: '',
-    //         class_name: '',
-    //         id_class: '',
-    //         id_class_type: '',
-    //         note: '',
-    //         date: moment(Date.now()).format('YYYY-MM-DD'),
-    //         id_student: ''
-    //     }])
-    // }, [open])
-
-    const getTuition = () => {
-        console.log('getTuition');
-
+        forceUpdate()
     }
 
     const handleAdd = () => {
@@ -248,20 +272,20 @@ export function CreateClasses({ open, handleCallback }) {
                                         </Select>
                                         <Select
                                             label="CS"
-                                            selected={(element) =>
-                                                element &&
-                                                React.cloneElement(element, {
-                                                    disabled: true,
-                                                    className:
-                                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                                })
-                                            }
+                                            value={info.cs_staff ? info.cs_staff : undefined}
                                         >
+                                            {info.cs_staff &&
+                                                <Option onClick={() => {
+                                                    updateClassList(index, 'cs_staff', '')
+                                                    updateClassList(index, 'cs_staff_id', '')
+                                                }} key={'Clear'} value={'Clear'} className="flex items-center gap-2">
+                                                    Clear
+                                                </Option>
+                                            }
                                             {(staffList || [])?.filter(staff => ([0, 4].includes(staff.department_id)))?.map(item => (
                                                 <Option
                                                     onClick={() => {
                                                         updateClassList(index, 'cs_staff', item.full_name)
-                                                        // updateClassList(index, 'cs_staff_phone', item.phone)
                                                         updateClassList(index, 'cs_staff_id', item.id)
                                                     }} key={item.id} value={item.full_name} className="flex items-center gap-2">
                                                     {item.full_name}
@@ -275,15 +299,17 @@ export function CreateClasses({ open, handleCallback }) {
                                         </Typography>
                                         <Select
                                             label="Teacher"
-                                            selected={(element) =>
-                                                element &&
-                                                React.cloneElement(element, {
-                                                    disabled: true,
-                                                    className:
-                                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                                })
-                                            }
+                                            value={info.teacher ? info.teacher : undefined}
                                         >
+                                            {info.teacher &&
+                                                <Option onClick={() => {
+                                                    updateClassList(index, 'teacher', '')
+                                                    updateClassList(index, 'teacher_id', '')
+                                                    updateClassList(index, 'teacher_phone', '')
+                                                }} key={'Clear'} value={'Clear'} className="flex items-center gap-2">
+                                                    Clear
+                                                </Option>
+                                            }
                                             {(staffList || [])?.filter(staff => staff.roles_id?.includes(3))?.map(item => (
                                                 <Option
                                                     onClick={() => {
@@ -297,15 +323,17 @@ export function CreateClasses({ open, handleCallback }) {
                                         </Select>
                                         <Select
                                             label="Sub Teacher"
-                                            selected={(element) =>
-                                                element &&
-                                                React.cloneElement(element, {
-                                                    disabled: true,
-                                                    className:
-                                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                                })
-                                            }
+                                            value={info.sub_teacher ? info.sub_teacher : undefined}
                                         >
+                                            {info.sub_teacher &&
+                                                <Option onClick={() => {
+                                                    updateClassList(index, 'sub_teacher', '')
+                                                    updateClassList(index, 'sub_teacher_id', '')
+                                                    updateClassList(index, 'sub_teacher_phone', '')
+                                                }} key={'Clear'} value={'Clear'} className="flex items-center gap-2">
+                                                    Clear
+                                                </Option>
+                                            }
                                             {(staffList || [])?.filter(staff => staff.roles_id?.includes(3))?.map(item => (
                                                 <Option
                                                     onClick={() => {
@@ -319,15 +347,17 @@ export function CreateClasses({ open, handleCallback }) {
                                         </Select>
                                         <Select
                                             label="TA"
-                                            selected={(element) =>
-                                                element &&
-                                                React.cloneElement(element, {
-                                                    disabled: true,
-                                                    className:
-                                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                                })
-                                            }
+                                            value={info.ta_teacher ? info.ta_teacher : undefined}
                                         >
+                                            {info.ta_teacher &&
+                                                <Option onClick={() => {
+                                                    updateClassList(index, 'ta_teacher', '')
+                                                    updateClassList(index, 'ta_teacher_id', '')
+                                                    updateClassList(index, 'ta_teacher_phone', '')
+                                                }} key={'Clear'} value={'Clear'} className="flex items-center gap-2">
+                                                    Clear
+                                                </Option>
+                                            }
                                             {(staffList || [])?.filter(staff => staff.roles_id?.includes(4))?.map(item => (
                                                 <Option
                                                     onClick={() => {

@@ -11,13 +11,13 @@ const formatNum = (num = '', decimals = 0, formatType = 'number') => {
     if (formatType === 'overall') {
         if (Number(num) >= 10) return Number(10).toFixed(1)
         const score = Number(String(num).slice(0, 1));
-        const decimalPart = Number(String(num).slice(1, -1));
-        if (decimalPart >= 0.25 && decimalPart < 0.75) {
-            return (score + 0.5).toFixed(1); // Làm tròn lên thành 0.5
-        } else if (decimalPart >= 0.75) {
-            return (score + 1).toFixed(1); // Làm tròn lên thành số nguyên
+        const decimalPart = Number(String((num || 0).toFixed(2)).slice(2,4));
+        if (decimalPart >= 25 && decimalPart < 75) {
+            return (score + 0.5).toFixed(1);
+        } else if (decimalPart >= 75) {
+            return (score + 1).toFixed(1);
         } else {
-            return score.toFixed(1); // Giữ nguyên giá trị làm tròn
+            return score.toFixed(1);
         }
     }
 

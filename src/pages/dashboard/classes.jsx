@@ -50,7 +50,7 @@ export function Class() {
     const tableRef = useRef([])
     const [classList, setClassList] = useState([])
     const [openList, setOpenList] = useState([])
-    const [dataClass, setDataClass] = useState(false)
+    const [dataClassIndex, setDataClassIndex] = useState(false)
 
     useEffect(() => {
         getClassList()
@@ -128,8 +128,8 @@ export function Class() {
         //     .catch(e => console.error(e))
     }
 
-    const handleOpenModal = (index, item) => {
-        setDataClass(item)
+    const handleOpenModal = (index) => {
+        setDataClassIndex(index)
         setOpenModalClass(true)
     }
 
@@ -178,7 +178,7 @@ export function Class() {
                                     </AccordionHeader>
                                     <AccordionBody>
                                         {classList.map((classInfo, index) => (
-                                            classInfo.id.includes(item) ? <ClassInfo openModal={() => handleOpenModal(index, classInfo)} item={classInfo} /> : null
+                                            classInfo.id.includes(item) ? <ClassInfo openModal={() => handleOpenModal(index)} item={classInfo} /> : null
                                         ))}
 
                                         {/* <ClassTable list={item.student_list} /> */}
@@ -201,7 +201,7 @@ export function Class() {
                     </Button>
                 </CardFooter> */}
             </Card>
-            {openModalClass ? <ModalClassInfo classList={classList} handleOpen={setOpenModalClass} open={openModalClass} data={dataClass} /> : null}
+            {openModalClass ? <ModalClassInfo getClassList={getClassList} classList={classList} handleOpen={setOpenModalClass} open={openModalClass} data={classList[dataClassIndex]} /> : null}
             {/* <CreateClasses open={openModal} handleOpen={setOpenModal} handleCallback={handleUpdateClass} /> */}
         </div>
     );

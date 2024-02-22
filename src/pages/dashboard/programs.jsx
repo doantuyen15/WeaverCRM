@@ -36,6 +36,7 @@ import FormatPhone from "../../utils/formatNumber/formatPhone";
 import DefaultSkeleton from "../../widgets/skeleton";
 import { TableScore } from "../../widgets/modal/table-score";
 import { ClassTable } from "./classes";
+import { toast } from "react-toastify";
 
 const Header = ['STT', 'Phone', 'Họ', 'Tên', 'Ngày sinh', "Email", 'Điểm', 'Ghi chú']
 
@@ -85,6 +86,10 @@ export function Programs() {
 
         if (ok) {
             useFirebase('add_classes', classList)
+                .then(() => {
+                    setLoading(false)
+                    toast.success('Tạo lớp thành công, yêu cầu đang chờ duyệt!')
+                })
         }
         setOpenModal(false)
     }

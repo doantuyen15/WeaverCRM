@@ -6,7 +6,7 @@ import { getAuth, signInWithCustomToken, updateProfile, Auth } from "firebase/au
 import useStorage from "../localStorageHook";
 import useRequest from './promise'
 import moment from "moment";
-import ClassInfo from "../../data/entities/classes";
+import ClassInfo from "../../data/entities/classesInfo";
 import StudentInfo from "../../data/entities/studentInfo";
 
 const controller = new AbortController();
@@ -49,12 +49,33 @@ export function useFirebase(service: string, params: any) {
         case 'delete_user': return deleteUser(params)
         case 'update_user': return updateUser(params)
         case 'update_attendance': return updateAttendance(params)
+        case 'update_lessondiary': return updateLessonDiary(params)
         case 'update_student_score': return updateStudentScore(params)
         case 'update_approval': return updateApproval(params)
         default:
             break;
     }
 }
+
+const updateLessonDiary = (classdata: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        console.log('classdata', classdata);
+        updateDoc(doc(db, `classes/${classdata.id}`), {
+            'timetable': classdata.timetable
+        })
+            .then(res => {
+                console.log('updateLessonDiary', res);
+                resolve(res)
+            })
+            .catch((error) => {
+                console.log('updateLessonDiary', error);
+                reject(error)
+                // An error occurred
+                // ...
+            })
+    })
+}
+
 
 const updateStudentScore = (studentList: any[]) => {
     return new useRequest((resolve: any, reject: any) => {
@@ -111,10 +132,6 @@ const updateAttendance = (data: any) => {
                 // An error occurred
                 // ...
             })
-            .finally(() => {
-                console.log('updateUser clear tm', timeoutId);
-                clearTimeout(timeoutId)
-            });
     })
 }
 
@@ -232,8 +249,6 @@ const getClassList = () => {
 
                             classList.push(classInfo)
                         })
-        console.log('classList', classList);
-
                         resolve(classList)
                     } catch (error) {
                         reject(error)
