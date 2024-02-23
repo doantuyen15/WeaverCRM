@@ -36,6 +36,20 @@ const custom = {
                 },
             }
         }
+    },
+    accordion: {
+        styles: {
+            base: {
+                header: {
+                    initial: {
+                        py: "py-1",
+                    }
+                },
+                body: {
+                    py: "py-0",
+                }
+            }
+        }
     }
 }
 export default custom

@@ -8,6 +8,7 @@ import useRequest from './promise'
 import moment from "moment";
 import ClassInfo from "../../data/entities/classesInfo";
 import StudentInfo from "../../data/entities/studentInfo";
+import formatDate from "../formatNumber/formatDate";
 
 const controller = new AbortController();
 const timeout = setTimeout(() => controller.abort(), 10000);
@@ -39,6 +40,7 @@ export function useFirebase(service: string, params: any) {
         case 'get_approval_list': return getApprovalList()
         case 'get_class_list': return getClassList()
         case 'get_student_score': return getStudentScore()
+        case 'get_tuition_table': return getTuitionTable(params)
         case 'add_student': return addStudent(params)
         case 'update_student': return updateStudent(params)
         case 'create_staff': return createStaff(params)
@@ -51,10 +53,47 @@ export function useFirebase(service: string, params: any) {
         case 'update_attendance': return updateAttendance(params)
         case 'update_lessondiary': return updateLessonDiary(params)
         case 'update_student_score': return updateStudentScore(params)
+        case 'make_tuition': return makeTuition(params)
         case 'update_approval': return updateApproval(params)
         default:
-            break;
+            return Promise.reject('Request rejected!');
     }
+}
+
+const makeTuition = (list: any[]) => {
+    return new useRequest((resolve: any, reject: any) => {
+        addDoc(collection(db, 'approval'), {
+            make_tuition: {
+                'data': list,
+                'requesting_username': userInfo.displayName,
+                'created_at': moment(Date.now()).format('DD.MM.YYYY')
+            }
+        })
+            .then(resolve)
+            .catch(reject)
+    })
+}
+
+const getTuitionTable = (params: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        getDocs(collection(db, `cashflow/tuition/${params}`))
+            .then(
+                (snap) => {
+                    try {
+                        const tuition = snap.docs.map(doc => {
+                            return (
+                                doc.data()
+                            )
+                        })
+                        resolve(tuition)
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            )
+            .catch(reject)
+            .finally(() => clearTimeout(timeoutId));
+    });
 }
 
 const updateLessonDiary = (classdata: any) => {
@@ -75,7 +114,6 @@ const updateLessonDiary = (classdata: any) => {
             })
     })
 }
-
 
 const updateStudentScore = (studentList: any[]) => {
     return new useRequest((resolve: any, reject: any) => {
@@ -238,15 +276,7 @@ const getClassList = () => {
                     try {
                         const classList: Array<ClassInfo> = []
                         snap.docs.forEach(doc => {
-                            // const student = doc.data().student_list.map(
-                            //     async (studentRef: any) => {
-                            //         const data = await getDoc(studentRef)
-                            //         return data.data()
-                            //     })
-                            // console.log('classList', student);
-                            // .then((doc) => {return doc.data()})
                             const classInfo = new ClassInfo(doc.data())
-
                             classList.push(classInfo)
                         })
                         resolve(classList)
@@ -302,6 +332,19 @@ const updateApproval = ({approval, ok}: any) => {
                     const docId = classInfo.id
                     const studentRef = doc(db, 'classes', docId)
                     batch.set(studentRef, classInfo)
+                })
+                batch.delete(approvalRef)
+                batch.commit()
+                    .then(resolve)
+                    .catch(reject)
+            } else if (approval.type === 'make_tuition') {
+                // let id = 0
+                // await getDocs(collection(db, 'classes')).then(snap => id = snap.docs.length);
+                approval?.data?.forEach((tuition: any) => {
+                    const docId = tuition.id_class
+                    const date = formatDate(tuition.date, 'MMYYYY')
+                    const studentRef = doc(db, `cashflow/tuition/${date}`, docId)
+                    batch.set(studentRef, tuition)
                 })
                 batch.delete(approvalRef)
                 batch.commit()

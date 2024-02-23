@@ -65,6 +65,18 @@ class globalService {
             '05/02', '06/02', '07/02', '08/02', '09/02', '10/02', '11/02', '12/02', '13/02', '14/02', '15/02', '16/02', '17/02', '18/02', //nghỉ tết
             '30/04', '01/05',
         ]
+        this.getTuitionFee = {
+            'LIFE': [
+                {key: 'Monthly', value: 700000}
+            ],
+            'IELTS': [
+                {key: 'Full', value: 4000000},
+                {key: 'Half', value: 2000000}
+            ],
+            'TEENS': [
+                {key: 'Monthly', value: 700000}
+            ]
+        }
     }
 }
 

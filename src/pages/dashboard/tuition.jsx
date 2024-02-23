@@ -30,6 +30,7 @@ import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import formatNum from "../../utils/formatNumber/formatNum";
 import formatDate from "../../utils/formatNumber/formatDate";
 import { glb_sv } from "../../service";
+import { toast } from "react-toastify";
 
 const Header = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền', 'Ghi chú']
 const tempData = [
@@ -62,6 +63,8 @@ export function Tuition() {
   // const [studentList, setStudentList] = useState([])
   const [openList, setOpenList] = useState([])
   const [openSubList, setOpenSubList] = useState([])
+  const currentMonth = moment().format('MMYYYY')
+  const [tuitionTable, setTuitionTable] = useState([])
 
   useEffect(() => {
     getClassList()
@@ -101,7 +104,21 @@ export function Tuition() {
         tableRef.current = data
         setClassList(data)
         useStorage('set', 'classList', data)
+        getTuitionTable()
         console.log('get_class_list', data);
+      })
+      .catch(err => console.log(err))
+      .finally(() => setLoading(false))
+  }
+
+  const getTuitionTable = () => {
+    setLoading(true)
+    useFirebase('get_tuition_table', currentMonth)
+      .then(data => {
+        setLoading(false)
+        setTuitionTable(data)
+        // useStorage('set', 'classList', data)
+        console.log('getTuitionTable', data);
       })
       .catch(err => console.log(err))
       .finally(() => setLoading(false))
@@ -110,11 +127,15 @@ export function Tuition() {
   const handleMakePayment = (ok, listPayment = []) => {
     console.log('handleMakePayment', ok, listPayment);
     setLoading(true)
-
     if (ok) {
-      //
+      useFirebase('make_tuition', listPayment)
+        .then(() => {
+          setLoading(false)
+          toast.success('Đóng tiền thành công, yêu cầu đang chờ duyệt!')
+        })
+    } else {
+      setOpenPayment(false)
     }
-    setOpenPayment(false)
   }
 
   const handleOpenList = (index) => {
@@ -220,7 +241,7 @@ export function Tuition() {
                               </div>
                             </AccordionHeader>
                             <AccordionBody>
-                              <TuitionTable classInfo={classInfo}/>
+                              <TuitionTable classInfo={classInfo} tuitionList={tuitionTable}/>
                             </AccordionBody>
                           </Accordion>
                         </ListItem>
@@ -246,84 +267,106 @@ export function Tuition() {
                     </Button>
                 </CardFooter> */}
       </Card>
-      <PaymentPopup classList={classList} open={openPayment} handleCallback={handleMakePayment} />
+      <PaymentPopup classList={classList} open={openPayment} handleCallback={handleMakePayment} loading={loading}/>
     </div>
   );
 }
 
 export default Tuition;
 
-export const TuitionTable = ({ classInfo }) => {
+export const TuitionTable = ({ classInfo, tuitionList }) => {
   const [classStudentList, setClassStudentList] = useState([])
+  const tuitionDefault = glb_sv.getTuitionFee[classInfo.id.split('_')[0]][0].value
+  const [tuiList, setTuiList] = useState(tuitionList[classInfo.id] || [])
+
+  useEffect(() => {
+    console.log('tuitionList', tuitionList);
+    setTuiList(tuitionList)
+  }, [tuitionList])
   
-  useEffect(async () => {
-    const list = await classInfo.getStudentList()
-    setClassStudentList(list)
-  }, [classInfo])
+  const filterNopay = (tuition) => {
+    if (typeof tuition !== 'number') return true
+    return tuitionDefault - tuition
+  }
+
+  useEffect(() => {
+    classInfo.getStudentList()
+      .then((list) => {
+        if (!tuiList?.length) {
+          setClassStudentList(list)
+        } else {
+          list = list.filter(item => tuiList[item.id] === undefined)
+          setClassStudentList(list)
+        }
+      })
+      .catch(err => console.log(err))
+  }, [])
   
   return (
-    <>
-      <table className="w-full min-w-[640px] table-auto" >
-        <thead>
-          <tr>
-            {Header.map((el) => (
-              <th
-                key={el}
-                className="border-b border-blue-gray-50 py-3 px-5 text-left"
+    <table className="w-full min-w-[640px] table-auto mt-4" >
+      <thead>
+        <tr>
+          {Header.map((el) => (
+            <th
+              key={el}
+              className="border-b border-blue-gray-50 py-3 px-5 text-left"
+            >
+              <Typography
+                variant="small"
+                className="text-[11px] font-bold uppercase text-blue-gray-400"
               >
-                <Typography
-                  variant="small"
-                  className="text-[11px] font-bold uppercase text-blue-gray-400"
-                >
-                  {el}
+                {el}
+              </Typography>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {classStudentList?.map(({ id, full_name }, index) => {
+          const { tuition, date, note } = tuiList.find(item => item.id_student === id) || {};
+          const className = `py-3 px-5 ${index === authorsTableData.length - 1
+            ? ""
+            : "border-b border-blue-gray-50"
+            }`;
+          if (!filterNopay(tuition)) return (<></>)
+          return (
+            <tr key={index}>
+          {console.log('tuition, date, note', id, formatDate(date), date)}
+
+              <td className={className}>
+                <Typography className="text-xs font-normal text-blue-gray-500">
+                  {id}
                 </Typography>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {classStudentList?.map(({ id, full_name, tuition_fee, tuition_date, note }, index) => {
-            const className = `py-3 px-5 ${index === authorsTableData.length - 1
-              ? ""
-              : "border-b border-blue-gray-50"
-              }`;
-            return (
-              <tr key={index}>
-                <td className={className}>
-                  <Typography className="text-xs font-normal text-blue-gray-500">
-                    {id}
-                  </Typography>
-                </td>
-                <td className={className}>
-                  <Typography className={`text-xs font-normal ${!tuition_fee ? 'text-red-500' : 'text-blue-gray-500'}`}>
-                    {full_name}
-                  </Typography>
-                </td>
-                {/* <td className={className}>
+              </td>
+              <td className={className}>
+                <Typography className={`text-xs font-normal ${!tuition ? 'text-red-500' : 'text-blue-gray-500'}`}>
+                  {full_name}
+                </Typography>
+              </td>
+              {/* <td className={className}>
                             <Typography className="text-xs font-normal text-blue-gray-500">
                               {'LIFE'}
                             </Typography>
                           </td> */}
-                <td className={className}>
-                  <Typography className="text-xs font-normal text-blue-gray-600">
-                    {formatDate(tuition_date)}
-                  </Typography>
-                </td>
-                <td className={className}>
-                  <Typography className="text-xs font-semibold text-blue-gray-500">
-                    {formatNum(tuition_fee, 0, 'price')}
-                  </Typography>
-                </td>
-                <td className={className}>
-                  <Typography className="text-xs font-normal text-blue-gray-500">
-                    {note}
-                  </Typography>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </>
+              <td className={className}>
+                <Typography className="text-xs font-normal text-blue-gray-600">
+                  {date ? formatDate(date) : ''}
+                </Typography>
+              </td>
+              <td className={className}>
+                <Typography className="text-xs font-semibold text-blue-gray-500">
+                  {typeof tuition === 'number' ? formatNum(tuitionDefault - tuition, 0, 'price') : formatNum(tuitionDefault, 0, 'price')}
+                </Typography>
+              </td>
+              <td className={className}>
+                <Typography className="text-xs font-normal text-blue-gray-500">
+                  {note}
+                </Typography>
+              </td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
   )
 }
