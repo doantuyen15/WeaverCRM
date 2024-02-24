@@ -7,6 +7,7 @@ const formatDate = (dateInput, type = 'DD/MM/YYYY') => {
     else if (moment(dateInput, 'DD/MM/YYYY').isValid()) return moment(dateInput, 'DDMMYYYY').format(type);
     else if (moment(dateInput, 'YYYYMMDD').isValid()) return moment(dateInput, 'YYYYMMDD').format(type);
     else if (moment(dateInput, 'YYYY-MM-DD').isValid()) return moment(dateInput, 'YYYYMMDD').format(type);
+    else return dateInput
     // // console.log('dateInput', dateInput, String(dateInput?.lenght));
     // if (!dateInput) return
     // const date = String(dateInput)?.slice(10)

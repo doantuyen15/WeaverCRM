@@ -32,7 +32,7 @@ import formatDate from "../../utils/formatNumber/formatDate";
 import { glb_sv } from "../../service";
 import { toast } from "react-toastify";
 
-const Header = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền', 'Ghi chú']
+const Header = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền còn lại', 'Ghi chú']
 const tempData = [
   {
     name: 'Toan',
@@ -65,36 +65,11 @@ export function Tuition() {
   const [openSubList, setOpenSubList] = useState([])
   const currentMonth = moment().format('MMYYYY')
   const [tuitionTable, setTuitionTable] = useState([])
+  const [filterTuition, setFilterTuition] = useState(false)
 
   useEffect(() => {
     getClassList()
-    // const studentList = useStorage('get', 'studentInfo', [])
-    // if (studentList?.length === 0) getStudentList()
-    // else {
-    //   tableRef.current = studentList
-    // }
-
-    // const classListRef = useStorage('get', 'classList', [])
-    // if (classListRef?.length === 0) getClassList()
-    // else {
-    //   tableRef.current = classListRef
-    //   setClassList(classListRef)
-    // }
   }, [])
-
-  // const getStudentList = () => {
-  //   setLoading(true)
-  //   useFirebase('get_student')
-  //     .then(data => {
-  //       setLoading(false)
-  //       tableRef.current = data
-  //       setStudentList(data)
-  //       // handleSort(1)
-  //       useStorage('set', 'studentInfo', data)
-  //     })
-  //     .catch(err => console.log(err))
-  //     .finally(() => setLoading(false))
-  // }
 
   const getClassList = () => {
     setLoading(true)
@@ -111,9 +86,9 @@ export function Tuition() {
       .finally(() => setLoading(false))
   }
 
-  const getTuitionTable = () => {
+  const getTuitionTable = (month = '') => {
     setLoading(true)
-    useFirebase('get_tuition_table', currentMonth)
+    useFirebase('get_tuition_table', month || currentMonth)
       .then(data => {
         setLoading(false)
         setTuitionTable(data)
@@ -165,17 +140,32 @@ export function Tuition() {
           </div>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2 max-h-[65vh]">
-          <div className="flex justify-end pr-4 gap-2">
-            <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
-              <PriceCheckIcon style={{ fontSize: '1rem' }} /> Make a tuition payment
-            </Button>
-            <Button
-              className="flex items-center gap-3"
-              size="sm"
-              onClick={() => getClassList()}
-            >
-              <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
-            </Button>
+          <div className="flex justify-between pr-4 gap-2">
+            <div className="flex items-center">
+              <Typography className="text-xs px-3 font-normal text-blue-gray-500">
+                Ẩn đã đóng
+              </Typography>
+              <Switch
+                key={'filter'}
+                checked={!filterTuition}
+                onClick={() => setFilterTuition(prev => !prev)}
+                labelProps={{
+                  className: "text-sm font-normal text-blue-gray-500 flex-row-reverse",
+                }}
+              />
+            </div>
+            <div className="flex justify-end">
+              <Button disabled={loading} className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
+                <PriceCheckIcon style={{ fontSize: '1rem' }} /> Make a tuition payment
+              </Button>
+              <Button
+                className="flex items-center gap-3"
+                size="sm"
+                onClick={() => getClassList()}
+              >
+                <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
+              </Button>
+            </div>
           </div>
           {glb_sv.programs.map((item, index) => (
             <ListItem ripple={false} className="hover:bg-transparent focus:bg-transparent active:bg-transparent">
@@ -198,55 +188,62 @@ export function Tuition() {
                 </AccordionHeader>
                 <AccordionBody>
                   <List>
-                    {classList.map((classInfo, index) => (
-                      classInfo.id.includes(item) ? (
-                        <ListItem>
-                          <Accordion
-                            open={!openSubList.includes(index)}
-                          >
-                            <AccordionHeader
-                              onClick={() => handleOpenSubList(index)}
+                    {classList.map((classInfo, index) => {
+                      const isPayAll = (tuitionTable[classInfo.id]?.length === classInfo.student_list?.length)
+                      return (
+                        classInfo.id.includes(item) ? (
+                          <ListItem>
+                            <Accordion
+                              open={!openSubList.includes(index)}
                             >
-                              <div className="flex justify-between items-center w-full">
-                                <div className="flex gap-2 items-center">
-                                  <Typography variant="h6" color="blue-gray">
-                                    {classInfo.id}
-                                  </Typography>
-                                  {openSubList.includes(index) ? (
-                                    <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
-                                  ) : (
-                                    <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
-                                  )}
+                              <AccordionHeader
+                                onClick={() => handleOpenSubList(index)}
+                              >
+                                <div className="flex justify-between items-center w-full">
+                                  <div className="flex gap-2 items-center">
+                                    <Typography variant="h6" color="blue-gray">
+                                      {classInfo.id}
+                                    </Typography>
+                                    {openSubList.includes(index) ? (
+                                      <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
+                                    )}
+                                  </div>
+                                  <div className="flex gap-4">
+                                    <Typography
+                                      variant="small"
+                                      className="text-[11px] font-bold text-blue-gray-400"
+                                    >
+                                      Start at: {formatDate(classInfo.start_date)}
+                                    </Typography>
+                                    <Typography
+                                      variant="small"
+                                      className="text-[11px] font-bold text-blue-gray-400"
+                                    >
+                                      Teacher: {classInfo.teacher}
+                                    </Typography>
+                                    <Typography
+                                      variant="small"
+                                      className="text-[11px] font-bold text-blue-gray-400"
+                                    >
+                                      Total student: {classInfo.student_list?.length || 0}
+                                    </Typography>
+                                  </div>
                                 </div>
-                                <div className="flex gap-4">
-                                  <Typography
-                                    variant="small"
-                                    className="text-[11px] font-bold text-blue-gray-400"
-                                  >
-                                    Start at: {formatDate(classInfo.start_date)}
-                                  </Typography>
-                                  <Typography
-                                    variant="small"
-                                    className="text-[11px] font-bold text-blue-gray-400"
-                                  >
-                                    Teacher: {classInfo.teacher}
-                                  </Typography>
-                                  <Typography
-                                    variant="small"
-                                    className="text-[11px] font-bold text-blue-gray-400"
-                                  >
-                                    Total student: {classInfo.student_list?.length || 0}
-                                  </Typography>
-                                </div>
-                              </div>
-                            </AccordionHeader>
-                            <AccordionBody>
-                              <TuitionTable classInfo={classInfo} tuitionList={tuitionTable}/>
-                            </AccordionBody>
-                          </Accordion>
-                        </ListItem>
-                      ) : null
-                    ))}
+                              </AccordionHeader>
+                              <AccordionBody>
+                              {console.log('filterTuition==========', isPayAll, filterTuition)}
+
+                                {!isPayAll || !filterTuition ?
+                                  <></> : <TuitionTable filterTuition={filterTuition} classInfo={classInfo} tuitionList={tuitionTable} />
+                                }
+                              </AccordionBody>
+                            </Accordion>
+                          </ListItem>
+                        ) : null
+                      )
+                    })}
                   </List>
                 </AccordionBody>
               </Accordion>
@@ -274,20 +271,21 @@ export function Tuition() {
 
 export default Tuition;
 
-export const TuitionTable = ({ classInfo, tuitionList }) => {
+export const TuitionTable = ({ filterTuition, classInfo, tuitionList }) => {
   const [classStudentList, setClassStudentList] = useState([])
   const tuitionDefault = glb_sv.getTuitionFee[classInfo.id.split('_')[0]][0].value
   const [tuiList, setTuiList] = useState(tuitionList[classInfo.id] || [])
 
   useEffect(() => {
-    console.log('tuitionList', tuitionList);
-    setTuiList(tuitionList)
-  }, [tuitionList])
-  
-  const filterNopay = (tuition) => {
-    if (typeof tuition !== 'number') return true
-    return tuitionDefault - tuition
-  }
+    const classTuition = tuitionList[classInfo.id] || []
+    setTuiList(classTuition)
+    if (filterTuition) {
+      setClassStudentList(prev => prev.filter(student => tuitionDefault - (classTuition[student.id]?.tuition || 0) === 0))
+    } else {
+      //
+    }
+    console.log('filterTuition', filterTuition);
+  }, [tuitionList, filterTuition])
 
   useEffect(() => {
     classInfo.getStudentList()
@@ -295,12 +293,17 @@ export const TuitionTable = ({ classInfo, tuitionList }) => {
         if (!tuiList?.length) {
           setClassStudentList(list)
         } else {
-          list = list.filter(item => tuiList[item.id] === undefined)
+          list = list.filter(item => tuiList?.[item.id] === undefined)
           setClassStudentList(list)
         }
       })
       .catch(err => console.log(err))
   }, [])
+  
+  const filterNopay = (tuition) => {
+    if (typeof tuition !== 'number') return true
+    return tuitionDefault - tuition
+  }
   
   return (
     <table className="w-full min-w-[640px] table-auto mt-4" >
@@ -323,16 +326,14 @@ export const TuitionTable = ({ classInfo, tuitionList }) => {
       </thead>
       <tbody>
         {classStudentList?.map(({ id, full_name }, index) => {
-          const { tuition, date, note } = tuiList.find(item => item.id_student === id) || {};
+          const { tuition, date, note } = (tuiList || []).find(item => item.id_student === id) || {};
           const className = `py-3 px-5 ${index === authorsTableData.length - 1
             ? ""
             : "border-b border-blue-gray-50"
             }`;
-          if (!filterNopay(tuition)) return (<></>)
+          // if (!filterNopay(tuition)) return (<></>)
           return (
             <tr key={index}>
-          {console.log('tuition, date, note', id, formatDate(date), date)}
-
               <td className={className}>
                 <Typography className="text-xs font-normal text-blue-gray-500">
                   {id}
@@ -343,11 +344,6 @@ export const TuitionTable = ({ classInfo, tuitionList }) => {
                   {full_name}
                 </Typography>
               </td>
-              {/* <td className={className}>
-                            <Typography className="text-xs font-normal text-blue-gray-500">
-                              {'LIFE'}
-                            </Typography>
-                          </td> */}
               <td className={className}>
                 <Typography className="text-xs font-normal text-blue-gray-600">
                   {date ? formatDate(date) : ''}

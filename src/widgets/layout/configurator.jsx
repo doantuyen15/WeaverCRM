@@ -128,7 +128,7 @@ export function Configurator() {
             </Button>
           </div>
           <div className="flex items-center justify-between mt-3">
-            <Typography variant="small" color="gray">
+            <Typography variant="h3" color="gray">
               Hide Sidenav
             </Typography>
             <Switch
@@ -140,8 +140,8 @@ export function Configurator() {
         </div>
         <div className="mb-12">
           <hr />
-          <div className="flex items-center justify-between py-5">
-            <Typography variant="h3" color="blue-gray">
+          <div className="flex items-center justify-between mt-3">
+            <Typography variant="small" color="blue-gray">
               Navbar Fixed
             </Typography>
             <Switch

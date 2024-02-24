@@ -76,16 +76,11 @@ const makeTuition = (list: any[]) => {
 
 const getTuitionTable = (params: any) => {
     return new useRequest((resolve: any, reject: any) => {
-        getDocs(collection(db, `cashflow/tuition/${params}`))
+        getDoc(doc(db, 'tuition', params))
             .then(
                 (snap) => {
                     try {
-                        const tuition = snap.docs.map(doc => {
-                            return (
-                                doc.data()
-                            )
-                        })
-                        resolve(tuition)
+                        resolve(snap.data() || [])
                     } catch (error) {
                         reject(error)
                     }
@@ -330,8 +325,8 @@ const updateApproval = ({approval, ok}: any) => {
                 // await getDocs(collection(db, 'classes')).then(snap => id = snap.docs.length);
                 approval?.data?.forEach((classInfo: ClassInfo) => {
                     const docId = classInfo.id
-                    const studentRef = doc(db, 'classes', docId)
-                    batch.set(studentRef, classInfo)
+                    const classRef = doc(db, 'classes', docId)
+                    batch.set(classRef, classInfo)
                 })
                 batch.delete(approvalRef)
                 batch.commit()
@@ -341,10 +336,12 @@ const updateApproval = ({approval, ok}: any) => {
                 // let id = 0
                 // await getDocs(collection(db, 'classes')).then(snap => id = snap.docs.length);
                 approval?.data?.forEach((tuition: any) => {
-                    const docId = tuition.id_class
+                    const classId = tuition.id_class
                     const date = formatDate(tuition.date, 'MMYYYY')
-                    const studentRef = doc(db, `cashflow/tuition/${date}`, docId)
-                    batch.set(studentRef, tuition)
+                    const tuitionRef = doc(db, 'tuition', date)
+                    batch.update(tuitionRef, {
+                        [classId]: arrayUnion(tuition)
+                    })
                 })
                 batch.delete(approvalRef)
                 batch.commit()

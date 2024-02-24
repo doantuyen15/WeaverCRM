@@ -79,7 +79,7 @@
 		"prebuild": "rimraf build && rimraf dist",
 		"react:build": "react-scripts build",
 		"react:dev": "cross-env BROWSER=none react-scripts start",
-		"electron:build": "electron-builder build --win --publish never",
+		"electron:build": "electron-builder build --mac --publish never",
 		"electron:deploy": "electron-builder build --win --publish always",
 		"electron:dev": "electron .",
 		"build": "npm run react:build && npm run electron:build",
@@ -88,11 +88,15 @@
 		"update": "taze latest -w"
 	},
 	"build": {
+		"productName": "Weaver CRM",
 		"win": {
 			"icon": "public/icon.ico"
 		},
 		"mac": {
-			"icon": "public/icon.ico"
+			"icon": "public/icon.png",
+			"target": [
+                "dmg"
+            ]
 		}
 	},
 	"eslintConfig": {

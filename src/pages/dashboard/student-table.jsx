@@ -227,7 +227,8 @@ export default function StudentTable() {
         try {
             // objectNew[index][key] = value
             objectNew[index].updateInfo(key, value)
-            setObjectNew(objectNew) 
+            setObjectNew(objectNew)
+            forceUpdate()
         } catch (error) {
             console.log(error);
         }
@@ -856,7 +857,10 @@ export default function StudentTable() {
                                                             </MenuHandler>
                                                             <MenuList className="min-w-0 p-1">
                                                                 {ListStatus.map(({ type, status, color }) => (
-                                                                    <MenuItem className="p-1" onClick={() => updateObjectNew(index, Header[0], type)}>
+                                                                    <MenuItem className="p-1" onClick={() => {
+                                                                        updateObjectNew(index, Header[0], type)
+                                                                        forceUpdate()
+                                                                    }}>
                                                                         <Chip
                                                                             className="w-full text-center"
                                                                             variant="ghost"
