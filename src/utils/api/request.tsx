@@ -50,6 +50,7 @@ export function useFirebase(service: string, params: any) {
         case 'create_user': return createUser(params)
         case 'delete_user': return deleteUser(params)
         case 'update_user': return updateUser(params)
+        case 'change_password': return changePassword(params)
         case 'update_attendance': return updateAttendance(params)
         case 'update_lessondiary': return updateLessonDiary(params)
         case 'update_student_score': return updateStudentScore(params)
@@ -58,6 +59,26 @@ export function useFirebase(service: string, params: any) {
         default:
             return Promise.reject('Request rejected!');
     }
+}
+
+const changePassword = (params: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        reject('Tính năng đang phát triển!')
+        // const getToken = httpsCallable(functions, 'getToken');
+        // getToken({ params: params })
+        //     .then((result: any) => {
+        //         updateDoc(doc(db, `account/${account.username}`), { ...account })
+        //         .then(res => {
+        //             resolve(res)
+        //         })
+        //         .catch((error) => {
+        //             reject(error)
+        //         })
+        //     })
+        //     .catch((error) => {
+        //         resolve(error)
+        //     })
+    })
 }
 
 const makeTuition = (list: any[]) => {
@@ -387,25 +408,8 @@ const updateUser = (account: Account) => {
                 // ...
             })
             .finally(() => {
-                console.log('updateUser clear tm', timeoutId);
                 clearTimeout(timeoutId)
-            }
-            );
-        // .finally(() => clearTimeout(timeoutId));
-        // updateProfile(auth.currentUser, account)
-        // .then(() => {
-        //     console.log('ok');
-        //     resolve('ok')
-        //     // Profile updated!
-        //     // ...
-        // })
-        // .catch((error) => {
-        //     reject(error)
-        //     // An error occurred
-        //     // ...
-        // })
-        // .finally(() => clearTimeout(timeoutId));
-
+            });
     })
 }
 
@@ -428,7 +432,8 @@ const getTokenLogin = (params = {}) => {
                     })
             })
             .catch((error) => {
-                console.log('data', error);
+                console.log('getTokenLogin', error);
+                resolve(error)
             })
             .finally(() => clearTimeout(timeoutId))
 

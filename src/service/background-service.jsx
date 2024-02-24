@@ -51,9 +51,7 @@ export function BackgroundService() {
         glb_sv.app = app
 
         const userInfo = useStorage('get', 'userInfo')
-        console.log('readConfigInfo', userInfo);
         if (userInfo.uid) {
-            console.log('userInfo', userInfo);
             glb_sv.userInfo = userInfo
             setUserInfo(dispatch, userInfo)
         }

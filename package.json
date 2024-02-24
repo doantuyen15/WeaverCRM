@@ -14,7 +14,7 @@
 		"releaseType": "release"
 	},
 	"license": "GPL-3.0",
-	"version": "1.0.11",
+	"version": "1.0.12",
 	"private": true,
 	"devDependencies": {
 		"@types/node": "^18.11.10",
@@ -80,7 +80,7 @@
 		"react:build": "react-scripts build",
 		"react:dev": "cross-env BROWSER=none react-scripts start",
 		"electron:build": "electron-builder build --mac --publish never",
-		"electron:deploy": "electron-builder build --win --publish always",
+		"electron:deploy": "electron-builder build -wm --publish always",
 		"electron:dev": "electron .",
 		"build": "npm run react:build && npm run electron:build",
 		"deploy": "npm run react:build && npm run electron:deploy",
@@ -96,7 +96,8 @@
 			"icon": "public/icon.png",
 			"target": [
                 "dmg"
-            ]
+            ],
+			"identity": null
 		}
 	},
 	"eslintConfig": {
