@@ -19,11 +19,11 @@ exports.createSplashScreen = async () => {
 		title: config.appName,
 		width: 500,
 		height: 200,
-		transparent: true,
-		frame: false
+		frame: false,
+		transparent: true
 	});
 	// window.loadFile('splash.html')
-
+	
 	await window.loadURL(
 		config.isDev
 			? "http://localhost:3000/#/splash"

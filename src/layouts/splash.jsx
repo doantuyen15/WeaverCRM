@@ -94,8 +94,8 @@ export function SplashScreen() {
     }
     
     return (
-        <div className="h-screen w-screen grid place-items-center">
-            <div className="bg-white rounded-3xl border-slate-200 border drop-shadow-lg grid place-items-center" style={{ height: '85%', width: '90%' }}>
+        <div className="h-screen w-screen grid place-items-center bg-transparent">
+            <div className="bg-white rounded-3xl border-slate-200 border drop-shadow-lg grid place-items-center" style={{ height: '90%', width: '95%' }}>
                 <img src={LogoDark}/>
                 <div className="flex items-center">
                     {loading === 'error' ?

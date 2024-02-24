@@ -69,7 +69,7 @@ ipcMain.on("finish_init_app", (event, arg) => {
 	setTimeout(() => {
 		config.splash.close()
 		config.mainWindow.maximize()
-	}, 2000);
+	}, 1500);
 });
 
 autoUpdater.on('update-not-available', (event, arg) => {
