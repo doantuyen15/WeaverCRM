@@ -27,6 +27,7 @@ import { ArrowPathIcon, ChevronDownIcon, ChevronUpIcon, PlusIcon, UserPlusIcon }
 import { PaymentPopup } from "../../widgets/modal/payment";
 import useStorage from "../../utils/localStorageHook";
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 import formatNum from "../../utils/formatNumber/formatNum";
 import formatDate from "../../utils/formatNumber/formatDate";
 import { glb_sv } from "../../service";
@@ -101,8 +102,8 @@ export function Tuition() {
 
   const handleMakePayment = (ok, listPayment = []) => {
     console.log('handleMakePayment', ok, listPayment);
-    setLoading(true)
     if (ok) {
+      setLoading(true)
       useFirebase('make_tuition', listPayment)
         .then(() => {
           setLoading(false)
@@ -140,21 +141,26 @@ export function Tuition() {
           </div>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2 max-h-[65vh]">
-          <div className="flex justify-between pr-4 gap-2">
-            <div className="flex items-center">
+          <div className="flex justify-between pr-4">
+            <div className="flex items-center py-2">
               <Typography className="text-xs px-3 font-normal text-blue-gray-500">
                 Ẩn đã đóng
               </Typography>
               <Switch
                 key={'filter'}
+                ripple={false}
                 checked={!filterTuition}
                 onClick={() => setFilterTuition(prev => !prev)}
-                labelProps={{
-                  className: "text-sm font-normal text-blue-gray-500 flex-row-reverse",
+                className="h-full w-full checked:bg-[#fd5f00] py-2"
+                containerProps={{
+                  className: "w-10 h-5",
+                }}
+                circleProps={{
+                  className: "before:hidden h-4 w-4 left-1 border-none",
                 }}
               />
             </div>
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
               <Button disabled={loading} className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
                 <PriceCheckIcon style={{ fontSize: '1rem' }} /> Make a tuition payment
               </Button>
@@ -192,25 +198,25 @@ export function Tuition() {
                       const isPayAll = (tuitionTable[classInfo.id]?.length === classInfo.student_list?.length)
                       return (
                         classInfo.id.includes(item) ? (
-                          <ListItem>
+                          <ListItem ripple={false} className="hover:bg-transparent focus:bg-transparent active:bg-transparent">
                             <Accordion
                               open={!openSubList.includes(index)}
                             >
                               <AccordionHeader
-                                onClick={() => handleOpenSubList(index)}
+                                onClick={() => (!isPayAll || filterTuition) && handleOpenSubList(index)}
                               >
                                 <div className="flex justify-between items-center w-full">
-                                  <div className="flex gap-2 items-center">
+                                  <div className="flex gap-2 items-center justify-between">
                                     <Typography variant="h6" color="blue-gray">
                                       {classInfo.id}
                                     </Typography>
-                                    {openSubList.includes(index) ? (
+                                    {(!isPayAll || filterTuition) ? (openSubList.includes(index) ? (
                                       <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
                                     ) : (
                                       <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
-                                    )}
+                                    )) : <></>}
                                   </div>
-                                  <div className="flex gap-4">
+                                  <div className="flex gap-4 items-center">
                                     <Typography
                                       variant="small"
                                       className="text-[11px] font-bold text-blue-gray-400"
@@ -229,12 +235,13 @@ export function Tuition() {
                                     >
                                       Total student: {classInfo.student_list?.length || 0}
                                     </Typography>
+                                    {isPayAll ? (
+                                        <DoneAllIcon style={{ fontSize: '1.5rem', color: '#fd5f00' }}/>
+                                      ) : <></>}
                                   </div>
                                 </div>
                               </AccordionHeader>
                               <AccordionBody>
-                              {console.log('filterTuition==========', isPayAll, filterTuition)}
-
                                 {!isPayAll || !filterTuition ?
                                   <></> : <TuitionTable filterTuition={filterTuition} classInfo={classInfo} tuitionList={tuitionTable} />
                                 }

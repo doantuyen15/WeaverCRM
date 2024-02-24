@@ -164,8 +164,6 @@ export function PaymentPopup({ open, handleCallback, classList, loading }) {
                                                 </Option>
                                             ))}
                                         </Select>
-                                        {console.log('pricest', prices)}
-
                                         {prices?.length > 1 ? (
                                             <Select
                                                 label="Select Price"
