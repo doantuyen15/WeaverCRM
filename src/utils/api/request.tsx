@@ -140,7 +140,7 @@ const updateStudentScore = (studentList: any[]) => {
             const studentRef = doc(db, 'student', student.id)
 
             batch.update(studentRef, {
-                score_table: student.score_table
+                score_table: arrayUnion(...student.score_table)
             })
         })
         batch.commit()
@@ -191,14 +191,17 @@ const updateAttendance = (data: any) => {
 
 const addStudentClasses = (updateList: any[]) => {
     return new useRequest((resolve: any, reject: any) => {
-        console.log('classes.id', updateList);
         const batch = writeBatch(db);
         updateList.forEach((classes) => {
             console.log('classes.id', classes);
             const classRef = doc(db, `classes/${classes.id}`);
-            classes.student.forEach((item: any) => {
+            classes.student.forEach((student: any) => {
+                const studentRef = doc(db, `student/${student.id}`);
+                batch.update(studentRef, {
+                    class_id: arrayUnion(classes.id)
+                })
                 batch.update(classRef, {
-                    student_list: arrayUnion(doc(db, `student/${item.id}`))
+                    student_list: arrayUnion(studentRef)
                 })
             })
         })

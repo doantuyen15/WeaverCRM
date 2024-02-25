@@ -34,27 +34,9 @@ import { glb_sv } from "../../service";
 import { toast } from "react-toastify";
 
 const Header = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền còn lại', 'Ghi chú']
-const tempData = [
-  {
-    name: 'Toan',
-    class_id: 'LIFE_A2B1_200523',
-    date: Date.now()
-  },
-  {
-    name: 'Tuyen',
-    class_id: 'LIFE_A1A2_070823',
-    date: Date.now()
-  },
-  {
-    name: 'Test',
-    class_id: 'LIFE_A2B1_200523',
-    date: Date.now()
-  }
-]
 
 export function Tuition() {
   const [list, setList] = useState([])
-  const listRef = useRef(tempData)
   const [controller] = useController();
   const { userInfo } = controller;
   const [openPayment, setOpenPayment] = useState(false)

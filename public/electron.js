@@ -10,6 +10,7 @@ const remote = require("@electron/remote/main");
 const config = require("./utils/configElectron");
 const fs = require('fs');
 if (config.isDev) require("electron-reloader")(module);
+const path = require('path')
 
 remote.initialize();
 
@@ -23,20 +24,36 @@ if (!config.isDev) {
 autoUpdater.allowPrerelease = false
 app.commandLine.appendSwitch("lang", "vi-VI");
 
-app.on("ready", async () => {
-	config.splash = await createSplashScreen();
-	console.log(app.getLocale());
-	// config.mainWindow.openDevTools()
-	// globalShortcut.register('F11', () => {
-	// 	config.mainWindow.webContents.openDevTools()
-	// })  
-	// config.popupWindow = await createPopupWindow();
+if (process.defaultApp) {
+    if (process.argv.length >= 2) {
+      app.setAsDefaultProtocolClient(app.getName(), process.execPath, [path.resolve(process.argv[1])])
+    }
+  } else {
+    app.setAsDefaultProtocolClient(app.getName())
+  }
 
-	// showNotification(
-	// 	config.appName,
-	// 	app.getLocale(),
-	// );
-});
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+	app.quit()
+} else {
+	app.on("ready", async () => {
+		config.splash = await createSplashScreen();
+		console.log(app.getLocale());
+		// config.mainWindow.openDevTools()
+		// globalShortcut.register('F11', () => {
+		// 	config.mainWindow.webContents.openDevTools()
+		// })  
+		// config.popupWindow = await createPopupWindow();
+
+		// showNotification(
+		// 	config.appName,
+		// 	app.getLocale(),
+		// );
+	});
+}
+
+
 
 app.on("window-all-closed", () => {
 	if (process.platform !== "darwin") app.quit();
@@ -59,6 +76,7 @@ ipcMain.on("check_update", (event, arg) => {
 });
 
 ipcMain.on("finish_init_app", async (event, arg) => {
+	if(config.mainWindow?.isVisible()) return
 	config.mainWindow = await createMainWindow();
 	setTimeout(() => {
 		config.splash.close()

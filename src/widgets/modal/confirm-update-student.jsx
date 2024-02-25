@@ -39,6 +39,7 @@ const TABLE_HEAD = [
     "Họ",
     "Tên",
     "Ngày đăng ký",
+    "Chương trình học/Lớp",
     "Điểm",
     "Số điện thoại",
     "Ngày sinh",
@@ -46,7 +47,8 @@ const TABLE_HEAD = [
     "Địa chỉ",
     "Email",
     "Người giới thiệu",
-    "Advisor"
+    "Advisor",
+    "Note"
 ];
 
 export function ModalConfirmUpdate({ handleOpen, open, objectNew, objectEdit, handleConfirmCallback, loading, StudentRow }) {

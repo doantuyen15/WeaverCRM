@@ -23,8 +23,8 @@ class globalService {
         this.app = null
         this.functions = null
         this.commonEvent = new Subject()
-        this.showAlert = ({content, handleCallback}) => {
-            this.commonEvent.next({ type: 'SHOW_ALERT', params: {content: content, handleCallback: handleCallback} })
+        this.showAlert = ({ content, handleCallback }) => {
+            this.commonEvent.next({ type: 'SHOW_ALERT', params: { content: content, handleCallback: handleCallback } })
         }
         this.roles = [
             'CEO',
@@ -67,16 +67,62 @@ class globalService {
         ]
         this.getTuitionFee = {
             'LIFE': [
-                {key: 'Monthly', value: 700000}
+                { key: 'Monthly', value: 700000 }
             ],
             'IELTS': [
-                {key: 'Full', value: 4000000},
-                {key: 'Half', value: 2000000}
+                { key: 'Full', value: 4000000 },
+                { key: 'Half', value: 2000000 }
             ],
             'TEENS': [
-                {key: 'Monthly', value: 700000}
+                { key: 'Monthly', value: 700000 }
             ]
         }
+        this.semester = {
+            LIFE: [
+                'Kỳ I',
+                'Kỳ II',
+                'Kỳ III'
+            ],
+            NORMAL: [
+                'Giữa kỳ',
+                'Cuối Kỳ'
+            ],
+            VALUE: {
+                LIFE: [
+                    'mid_i',
+                    'mid_ii',
+                    'mid_iii'
+                ],
+                NORMAL: [
+                    'mid',
+                    'final'
+                ],
+            },
+            MAP: {
+                'mid_i': 'Kỳ I',
+                'mid_ii': 'Kỳ II',
+                'mid_iii': 'Kỳ III',
+                'mid': 'Giữa kỳ',
+                'final': 'Cuối Kỳ'
+            }
+        }
+        this.HEADER_STUDENT = [
+            "Tình trạng đăng ký",
+            "ID",
+            "Họ",
+            "Tên",
+            "Ngày đăng ký",
+            "Chương trình học/lớp",
+            "Điểm",
+            "Số điện thoại",
+            "Ngày sinh",
+            "Số điện thoại phụ",
+            "Địa chỉ",
+            "Email",
+            "Người giới thiệu",
+            "Advisor",
+            "Note"
+        ]
     }
 }
 

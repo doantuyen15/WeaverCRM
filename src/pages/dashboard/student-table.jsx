@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
     MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
-import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, UserPlusIcon, ArrowUpTrayIcon, BackwardIcon, ArrowUturnLeftIcon, ArrowUturnDownIcon, ArrowPathIcon, PlusIcon } from "@heroicons/react/24/solid";
+import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, UserPlusIcon, ArrowUpTrayIcon, BackwardIcon, ArrowUturnLeftIcon, ArrowUturnDownIcon, ArrowPathIcon, PlusIcon, DocumentTextIcon } from "@heroicons/react/24/solid";
 import {
     Card,
     CardHeader,
@@ -47,6 +47,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import InputMask from 'react-input-mask';
 import DefaultSkeleton from './../../widgets/skeleton/index'
+import { glb_sv } from "../../service";
 
 const TABLE_HEAD = [
     "Tình trạng đăng ký",
@@ -54,6 +55,7 @@ const TABLE_HEAD = [
     "Họ",
     "Tên",
     "Ngày đăng ký",
+    "Chương trình học/lớp",
     "Điểm",
     "Số điện thoại",
     "Ngày sinh",
@@ -61,7 +63,8 @@ const TABLE_HEAD = [
     "Địa chỉ",
     "Email",
     "Người giới thiệu",
-    "Advisor"
+    "Advisor",
+    "Note"
 ];
 
 const ListStatus = [
@@ -88,24 +91,27 @@ const Header = [
     "first_name",
     "last_name",
     'register_date',
+    'class_id',
     'has_score',
     'phone',
     'dob',
     'parent_phone',
     'address',
-    'email', //10
+    'email', //11
     'referrer',
     'advisor',
-    'writing',
-    'reading',
-    'speaking',//15
-    'listening',
-    'grammar',
-    'total'
+    'note'//14
+        // 'writing',
+    // 'reading',
+    // 'speaking',
+    // 'listening',
+    // 'grammar',
+    // 'total',
 ]
 
 const HeaderScore = [
     '',
+    'Semester',
     'Grammar',
     'Listening',
     'Speaking',
@@ -208,16 +214,15 @@ export default function StudentTable() {
 
     const updateObjectEdit = (key, value, index) => {
         try {
-            console.log('updateObjectEdit', key, value, index, objectEdit);
             const editIndex = currentEditKey.current[index]
             if (['listening', 'speaking', 'reading', 'writing', 'grammar'].includes(key)) {
-                objectEdit[editIndex].updateScore({key: key, score: value, classId: 'test'})
+                objectEdit[editIndex].updateScore({key: key, score: value, classId: 'test', type: ''})
                 setObjectEdit(objectEdit)
-                forceUpdate()
             } else {
                 objectEdit[editIndex].updateInfo(key, value)
                 setObjectEdit(objectEdit)
             }
+            forceUpdate()
         } catch (error) {
             console.log(error);
         }
@@ -388,7 +393,8 @@ export default function StudentTable() {
                             <div className="w-full md:w-72">
                                 <Input
                                     className=""
-                                    label="Search"
+                                    placeholder="Student name"
+                                    label="Search student"
                                     icon={<MagnifyingGlassIcon className="h-5 w-5" />}
                                     onChange={(e) => handleSearch(e.target.value)}
                                 />
@@ -439,6 +445,7 @@ export default function StudentTable() {
                         <tbody>
                             {studentList?.map(
                                 (item, index) => {
+                                    const testScore = item.score_table.find(item => item.class_id === 'test') || {}
                                     const isLast = index === studentList.length - 1;
                                     const classes = isLast
                                         ? "py-2 px-4"
@@ -562,14 +569,8 @@ export default function StudentTable() {
                                                         />
                                                     </td>
                                                     <td className={classes}>
-                                                        <Button disabled={item.has_score} className="flex items-center gap-3" size="sm"
-                                                            onClick={() => updateObjectEdit(Header[5], !item.has_score, index)}
-                                                        >
-                                                            Nhập Điểm
-                                                        </Button>
-                                                    </td>
-                                                    <td className={classes}>
                                                         <Input
+                                                            readOnly
                                                             variant="static"
                                                             type="text"
                                                             size="sm"
@@ -580,17 +581,25 @@ export default function StudentTable() {
                                                             labelProps={{
                                                                 className: "before:content-none after:content-none",
                                                             }}
-                                                            value={item[Header[6]]}
+                                                            value={item[Header[5]]}
                                                             onChange={(e) => {
-                                                                updateObjectEdit(Header[6], e.target.value, index)
+                                                                updateObjectEdit(Header[5], e.target.value, index)
                                                             }}
                                                         />
                                                     </td>
                                                     <td className={classes}>
+                                                        <Button disabled={item.has_score} className="flex items-center gap-3" size="sm"
+                                                            onClick={() => updateObjectEdit(Header[6], !item.has_score, index)}
+                                                        >
+                                                            Nhập Điểm
+                                                        </Button>
+                                                    </td>
+                                                    <td className={classes}>
                                                         <Input
                                                             variant="static"
-                                                            type="date"
+                                                            type="text"
                                                             size="sm"
+                                                            placeholder={TABLE_HEAD[8]}
                                                             className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
                                                             containerProps={{
                                                                 className: 'min-w-[1px]'
@@ -607,9 +616,8 @@ export default function StudentTable() {
                                                     <td className={classes}>
                                                         <Input
                                                             variant="static"
-                                                            type="text"
+                                                            type="date"
                                                             size="sm"
-                                                            placeholder={TABLE_HEAD[8]}
                                                             className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
                                                             containerProps={{
                                                                 className: 'min-w-[1px]'
@@ -699,6 +707,43 @@ export default function StudentTable() {
                                                             }}
                                                         />
                                                     </td>
+                                                    <td className={classes}>
+                                                        <Input
+                                                            variant="static"
+                                                            type="text"
+                                                            size="sm"
+                                                            placeholder={TABLE_HEAD[13]}
+                                                            className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                            containerProps={{
+                                                                className: 'min-w-[1px]'
+                                                            }}
+                                                            labelProps={{
+                                                                className: "before:content-none after:content-none",
+                                                            }}
+                                                            value={item[Header[13]]}
+                                                            onChange={(e) => {
+                                                                updateObjectEdit(Header[13], e.target.value, index)
+                                                            }}
+                                                        />
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Input //note
+                                                            variant="static"
+                                                            type="text"
+                                                            size="sm"
+                                                            className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                            containerProps={{
+                                                                className: 'min-w-[1px]'
+                                                            }}
+                                                            labelProps={{
+                                                                className: "before:content-none after:content-none",
+                                                            }}
+                                                            value={item[Header[14]]}
+                                                            onChange={(e) => {
+                                                                updateObjectEdit(Header[14], e.target.value, index)
+                                                            }}
+                                                        />
+                                                    </td>
                                                     <td className={classes} onClick={() => handleCancelEdit(index)}>
                                                         <IconButton variant="text">
                                                             <ArrowUturnLeftIcon className="h-4 w-4" />
@@ -725,9 +770,9 @@ export default function StudentTable() {
                                                                         labelProps={{
                                                                             className: "before:content-none after:content-none",
                                                                         }}
-                                                                        value={item.score_table.test[Header[13]]}
+                                                                        value={testScore?.writing}
                                                                         onChange={(e) => {
-                                                                            updateObjectEdit(Header[13], e.target.value, index)
+                                                                            updateObjectEdit('writing', e.target.value, index)
                                                                         }}
                                                                     />
                                                                 </div>
@@ -745,9 +790,9 @@ export default function StudentTable() {
                                                                         labelProps={{
                                                                             className: "before:content-none after:content-none",
                                                                         }}
-                                                                        value={item.score_table.test[Header[14]]}
+                                                                        value={testScore?.reading}
                                                                         onChange={(e) => {
-                                                                            updateObjectEdit(Header[14], e.target.value, index)
+                                                                            updateObjectEdit('reading', e.target.value, index)
                                                                         }}
                                                                     />
                                                                 </div>
@@ -765,9 +810,9 @@ export default function StudentTable() {
                                                                         labelProps={{
                                                                             className: "before:content-none after:content-none",
                                                                         }}
-                                                                        value={item.score_table.test[Header[15]]}
+                                                                        value={testScore?.speaking}
                                                                         onChange={(e) => {
-                                                                            updateObjectEdit(Header[15], e.target.value, index)
+                                                                            updateObjectEdit('speaking', e.target.value, index)
                                                                         }}
                                                                     />
                                                                 </div>
@@ -785,9 +830,9 @@ export default function StudentTable() {
                                                                         labelProps={{
                                                                             className: "before:content-none after:content-none",
                                                                         }}
-                                                                        value={item.score_table.test[Header[16]]}
+                                                                        value={testScore?.listening}
                                                                         onChange={(e) => {
-                                                                            updateObjectEdit(Header[16], e.target.value, index)
+                                                                            updateObjectEdit('listening', e.target.value, index)
                                                                         }}
                                                                     />
                                                                 </div>
@@ -806,9 +851,9 @@ export default function StudentTable() {
                                                                         labelProps={{
                                                                             className: "before:content-none after:content-none",
                                                                         }}
-                                                                        value={item.score_table.test[Header[17]]}
+                                                                        value={testScore.grammar}
                                                                         onChange={(e) => {
-                                                                            updateObjectEdit(Header[17], e.target.value, index)
+                                                                            updateObjectEdit('grammar', e.target.value, index)
                                                                         }}
                                                                     />
                                                                 </div>
@@ -1257,9 +1302,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
     //   onMouseLeave: () => setOpenPopover(false),
     // };
 
-    const TableScore = ({data = {}}) => {
-        const score = data.test
-        console.log('TableScore', score);
+    const TableScore = ({scoreTable = []}) => {
         return (
             <table className="text-left">
                 <thead>
@@ -1281,80 +1324,93 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                     </tr>
                 </thead>
                 <tbody>
-                    <tr key={'scorebody'}>
-                        <td className='p-4'>
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-normal"
-                            >
-                                {score.class_id?.toUpperCase() || 'Test'}
-                            </Typography>
-                        </td>
-                        <td className='p-4'>
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-normal"
-                            >
-                                {score.grammar}
-                            </Typography>
-                        </td>
-                        <td className='p-4'>
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-normal"
-                            >
-                                {score.listening}
-                            </Typography>
-                        </td>
-                        <td className='p-4'>
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-normal"
-                            >
-                                {score.speaking}
-                            </Typography>
-                        </td>
-                        <td className='p-4'>
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-medium"
-                            >
-                                {score.reading}
-                            </Typography>
-                        </td>
-                        <td className='p-4'>
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-medium"
-                            >
-                                {score.writing}
-                            </Typography>
-                        </td>
-                        <td className='p-4'>
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-medium"
-                            >
-                                {score.total}
-                            </Typography>
-                        </td>
-                        <td className='p-4'>
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-medium"
-                            >
-                                {formatDate(score.update_time, 'DD/MM/YYYY')}
-                            </Typography>
-                        </td>
-                    </tr>
+                    {scoreTable.map((score, index) => {
+                        return (
+                            <tr key={'scorebody'}>
+                                <td className='p-4'>
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal"
+                                    >
+                                        {score.class_id?.toUpperCase() || 'Test'}
+                                    </Typography>
+                                </td>
+                                <td className='p-4'>
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal"
+                                    >
+                                        {glb_sv.semester.MAP[score.term]}
+                                    </Typography>
+                                </td>
+                                <td className='p-4'>
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal"
+                                    >
+                                        {score.grammar}
+                                    </Typography>
+                                </td>
+                                <td className='p-4'>
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal"
+                                    >
+                                        {score.listening}
+                                    </Typography>
+                                </td>
+                                <td className='p-4'>
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal"
+                                    >
+                                        {score.speaking}
+                                    </Typography>
+                                </td>
+                                <td className='p-4'>
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-medium"
+                                    >
+                                        {score.reading}
+                                    </Typography>
+                                </td>
+                                <td className='p-4'>
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-medium"
+                                    >
+                                        {score.writing}
+                                    </Typography>
+                                </td>
+                                <td className='p-4'>
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-medium"
+                                    >
+                                        {score.total}
+                                    </Typography>
+                                </td>
+                                <td className='p-4'>
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-medium"
+                                    >
+                                        {formatDate(score.update_time, 'DD/MM/YYYY')}
+                                    </Typography>
+                                </td>
+                            </tr>
+                        )
+                    })}
                 </tbody>
             </table>
         )
@@ -1437,7 +1493,24 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                     </Typography>
                 </div>
             </td>
-            {item.has_score ? (
+            <td className={classes}>
+                <div className="flex flex-row">
+                    {item.class_id.map((id, indexClassID) => {
+                        const isLast = indexClassID === item.class_id?.length - 1;
+                        return (
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-normal"
+                            >
+                                {id}{!isLast && ', '}
+                            </Typography>
+                        )
+                    })}
+
+                </div>
+            </td>
+            {item.score_table?.length > 1 || item.has_score ? (
                 <td className={classes}>
                     <Popover placement="top-start" open={openPopover} handler={() => {
                         // getStudentScore(item.id);
@@ -1450,7 +1523,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                             {loading ? (
                                 <DefaultSkeleton />
                             ) : (
-                                <TableScore data={item.score_table}/>
+                                <TableScore scoreTable={item.score_table}/>
                             )}
                         </PopoverContent>
                     </Popover>
@@ -1519,6 +1592,15 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                     className="font-normal"
                 >
                     {item.advisor}
+                </Typography>
+            </td>
+            <td className={classes}>
+                <Typography
+                    variant="small"
+                    color="blue-gray"
+                    className="font-normal"
+                >
+                    {item.note}
                 </Typography>
             </td>
             {!isConfirm ? (

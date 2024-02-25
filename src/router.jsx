@@ -12,11 +12,13 @@ import {
 	UserGroupIcon,
 	BanknotesIcon,
 	DocumentCheckIcon,
+	DocumentMagnifyingGlassIcon,
 } from "@heroicons/react/24/solid";
 import { Approval, Home, Notifications, Profile, Tuition, Class, Programs, StaffList } from "./pages/dashboard";
 import { SignIn, SignUp } from "./pages/auth";
 import Roles from "./pages/dashboard/roles";
 import StudentTable from "./pages/dashboard/student-table";
+import ReportScore from "./pages/dashboard/report-score";
 
 export const Router = () => {
 	console.log('Router', typeof localStorage.getItem("userInfo"));
@@ -98,10 +100,17 @@ export const routes = [
 			// },
 			{
 				icon: <UserGroupIcon {...menu} />,
-				name: "student",
+				name: "Student list",
 				path: "/student",
 				element: <StudentTable />,
-				roles: ["1"]
+				roles: ["1", "4"]
+			},
+			{
+				icon: <DocumentMagnifyingGlassIcon {...menu} />,
+				name: "Report score",
+				path: "/report",
+				element: <ReportScore />,
+				roles: ["1", "4"]
 			},
 			{
 				icon: <BanknotesIcon {...menu} />,
@@ -115,14 +124,14 @@ export const routes = [
 				name: "class",
 				path: "/class",
 				element: <Class />,
-				roles: ["1"]
+				roles: ["1", "4"]
 			},
 			{
 				icon: <TableCellsIcon {...menu} />,
 				name: "programs",
 				path: "/programs",
 				element: <Programs />,
-				roles: ["1"]
+				roles: ["1", "4"]
 			},
 			// {
 			// 	icon: <InformationCircleIcon {...menu} />,

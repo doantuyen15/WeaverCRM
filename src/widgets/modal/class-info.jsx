@@ -16,11 +16,9 @@ import {
 } from "@material-tailwind/react";
 import { useController } from "../../context";
 import useStorage from "../../utils/localStorageHook";
-import StaffInfo from "../../data/entities/staffInfo";
 import { orderBy } from 'lodash'
 import { ArrowsPointingInIcon, ArrowsPointingOutIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
 import DefaultSkeleton, { TableSkeleton } from "../skeleton";
-import { doc, getDoc } from "firebase/firestore";
 import { StudentRow } from "../../pages/dashboard";
 import { glb_sv } from "../../service";
 import moment from "moment";
@@ -32,12 +30,13 @@ import { toast } from "react-toastify";
 import { AddStudentToClass } from "./add-student-class";
 import formatDate from "../../utils/formatNumber/formatDate";
 
-const TABLE_HEAD = [
+const HEADER_STUDENT = [
     // "Tình trạng đăng ký",
     "ID",
     "Họ",
     "Tên",
     "Ngày đăng ký",
+    "Chương trình học/Lớp",
     "Điểm",
     "Số điện thoại",
     "Ngày sinh",
@@ -45,31 +44,11 @@ const TABLE_HEAD = [
     "Địa chỉ",
     "Email",
     "Người giới thiệu",
-    "Advisor"
+    "Advisor",
+    "Note"
 ];
 
-const semester = {
-    LIFE: [
-        'Kỳ I',
-        'Kỳ II',
-        'Kỳ III'
-    ],
-    NORMAL: [
-        'Giữa kỳ',
-        'Cuối Kỳ'   
-    ],
-    VALUE: {
-        LIFE: [
-            'mid',
-            'mid_ii',
-            'mid_iii'
-        ],
-        NORMAL: [
-            'mid',
-            'final'
-        ],
-    }
-}
+const semester = glb_sv.semester
 
 const HEADER_SCORE = [
     "Listening",
@@ -900,7 +879,7 @@ const TableStudent = ({ studentList, setStudentList }) => {
         <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
             <thead>
                 <tr>
-                    {TABLE_HEAD.map((head, index) => (
+                    {HEADER_STUDENT.map((head, index) => (
                         <th
                             onClick={() => handleSort(index)}
                             key={head}
@@ -1145,7 +1124,7 @@ const ScoreTable = ({ studentList, setStudentList, classId }) => {
                                 <td className={classes + ' min-w-max py-2 bg-blue-50 sticky left-0 border-r z-20'}>{student.full_name}</td>
                                 {semester.VALUE[classId.includes('LIFE') ? 'LIFE' : 'NORMAL'].map((sem, semIndex) => (
                                     SCORE_FIELD.map((field, index) => {
-                                        const score = (student.score_table?.[classId] || {})[sem] || {};
+                                        const score = student.score_table.find(item => item.term === sem) || {}
                                         return (
                                             <td
                                                 onBlur={() => forceUpdate()}
