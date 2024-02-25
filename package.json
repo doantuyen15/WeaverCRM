@@ -80,10 +80,12 @@
 		"react:build": "react-scripts build",
 		"react:dev": "cross-env BROWSER=none react-scripts start",
 		"electron:build": "electron-builder build --mac --publish never",
-		"electron:deploy": "electron-builder build -wm --publish always",
+		"electron:deploy": "electron-builder build --win --publish always",		
+		"electron:deploy-mac": "electron-builder build --mac --publish always",
 		"electron:dev": "electron .",
 		"build": "npm run react:build && npm run electron:build",
 		"deploy": "npm run react:build && npm run electron:deploy",
+		"deploy-mac": "npm run react:build && npm run electron:deploy-mac",
 		"format": "prettier --write .",
 		"update": "taze latest -w"
 	},
@@ -95,7 +97,8 @@
 		"mac": {
 			"icon": "public/icon.png",
 			"target": [
-                "dmg"
+                "dmg",
+				"zip"
             ],
 			"identity": null
 		}

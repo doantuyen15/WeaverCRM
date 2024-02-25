@@ -31,7 +31,7 @@ exports.createSplashScreen = async () => {
 	);
 
 	window.center()
-
+	window.setClosable(true)
 	window.once("ready-to-show", () => {
 		window.show()
 		setTimeout(() => {

@@ -242,9 +242,9 @@ export function Tuition() {
                                 </div>
                               </AccordionHeader>
                               <AccordionBody>
-                                {!isPayAll || !filterTuition ?
-                                  <></> : <TuitionTable filterTuition={filterTuition} classInfo={classInfo} tuitionList={tuitionTable} />
-                                }
+                                <TuitionTable filterTuition={filterTuition} classInfo={classInfo} tuitionList={tuitionTable} />
+                                {/* {!isPayAll || !filterTuition ?
+                                } */}
                               </AccordionBody>
                             </Accordion>
                           </ListItem>
@@ -280,37 +280,53 @@ export default Tuition;
 
 export const TuitionTable = ({ filterTuition, classInfo, tuitionList }) => {
   const [classStudentList, setClassStudentList] = useState([])
+  const classStudentListRef = useRef([])
   const tuitionDefault = glb_sv.getTuitionFee[classInfo.id.split('_')[0]][0].value
   const [tuiList, setTuiList] = useState(tuitionList[classInfo.id] || [])
+  const isPayAll = (tuitionList.length === classInfo.student_list?.length)
 
   useEffect(() => {
     const classTuition = tuitionList[classInfo.id] || []
-    setTuiList(classTuition)
-    if (filterTuition) {
-      setClassStudentList(prev => prev.filter(student => tuitionDefault - (classTuition[student.id]?.tuition || 0) === 0))
-    } else {
-      //
-    }
-    console.log('filterTuition', filterTuition);
-  }, [tuitionList, filterTuition])
-
-  useEffect(() => {
     classInfo.getStudentList()
       .then((list) => {
-        if (!tuiList?.length) {
-          setClassStudentList(list)
-        } else {
-          list = list.filter(item => tuiList?.[item.id] === undefined)
-          setClassStudentList(list)
-        }
+        setClassStudentList(list.map(item => {
+          return {
+            ...item,
+            ...classTuition.find(info => info.id_student === item.id)
+          }
+        }))
+        // classStudentListRef.current = list
+        // if (!tuiList?.length) {
+        //   setClassStudentList(list)
+        // } else {
+        //   // list = list.filter(item => tuiList?.[item.id] === undefined)
+        //   setClassStudentList(list.map(item => {
+        //     return {
+        //       ...item,
+        //       ...tuiList.find(info => info.id_student === item.id)
+        //     }
+        //   }))
+
+        //   // setClassStudentList(list)
+        // }
       })
       .catch(err => console.log(err))
-  }, [])
-  
+  //   if (!filterTuition) {
+      
+  //     // const listFilter = classStudentListRef.current.filter(student => tuitionDefault - (classTuition[student.id]?.tuition || 0) === 0)
+  //     // console.log('classTuition[student.id]?.tuition ', classTuition, classStudentListRef.current.map(student => classTuition[student.id]?.tuition) );
+  //     setClassStudentList(listFilter)
+  //   } else {
+  //     setClassStudentList(classStudentListRef.current)
+  //   }
+  }, [tuitionList])
+
   const filterNopay = (tuition) => {
     if (typeof tuition !== 'number') return true
     return tuitionDefault - tuition
   }
+
+  // if (tuiList.length === 0 && !filterTuition) return <></>
   
   return (
     <table className="w-full min-w-[640px] table-auto mt-4" >
@@ -332,13 +348,13 @@ export const TuitionTable = ({ filterTuition, classInfo, tuitionList }) => {
         </tr>
       </thead>
       <tbody>
-        {classStudentList?.map(({ id, full_name }, index) => {
-          const { tuition, date, note } = (tuiList || []).find(item => item.id_student === id) || {};
+        {classStudentList?.map(({ id, full_name, tuition, date, note }, index) => {
+          // const { tuition, date, note } = (tuiList || []).find(item => item.id_student === id) || {};
           const className = `py-3 px-5 ${index === authorsTableData.length - 1
             ? ""
             : "border-b border-blue-gray-50"
             }`;
-          // if (!filterNopay(tuition)) return (<></>)
+          if ((tuitionDefault - tuition === 0) && !filterTuition) return (<></>)
           return (
             <tr key={index}>
               <td className={className}>

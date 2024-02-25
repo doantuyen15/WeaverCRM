@@ -24,19 +24,12 @@ autoUpdater.allowPrerelease = false
 app.commandLine.appendSwitch("lang", "vi-VI");
 
 app.on("ready", async () => {
-	config.mainWindow = await createMainWindow();
 	config.splash = await createSplashScreen();
 	console.log(app.getLocale());
 	// config.mainWindow.openDevTools()
 	// globalShortcut.register('F11', () => {
 	// 	config.mainWindow.webContents.openDevTools()
 	// })  
-
-	config.tray = createTray();
-	config.tray.on('double-click', () => {
-		if (!config.mainWindow.isVisible())
-		config.mainWindow.show();
-	})
 	// config.popupWindow = await createPopupWindow();
 
 	// showNotification(
@@ -65,9 +58,15 @@ ipcMain.on("check_update", (event, arg) => {
 	else autoUpdater.checkForUpdates()
 });
 
-ipcMain.on("finish_init_app", (event, arg) => {
+ipcMain.on("finish_init_app", async (event, arg) => {
+	config.mainWindow = await createMainWindow();
 	setTimeout(() => {
 		config.splash.close()
+		config.tray = createTray();
+		config.tray.on('double-click', () => {
+			if (!config.mainWindow.isVisible())
+				config.mainWindow.show();
+		})
 		config.mainWindow.maximize()
 	}, 1500);
 });
@@ -94,7 +93,9 @@ autoUpdater.on("update-downloaded", () => {
 });
 
 ipcMain.on("restart_app", () => {
-	autoUpdater.quitAndInstall();
+	setTimeout(() => {
+		autoUpdater.quitAndInstall();
+	}, 2000);
 });
 // ipcMain.on("ipc_event", (event, msg) => {
 // 	if (msg.type === 'update_config') {
