@@ -13,6 +13,7 @@ import {
 	BanknotesIcon,
 	DocumentCheckIcon,
 	DocumentMagnifyingGlassIcon,
+	BriefcaseIcon,
 } from "@heroicons/react/24/solid";
 import { Approval, Home, Notifications, Profile, Tuition, Class, Programs, StaffList } from "./pages/dashboard";
 import { SignIn, SignUp } from "./pages/auth";
@@ -71,7 +72,7 @@ export const routes = [
 				roles: ["1"]
 			},
 			{
-				icon: <UserCircleIcon {...menu} />,
+				icon: <BriefcaseIcon {...menu} />,
 				name: "Danh sách nhân viên",
 				path: "/staff",
 				element: <StaffList />,
@@ -107,7 +108,7 @@ export const routes = [
 			},
 			{
 				icon: <DocumentMagnifyingGlassIcon {...menu} />,
-				name: "Report score",
+				name: "Report",
 				path: "/report",
 				element: <ReportScore />,
 				roles: ["1", "4"]

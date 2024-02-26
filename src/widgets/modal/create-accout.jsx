@@ -13,6 +13,7 @@ import {
     Select,
     Option,
 } from "@material-tailwind/react";
+import { useFirebase } from "../../utils/api/request";
 
 const Roles = [
     'Admin',
@@ -24,6 +25,7 @@ const Roles = [
 ]
 
 export function CreateAccount({ open, handleOpen, handleCallback, editAccount = {} }) {
+    const [staffList, setStaffList] = useState([])
     const [account, setAccount] = useState(editAccount || {
         phoneNumber: "",
         password: "",
@@ -37,11 +39,21 @@ export function CreateAccount({ open, handleOpen, handleCallback, editAccount = 
 
     useEffect(() => {
         setAccount(editAccount)
+        getStaffList()
     }, [editAccount])
     
     const checkInfo = () => {
-        if (!account.username || !account.password || !account.roles) return true
+        if (!account.username || !account.password || !account.roles || !account.staff_name) return true
         else return false
+    }
+
+    const getStaffList = () => {
+        useFirebase('get_staff_list')
+            .then((list) => {
+                console.log('list', list);
+                setStaffList(list)
+            })
+            // .catch(() => setLoading(false))
     }
 
     return (
@@ -118,29 +130,55 @@ export function CreateAccount({ open, handleOpen, handleCallback, editAccount = 
                                 />
                             </div>
                         </div>
-                        <Select
-                            label="Select Roles"
-                            value={Roles[Number(account.roles - 1)]}
-                            selected={(element) =>
-                                element &&
-                                React.cloneElement(element, {
-                                    disabled: true,
-                                    className:
-                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                })
-                            }
-                        >
-                            {Roles?.map((item, index) => (
-                                <Option
-                                    onClick={() => setAccount({
-                                        ...account,
-                                        roles: String(index + 1)
-                                    })}
-                                    key={item} value={item} className="flex items-center gap-2">
-                                    {item}
-                                </Option>
-                            ))}
-                        </Select>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Select
+                                label="Select Roles"
+                                value={Roles[Number(account.roles - 1)]}
+                                selected={(element) =>
+                                    element &&
+                                    React.cloneElement(element, {
+                                        disabled: true,
+                                        className:
+                                            "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                    })
+                                }
+                            >
+                                {Roles?.map((item, index) => (
+                                    <Option
+                                        onClick={() => setAccount({
+                                            ...account,
+                                            roles: String(index + 1)
+                                        })}
+                                        key={item} value={item} className="flex items-center gap-2">
+                                        {item}
+                                    </Option>
+                                ))}
+                            </Select>
+                            <Select
+                                label="Staff id"
+                                value={account.staff_name}
+                                selected={(element) =>
+                                    element &&
+                                    React.cloneElement(element, {
+                                        disabled: true,
+                                        className:
+                                            "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                    })
+                                }
+                            >
+                                {staffList?.map((item, index) => (
+                                    <Option
+                                        onClick={() => setAccount({
+                                            ...account,
+                                            staff_name: item.full_name,
+                                            staff_id: item.id
+                                        })}
+                                        key={item.id} value={item.full_name} className="flex items-center gap-2">
+                                        {item.full_name}
+                                    </Option>
+                                ))}
+                            </Select>
+                        </div>
                     </CardBody>
                     <CardFooter className="pt-0">
                         <Button disabled={checkInfo()} variant="gradient" onClick={() => handleCallback(true, account)} fullWidth>

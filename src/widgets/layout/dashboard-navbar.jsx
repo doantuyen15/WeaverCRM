@@ -1,4 +1,4 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   Navbar,
   Typography,
@@ -21,6 +21,7 @@ import {
   ClockIcon,
   CreditCardIcon,
   Bars3Icon,
+  CalendarDaysIcon,
 } from "@heroicons/react/24/solid";
 import {
   useController,
@@ -30,6 +31,9 @@ import {
 import { Popover } from "@mui/material";
 import { AccountInfo } from "../modal/account-info";
 import { useState } from "react";
+import useStorage from "../../utils/localStorageHook";
+import { useFirebase } from "../../utils/api/request";
+import { toast } from "react-toastify";
 
 export function DashboardNavbar() {
   const [controller, dispatch] = useController();
@@ -37,12 +41,33 @@ export function DashboardNavbar() {
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
   const [openAccountInfo, setOpenAccountInfo] = useState(false)
+  const [openAttendance, setOpenAttendance] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate();
 
   const handleSignOut = () => {
     localStorage.removeItem('userInfo')
     setTimeout(() => {
-      window.location.replace('/dashboard/home')
+      setOpenAccountInfo(false)
+      window.location.reload()
     }, 1000);
+  }
+
+  const handleCheckIn = () => {
+    // const checkedIn = useStorage('get', 'checkIn', false)
+    console.log('userInfo.id', userInfo.id);
+    // if (!checkedIn) {
+      setLoading(true)
+      useFirebase('staff_checkin', userInfo.id)
+        .then(() => {
+          // useStorage('set', 'checkIn', true)
+          toast.success('Điểm danh thành công, yêu cầu đang chờ duyệt!')
+        })
+        .catch(() => {
+          toast.error('Điểm danh thất bại!')
+        })
+        .finally(() => setLoading(false))
+    // }
   }
 
   return (
@@ -99,6 +124,27 @@ export function DashboardNavbar() {
           {userInfo.uid ? (
             <>
               <Button
+                onClick={() => handleCheckIn()}
+                variant="text"
+                color="blue-gray"
+                className="hidden items-center gap-1 px-4 xl:flex normal-case"
+              >
+                <CalendarDaysIcon className="h-5 w-5 text-blue-gray-500" />
+                Check in
+              </Button>
+              <IconButton
+                onClick={() => handleCheckIn()}
+                variant="text"
+                color="blue-gray"
+                className="grid xl:hidden"
+              >
+                <CalendarDaysIcon className="h-5 w-5 text-blue-gray-500" />
+              </IconButton>
+            </>
+          ) : null}
+          {userInfo.uid ? (
+            <>
+              <Button
                 onClick={() => setOpenAccountInfo(true)}
                 variant="text"
                 color="blue-gray"
@@ -108,6 +154,7 @@ export function DashboardNavbar() {
                 {userInfo.displayName || userInfo.uid}
               </Button>
               <IconButton
+                onClick={() => setOpenAccountInfo(true)}
                 variant="text"
                 color="blue-gray"
                 className="grid xl:hidden"

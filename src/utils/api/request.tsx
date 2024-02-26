@@ -9,6 +9,7 @@ import moment from "moment";
 import ClassInfo from "../../data/entities/classesInfo";
 import StudentInfo from "../../data/entities/studentInfo";
 import formatDate from "../formatNumber/formatDate";
+import StaffInfo from "../../data/entities/staffInfo";
 
 const controller = new AbortController();
 const timeout = setTimeout(() => controller.abort(), 10000);
@@ -41,6 +42,7 @@ export function useFirebase(service: string, params: any) {
         case 'get_class_list': return getClassList()
         case 'get_student_score': return getStudentScore()
         case 'get_tuition_table': return getTuitionTable(params)
+        case 'get_staff_attendance': return getStaffAttendance()
         case 'add_student': return addStudent(params)
         case 'update_student': return updateStudent(params)
         case 'create_staff': return createStaff(params)
@@ -51,14 +53,68 @@ export function useFirebase(service: string, params: any) {
         case 'delete_user': return deleteUser(params)
         case 'update_user': return updateUser(params)
         case 'change_password': return changePassword(params)
-        case 'update_attendance': return updateAttendance(params)
+        case 'update_student_attendance': return updateStudentAttendance(params)
+        case 'update_staff_attendance': return updateStaffAttendance(params)
         case 'update_lessondiary': return updateLessonDiary(params)
         case 'update_student_score': return updateStudentScore(params)
         case 'make_tuition': return makeTuition(params)
+        case 'staff_checkin': return staffCheckin(params)
         case 'update_approval': return updateApproval(params)
         default:
             return Promise.reject('Request rejected!');
     }
+}
+
+const staffCheckin = (params: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        addDoc(collection(db, 'approval'), {
+            staff_checkin: {
+                'data': userInfo.staff_id,
+                'requesting_username': userInfo.displayName,
+                'created_at': moment().format('DDMMYYYY')
+            }
+        })
+            .then(resolve)
+            .catch(reject)
+    })
+}
+
+const updateStaffAttendance = (params: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        console.log('data', params);
+
+        setDoc(doc(db, 'staff', 'timetable'), {
+            [params.month]: {
+                ...params.calendar
+            }
+        })
+            .then(res => {
+                resolve(res)
+            })
+            .catch((error: any) => {
+                console.log('error', error);
+                
+                reject(error)
+                // An error occurred
+                // ...
+            })
+    })
+}
+
+const getStaffAttendance = () => {
+    return new useRequest((resolve: any, reject: any) => {
+        getDoc(doc(db, 'staff', 'timetable'))
+            .then(
+                (snap) => {
+                    try {
+                        resolve(snap.data() || [])
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            )
+            .catch(reject)
+    });
 }
 
 const changePassword = (params: any) => {
@@ -87,7 +143,7 @@ const makeTuition = (list: any[]) => {
             make_tuition: {
                 'data': list,
                 'requesting_username': userInfo.displayName,
-                'created_at': moment(Date.now()).format('DD.MM.YYYY')
+                'created_at': moment().format('DDMMYYYY')
             }
         })
             .then(resolve)
@@ -108,7 +164,6 @@ const getTuitionTable = (params: any) => {
                 }
             )
             .catch(reject)
-            .finally(() => clearTimeout(timeoutId));
     });
 }
 
@@ -161,7 +216,7 @@ const updateStudent = (list: any[]) => {
             update_student: {
                 'data': studentList,
                 'requesting_username': userInfo.displayName,
-                'created_at': moment(Date.now()).format('DD.MM.YYYY')
+                'created_at': moment().format('DDMMYYYY')
             }
         })
             .then(resolve)
@@ -169,7 +224,7 @@ const updateStudent = (list: any[]) => {
     })
 }
 
-const updateAttendance = (data: any) => {
+const updateStudentAttendance = (data: any) => {
     return new useRequest((resolve: any, reject: any) => {
         console.log('data', data);
         
@@ -257,7 +312,7 @@ const addClasses = (list: any[]) => {
             add_classes: {
                 'data': classList,
                 'requesting_username': userInfo.displayName,
-                'created_at': moment(Date.now()).format('DD.MM.YYYY')
+                'created_at': moment().format('DDMMYYYY')
             }
         })
             .then(resolve)
@@ -283,7 +338,6 @@ const getStudentScore = () => {
                 }
             )
             .catch(reject)
-            .finally(() => clearTimeout(timeoutId));
     });
 }
 
@@ -305,7 +359,6 @@ const getClassList = () => {
                 }
             )
             .catch(reject)
-            .finally(() => clearTimeout(timeoutId));
     });
 }
 
@@ -371,6 +424,30 @@ const updateApproval = ({approval, ok}: any) => {
                 batch.commit()
                     .then(resolve)
                     .catch(reject)
+            } else if (approval.type === 'staff_checkin') {
+                if (!approval.data) reject('Không xác định được nhân viên')
+                const staffRef = doc(db, 'staff', 'timetable')
+                const month = formatDate(approval.created_at, 'MMYYYY')
+                const date = formatDate(approval.created_at, 'DDMMYYYY')
+                // approval?.data?.forEach((tuition: any) => {
+                //     const classId = tuition.id_class
+                //     const date = formatDate(tuition.date, 'MMYYYY')
+                //     const tuitionRef = doc(db, 'tuition', date)
+                //     batch.update(tuitionRef, {
+                //         [classId]: arrayUnion(tuition)
+                //     })
+                // })
+                batch.update(staffRef, {
+                    [month]: {
+                        [date]: {
+                            [approval.data]: 1
+                        }
+                    }
+                })
+                batch.delete(approvalRef)
+                batch.commit()
+                    .then(resolve)
+                    .catch(reject)
             }
         }
     })
@@ -395,7 +472,6 @@ const getApprovalList = () => {
                 }
             )
             .catch(reject)
-            .finally(() => clearTimeout(timeoutId));
     });
 }
 
@@ -410,9 +486,6 @@ const updateUser = (account: Account) => {
                 // An error occurred
                 // ...
             })
-            .finally(() => {
-                clearTimeout(timeoutId)
-            });
     })
 }
 
@@ -450,7 +523,6 @@ const getTokenLogin = (params = {}) => {
         //     }
         // )
         // .catch(reject)
-        // .finally(() => clearTimeout(timeoutId));
     });
 }
 
@@ -479,14 +551,17 @@ const getStaffList = () => {
         getDocs(collection(db, "staff"))
             .then(
                 (snap) => {
-                    resolve(snap.docs.map(doc => doc.data()))
-                    // snap.forEach((doc) => {
-                    //     console.log(doc.id, "=>", doc.data());
-                    // });
+                    const data: Array<StaffInfo> = []
+                    snap.docs.forEach(doc => {
+                        if (doc.id !== 'timetable') {
+                            const map = new StaffInfo(doc.data())
+                            data.push(map)
+                        }
+                    })
+                    resolve(data)
                 }
             )
             .catch(reject)
-            .finally(() => clearTimeout(timeoutId));
     });
 }
 
@@ -502,7 +577,6 @@ const getStaffAccount = () => {
                 }
             )
             .catch(reject)
-            .finally(() => clearTimeout(timeoutId));
     });
 }
 
@@ -545,7 +619,6 @@ const getStudent = () => {
                 }
             )
             .catch(reject)
-            .finally(() => clearTimeout(timeoutId));
     });
 }
 
@@ -561,7 +634,6 @@ const getAccountInfo = () => {
                 }
             )
             .catch(reject)
-            .finally(() => clearTimeout(timeoutId));
     });
 }
 
@@ -577,7 +649,7 @@ const addStudent = (list: any[]) => {
             add_student: {
                 'data': studentList,
                 'requesting_username': userInfo.displayName,
-                'created_at': moment(Date.now()).format('DD.MM.YYYY')
+                'created_at': moment().format('DDMMYYYY')
             }
         })
             .then(resolve)
@@ -597,7 +669,6 @@ const addToApproval = () => {
                 }
             )
             .catch(reject)
-            .finally(() => clearTimeout(timeoutId));
     });
 }
 

@@ -76,15 +76,17 @@ ipcMain.on("check_update", (event, arg) => {
 });
 
 ipcMain.on("finish_init_app", async (event, arg) => {
-	if(config.mainWindow?.isVisible()) return
+	if(config.mainWindow?.isEnable()) return
 	config.mainWindow = await createMainWindow();
 	setTimeout(() => {
 		config.splash.close()
-		config.tray = createTray();
-		config.tray.on('double-click', () => {
-			if (!config.mainWindow.isVisible())
-				config.mainWindow.show();
-		})
+		if (!config.isDev) {
+			config.tray = createTray();
+			config.tray.on('double-click', () => {
+				if (!config.mainWindow.isVisible())
+					config.mainWindow.show();
+			})
+		}
 		config.mainWindow.maximize()
 	}, 1500);
 });

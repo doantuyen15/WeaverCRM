@@ -22,10 +22,10 @@ export default class StaffInfo {
         this.end_date = info?.end_date || '',
         this.note = info?.note || '',
         this.isUpdate = info?.isUpdate || false
-        this.roles_id = info?.roles_id || ''
-        this.department_id = info?.department_id || ''
-        this.academic_id = info?.academic_id || ''
-        this.working_status_id = info?.working_status_id || ''
+        this.roles_id = info?.roles_id || 0
+        this.department_id = info?.department_id || 0
+        this.academic_id = info?.academic_id || 0
+        this.working_status_id = info?.working_status_id || 0
     }
     updateInfo(key, value) {
         if (this[key] !== undefined) {

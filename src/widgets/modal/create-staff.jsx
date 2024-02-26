@@ -30,33 +30,40 @@ const department = glb_sv.department
 
 const roles = glb_sv.roles
 
-export function CreateStaff({ open, handleCallback }) {
+export function CreateStaff({ open, handleCallback, staffInfo }) {
     const [controller] = useController();
     const { userInfo } = controller;
-    const [loading, setLoading] = useState(false)
     const [newStaff, setNewStaff] = useState({})
-    const [tuition, setTuition] = useState(useStorage('get', 'tuition') || [])
-    const [studentList, setStudentList] = useState([])
+    // const [editStaff, setEditStaff] = useState(staffInfo)
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
 
     useEffect(() => {
-        const newStaffRef = new StaffInfo({})
-        setNewStaff(newStaffRef)
-    }, [])
+        if (!staffInfo) {
+            const newStaffRef = new StaffInfo({})
+            setNewStaff(newStaffRef)
+        } else {
+            const editStaffRef = new StaffInfo({...staffInfo})
+            editStaffRef.updateInfo('isUpdate', true)
+            console.log('editStaffRef', editStaffRef);
+            setNewStaff(editStaffRef)
+        }
+    }, [open])
 
     const updateStaffList = (key, value) => {
-        if (key === 'roles' || key === 'roles_id') {
-            if (newStaff[key]?.includes(value)) {
-                const newRoles= newStaff[key]?.filter(item => item !== value)
-                newStaff.updateInfo(key, newRoles)
-            } else {
-                newStaff.updateInfo(key, [...newStaff[key], value])
-            }
-        } else {
-            newStaff.updateInfo(key, value)
-            setNewStaff(newStaff)
-        }
+        // if (key === 'roles' || key === 'roles_id') {
+        //     if (newStaff[key]?.includes(value)) {
+        //         const newRoles= newStaff[key]?.filter(item => item !== value)
+        //         newStaff.updateInfo(key, newRoles)
+        //     } else {
+        //         newStaff.updateInfo(key, [...newStaff[key], value])
+        //     }
+        // } else {
+        //     newStaff.updateInfo(key, value)
+        //     setNewStaff(newStaff)
+        // }
+        newStaff.updateInfo(key, value)
+        setNewStaff(newStaff)
         forceUpdate()
     }
 
@@ -139,10 +146,10 @@ export function CreateStaff({ open, handleCallback }) {
                                             value={newStaff.roles?.toString()}
                                             label="Chức vụ"
                                             selected={(element) =>
-                                                // (element) &&
-                                                <Typography className="max-w-[200px] text-xs overflow-hidden font-normal text-blue-gray-600 pointer-events-none">
+                                                <Typography variant="small" className="flex truncate items-center opacity-100 px-0 gap-2 pointer-events-none">
                                                     {newStaff.roles?.toString()}
                                                 </Typography>
+                                                // (element) &&
                                                 // React.cloneElement(element, {
                                                 //     disabled: true,
                                                 //     className:
@@ -169,6 +176,7 @@ export function CreateStaff({ open, handleCallback }) {
                                         </Select>
                                         <Select
                                             label="Phòng"
+                                            value={newStaff.department}
                                             selected={(element) =>
                                                 element &&
                                                 React.cloneElement(element, {
@@ -202,6 +210,7 @@ export function CreateStaff({ open, handleCallback }) {
                                         />
                                         <Select
                                             label="Trình độ học vấn"
+                                            value={newStaff.academic}
                                             selected={(element) =>
                                                 element &&
                                                 React.cloneElement(element, {
@@ -229,6 +238,7 @@ export function CreateStaff({ open, handleCallback }) {
                                         />
                                         <Select
                                             label="Trạng thái làm việc"
+                                            value={newStaff.working_status}
                                             selected={(element) =>
                                                 element &&
                                                 React.cloneElement(element, {

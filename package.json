@@ -14,7 +14,7 @@
 		"releaseType": "release"
 	},
 	"license": "GPL-3.0",
-	"version": "1.0.12",
+	"version": "1.0.13",
 	"private": true,
 	"devDependencies": {
 		"@types/node": "^18.11.10",

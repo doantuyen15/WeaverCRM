@@ -16,7 +16,9 @@ class globalService {
             'username': '',
             'roles': '',
             'cert': {},
-            'displayName': ''
+            'displayName': '',
+            'staff_id': '',
+            'staff_name': ''
         }
         this.database = null
         this.auth = null

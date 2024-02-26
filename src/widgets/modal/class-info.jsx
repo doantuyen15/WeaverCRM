@@ -162,13 +162,16 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
     }
 
     const handleUpdateAttendance = () => {
-        useFirebase('update_attendance', {
+        useFirebase('update_student_attendance', {
             id: data.id,
             month: currentMonth,
             data: calendar
         })
             .then(() => {
                 toast.success(`Điểm danh lớp ${data.id} thành công!`)
+            })
+            .catch(() => {
+                toast.error(`Điểm danh lớp ${data.id} thất bại!`)
             })
     }
 
@@ -933,46 +936,6 @@ const TableStudent = ({ studentList, setStudentList }) => {
 }
 
 const Attendance = ({open, handleCallback, studentList, classInfo, calendar, setCalendar}) => {
-    const calendarRef = useRef({})
-    const [, updateState] = React.useState();
-    const forceUpdate = React.useCallback(() => updateState({}), []);
-
-    useEffect(() => {
-
-        // if (classInfo.attendance[currentMonth]?.length > 0) {
-        //     setCalendar(classInfo.attendance[currentMonth])
-        //     calendarRef.current = classInfo.attendance[currentMonth]
-        // }
-        // else generateCalendar()
-    }, [])
-
-    const updateAttendanceList = () => {
-        console.log('classInfo', classInfo);
-    }
-
-    const generateCalendar = () => {
-        const startDate = moment().startOf('month');
-        const endDate = moment().endOf('month');
-        // Lấy mảng các ngày trong tháng
-        const days = [];
-        for (let i = 0; i < endDate.diff(startDate, 'days'); i++) {
-            days.push(startDate.clone().add(i, 'days'));
-        }
-        const schooldays = []
-
-        if (classInfo.class_schedule_id === 0) {
-             days.forEach(day => (day.day() === 1 || day.day() === 3) && schooldays.push({[moment(day).valueOf()]: new Object()}));
-        } else if (classInfo.class_schedule_id === 1) {
-             days.forEach(day => (day.day() === 2 || day.day() === 4) && schooldays.push({[moment(day).valueOf()]: new Object()}));
-        } else if (classInfo.class_schedule_id === 2) {
-             days.forEach(day => (day.day() === 6 || day.day() === 7) && schooldays.push({[moment(day).valueOf()]: new Object()}));
-        } else if (classInfo.class_schedule_id === 3) {
-             days.forEach(day => day.day() === 5 && schooldays.push({[moment(day).valueOf()]: new Object()}));
-        }
-        calendarRef.current = [{[moment().format('M')]: schooldays}]
-        // setCalendar(schooldays)
-    }
-    
     return (
         <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
             <thead>
