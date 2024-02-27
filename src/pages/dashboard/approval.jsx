@@ -47,7 +47,8 @@ const header = [
 ]
 const headerMap = ["type_request", "created_at"]
 const typeList = {
-    'add_student': 'Add Student'
+    'add_student': 'Add Student',
+    'staff_checkin': 'Staff check in'
 }
 const status = [
     'Duyệt',
@@ -70,6 +71,7 @@ export function Approval() {
     const tableRef = useRef([])
     const [openDetail, setOpenDetail] = useState(false)
     const [itemDetail, setItemDetail] = useState([])
+    const [typeApprove, setTypeApprove] = useState('')
 
     useEffect(() => {
         getApprovalList()
@@ -114,6 +116,7 @@ export function Approval() {
     const openApproveDetail = (item, type) => {
         setOpenDetail(true)
         setItemDetail(item)
+        setTypeApprove(type)
     }
 
     return (
@@ -138,30 +141,33 @@ export function Approval() {
                                 <strong>{Object.values(list)?.length || 0} waiting</strong>
                             </Typography>
                         </div>
-                        <Menu placement="left-start">
-                            <MenuHandler>
-                                <div>
+                        <div>
+                            <Button
+                                size="sm"
+                                onClick={() => getApprovalList()}
+                            >
+                                <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
+                            </Button>
+                            {/* <Menu placement="left-start">
+                                <MenuHandler>
+                                    <div>
 
-                                <Button
-                                    size="sm"
-                                    onClick={() => getApprovalList()}
-                                >
-                                    <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
-                                </Button>
-                                <IconButton size="sm" variant="text" color="blue-gray">
-                                    <EllipsisVerticalIcon
-                                        strokeWidth={3}
-                                        fill="currenColor"
-                                        className="h-6 w-6"
-                                    />
-                                </IconButton>
-                                </div>
-                            </MenuHandler>
-                            <MenuList>
-                                <MenuItem>Accept All</MenuItem>
-                                <MenuItem>Reject All</MenuItem>
-                            </MenuList>
-                        </Menu>
+
+                                        <IconButton size="sm" variant="text" color="blue-gray">
+                                            <EllipsisVerticalIcon
+                                                strokeWidth={3}
+                                                fill="currenColor"
+                                                className="h-6 w-6"
+                                            />
+                                        </IconButton>
+                                    </div>
+                                </MenuHandler>
+                                <MenuList>
+                                    <MenuItem>Accept All</MenuItem>
+                                    <MenuItem>Reject All</MenuItem>
+                                </MenuList>
+                            </Menu> */}
+                        </div>
                     </CardHeader>
                     <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
                         <table className="w-full min-w-[640px] table-auto border-separate border-spacing-0">
@@ -214,7 +220,7 @@ export function Approval() {
                                                         color="blue-gray"
                                                         className="font-bold pt-4 pl-4"
                                                     >
-                                                        {typeList[type]}
+                                                        {typeList[type] || type}
                                                     </Typography>
                                                 </tr>
                                                 {list[type].map((item, stt) => (
@@ -251,7 +257,7 @@ export function Approval() {
                                                                 variant="small"
                                                                 className="text-xs font-medium text-blue-gray-600"
                                                             >
-                                                                {item.created_at}
+                                                                {formatDate(item.created_at)}
                                                             </Typography>
                                                         </td>
                                                         <td className={className}>
@@ -292,7 +298,7 @@ export function Approval() {
                     </CardBody>
                 </Card>
             </div>
-            <ModalApproveDetail open={openDetail} handleOpen={setOpenDetail} data={itemDetail}/>
+            <ModalApproveDetail open={openDetail} handleOpen={setOpenDetail} data={itemDetail} typeApprove={typeApprove}/>
         </div>
     );
 }

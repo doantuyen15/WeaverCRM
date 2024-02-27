@@ -39,7 +39,7 @@ export function CreateStaff({ open, handleCallback, staffInfo }) {
     const forceUpdate = React.useCallback(() => updateState({}), []);
 
     useEffect(() => {
-        if (!staffInfo) {
+        if (!staffInfo.id) {
             const newStaffRef = new StaffInfo({})
             setNewStaff(newStaffRef)
         } else {

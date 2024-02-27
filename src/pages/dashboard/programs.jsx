@@ -18,6 +18,11 @@ import {
     PopoverHandler,
     PopoverContent,
     Popover,
+    Menu,
+    MenuHandler,
+    IconButton,
+    MenuList,
+    MenuItem,
 } from "@material-tailwind/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { authorsTableData, projectsTableData } from "../../data";
@@ -47,6 +52,7 @@ export function Programs() {
     const [loading, setLoading] = useState(false)
     const tableRef = useRef([])
     const [classList, setClassList] = useState([])
+    const [objectEdit, setObjectEdit] = useState({})
     const [openList, setOpenList] = useState([])
 
     useEffect(() => {
@@ -80,35 +86,65 @@ export function Programs() {
             .finally(() => setLoading(false))
     }
 
-    const handleUpdateClass = (ok, classList = []) => {
+    const handleAddClasses = (ok, classList = []) => {
         console.log('handleMakePayment', ok, classList);
-        setLoading(true)
-
         if (ok) {
+            setLoading(true)
             useFirebase('add_classes', classList)
                 .then(() => {
                     setLoading(false)
                     toast.success('Tạo lớp thành công, yêu cầu đang chờ duyệt!')
                 })
-        }
+        } 
         setOpenModal(false)
     }
 
-    const handleOpenTable = (item, index) => {
-        // console.log('handleOpenTable', item?.getStudentList());
-        if (openList.includes(index)) setOpenList([...openList.filter(i => i !== index)])
-        else {
-            openList.push(index)
-            setOpenList([...openList])
-            return
-        }
-        item?.getStudentList()
-            .then((student_list) => {
-                classList[index].updateInfo('student_list', student_list)
-                setClassList([...classList])
+    const handleUpdateClass = (type, item) => {
+        setLoading(true)
+        if (type === 'update') {
+            useFirebase('update_class_info', item)
+            .then((res) => {
+                toast.success('Cập nhật thông tin lớp học thành công!')
             })
-            .catch(e => console.error(e))
+            .catch((err) => toast.error('Lỗi: ' + err))
+            .finally(() => {
+                getClassList()
+                setLoading(false)
+            })
+        } else {
+            useFirebase('delete_class_info', item)
+            .then((res) => {
+                toast.success('Xoá lớp học thành công!')
+            })
+            .catch((err) => toast.error('Lỗi: ' + err))
+            .finally(() => {
+                getClassList()
+                setLoading(false)
+            })
+        }
+
     }
+
+    const handleSelectEdit = (item) => {
+        setObjectEdit(item)
+        setOpenModal(true)
+    }
+
+    // const handleOpenTable = (item, index) => {
+    //     // console.log('handleOpenTable', item?.getStudentList());
+    //     if (openList.includes(index)) setOpenList([...openList.filter(i => i !== index)])
+    //     else {
+    //         openList.push(index)
+    //         setOpenList([...openList])
+    //         return
+    //     }
+    //     item?.getStudentList()
+    //         .then((student_list) => {
+    //             classList[index].updateInfo('student_list', student_list)
+    //             setClassList([...classList])
+    //         })
+    //         .catch(e => console.error(e))
+    // }
 
     return (
         <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -142,7 +178,7 @@ export function Programs() {
                                     <AccordionHeader
                                         // onClick={() => handleOpenTable(item, index)}
                                     >
-                                        <div className="flex justify-between items-center w-full">
+                                        <div co className="flex justify-between items-center w-full">
                                             <Typography variant="h6" color="blue-gray">
                                                 {item.id}
                                             </Typography>
@@ -277,6 +313,23 @@ export function Programs() {
                                                         {item.class_schedule}
                                                     </Typography>
                                                 </div>
+                                                <div className="row-span-2 h-full flex items-center">
+                                                    <Menu placement="bottom-end">
+                                                        <MenuHandler>
+                                                            <IconButton size="sm" variant="text" color="blue-gray">
+                                                                <EllipsisVerticalIcon
+                                                                    strokeWidth={3}
+                                                                    fill="currenColor"
+                                                                    className="h-6 w-6"
+                                                                />
+                                                            </IconButton>
+                                                        </MenuHandler>
+                                                        <MenuList>
+                                                            <MenuItem onClick={() => handleSelectEdit(item)}>Edit</MenuItem>
+                                                            <MenuItem onClick={() => handleUpdateClass('delete', item)}>Remove</MenuItem>
+                                                        </MenuList>
+                                                    </Menu>
+                                                </div>
                                             </div>
                                         </div>
                                     </AccordionHeader>
@@ -301,7 +354,7 @@ export function Programs() {
                     </Button>
                 </CardFooter> */}
             </Card>
-            <CreateClasses open={openModal} handleOpen={setOpenModal} handleCallback={handleUpdateClass} />
+            <CreateClasses classInfo={objectEdit} setClassInfo={setObjectEdit} handleUpdateClass={handleUpdateClass} open={openModal} handleOpen={setOpenModal} handleCallback={handleAddClasses} />
         </div>
     );
 }

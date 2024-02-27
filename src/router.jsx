@@ -17,7 +17,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { Approval, Home, Notifications, Profile, Tuition, Class, Programs, StaffList } from "./pages/dashboard";
 import { SignIn, SignUp } from "./pages/auth";
-import Roles from "./pages/dashboard/roles";
+import Roles from "./pages/dashboard/account";
 import StudentTable from "./pages/dashboard/student-table";
 import ReportScore from "./pages/dashboard/report-score";
 

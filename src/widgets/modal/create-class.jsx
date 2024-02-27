@@ -51,11 +51,12 @@ const classType = {
 
 const classSchedule = glb_sv.classSchedule
 
-export function CreateClasses({ open, handleCallback }) {
+export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass, open, handleCallback, isShow = true }) {
     const [controller] = useController();
     const { userInfo } = controller;
     const [selectedClass, setSelectedClass] = useState({})
     const [loading, setLoading] = useState(false)
+    const [isUpdate, setIsUpdate] = useState(false)
     const [classList, setClassList] = useState([])
     const paymentListRef = useRef([])
     const [tuition, setTuition] = useState(useStorage('get', 'tuition') || [])
@@ -176,17 +177,23 @@ export function CreateClasses({ open, handleCallback }) {
                 toast.error('Ngày không hợp lệ!')
             }
         }
-        setClassList(classList)
         forceUpdate()
+        // setClassList(classList)
     }
 
     const handleAdd = () => {
         try {
-            const newClass = new ClassInfo({})
-            console.log('handleAdd', newClass);
-            const list = [...classList]
-            list.push(newClass)
-            setClassList(list)
+            if (!classInfo.id) {
+                const newClass = new ClassInfo({})
+                const list = [...classList]
+                list.push(newClass)
+                setClassList(list)
+            } else {
+                const list = [...classList]
+                list.push(classInfo)
+                setClassList(list)
+                setIsUpdate(true)
+            }
         } catch (error) {
             console.log(error);
         }
@@ -237,6 +244,7 @@ export function CreateClasses({ open, handleCallback }) {
                                         <Select
                                             // disabled={!info.id_student}
                                             label="Select Program"
+                                            value={info.program}
                                             selected={(element) =>
                                                 element &&
                                                 React.cloneElement(element, {
@@ -255,20 +263,18 @@ export function CreateClasses({ open, handleCallback }) {
                                         <Select
                                             // disabled={!info.program}
                                             label="Class level"
+                                            value={info.level}
                                             selected={(element) =>
-                                                element &&
-                                                React.cloneElement(element, {
-                                                    disabled: true,
-                                                    className:
-                                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                                })
+                                                <Typography variant="small" className="flex truncate items-center opacity-100 px-0 gap-2 pointer-events-none">
+                                                    {info.level}
+                                                </Typography>
                                             }
                                         >
-                                            {info.program && (classType[info.program].map(item => (
-                                                <Option onClick={() => updateClassList(index, 'level', item)} key={index} value={item} className="flex items-center gap-2">
+                                            {info.program && (classType[info.program]).map(item => (
+                                                <Option onClick={() => updateClassList(index, 'level', item)} key={item} value={item} className="flex items-center gap-2">
                                                     {item}
                                                 </Option>
-                                            )))}
+                                            ))}
                                         </Select>
                                         <Select
                                             label="CS"
@@ -310,7 +316,7 @@ export function CreateClasses({ open, handleCallback }) {
                                                     Clear
                                                 </Option>
                                             }
-                                            {(staffList || [])?.filter(staff => staff.roles_id?.includes(3))?.map(item => (
+                                            {(staffList || [])?.filter(staff => staff.roles_id === 3)?.map(item => (
                                                 <Option
                                                     onClick={() => {
                                                         updateClassList(index, 'teacher', item.full_name)
@@ -334,7 +340,7 @@ export function CreateClasses({ open, handleCallback }) {
                                                     Clear
                                                 </Option>
                                             }
-                                            {(staffList || [])?.filter(staff => staff.roles_id?.includes(3))?.map(item => (
+                                            {(staffList || [])?.filter(staff => staff.roles_id === 3)?.map(item => (
                                                 <Option
                                                     onClick={() => {
                                                         updateClassList(index, 'sub_teacher', item.full_name)
@@ -358,7 +364,7 @@ export function CreateClasses({ open, handleCallback }) {
                                                     Clear
                                                 </Option>
                                             }
-                                            {(staffList || [])?.filter(staff => staff.roles_id?.includes(4))?.map(item => (
+                                            {(staffList || [])?.filter(staff => staff.roles_id === 5)?.map(item => (
                                                 <Option
                                                     onClick={() => {
                                                         updateClassList(index, 'ta_teacher', item.full_name)
@@ -390,6 +396,7 @@ export function CreateClasses({ open, handleCallback }) {
                                         />
                                         <Select
                                             label="Class Schedule"
+                                            value={info.class_schedule}
                                             selected={(element) =>
                                                 element &&
                                                 React.cloneElement(element, {
@@ -438,8 +445,9 @@ export function CreateClasses({ open, handleCallback }) {
                             // />
                         ))}
                     </CardBody>
-                    <CardFooter className="pt-0 flex justify-end">
-                        {/* <Button 
+                    {isShow ? (
+                        <CardFooter className="pt-0 flex justify-end">
+                            {/* <Button 
                             className="flex align-center" 
                             variant="text" color="blue-gray" 
                             onClick={handleAdd}
@@ -447,20 +455,22 @@ export function CreateClasses({ open, handleCallback }) {
                             <PlusIcon className="w-3.5 h-3.5 mr-2"/>
                             Add more class
                         </Button> */}
-                        <div className="pr-4">
-                            <Button variant="text" color="blue-gray" onClick={() => handleCallback(false)}>
-                                Close
-                            </Button>
-                            <Button
-                                // disabled={classList?.findIndex(item => item.class_name === '') > -1}
-                                loading={loading}
-                                variant="gradient"
-                                onClick={() => handleCallback(true, classList)}
-                            >
-                                Confirm
-                            </Button>
-                        </div>
-                    </CardFooter>
+                            <div className="pr-4">
+                                <Button variant="text" color="blue-gray" onClick={() => handleCallback(false)}>
+                                    Close
+                                </Button>
+                                <Button
+                                    disabled={classList?.findIndex(item => !item.program || !item.level || !item.start_date || !item.end_date) > -1}
+                                    loading={loading}
+                                    variant="gradient"
+                                    onClick={() => isUpdate ? handleUpdateClass('update', classList[0]) : handleCallback(true, classList)}
+                                >
+                                    {isUpdate ? 'Update' : 'Confirm'}
+                                </Button>
+                            </div>
+                        </CardFooter>
+                    ) : null}
+                    
                 </Card>
             </Dialog>
         </>

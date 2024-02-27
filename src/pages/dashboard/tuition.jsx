@@ -224,7 +224,9 @@ export function Tuition() {
                                 </div>
                               </AccordionHeader>
                               <AccordionBody>
-                                <TuitionTable filterTuition={filterTuition} classInfo={classInfo} tuitionList={tuitionTable} />
+                                {moment(classInfo.start_date, 'DD/MM/YYYY').diff(moment(), 'hours') <= 24 ? (
+                                  <TuitionTable filterTuition={filterTuition} classInfo={classInfo} tuitionList={tuitionTable} />
+                                ) : null}
                                 {/* {!isPayAll || !filterTuition ?
                                 } */}
                               </AccordionBody>
@@ -332,6 +334,7 @@ export const TuitionTable = ({ filterTuition, classInfo, tuitionList }) => {
       <tbody>
         {classStudentList?.map(({ id, full_name, tuition, date, note }, index) => {
           // const { tuition, date, note } = (tuiList || []).find(item => item.id_student === id) || {};
+          console.log('day==============', );
           const className = `py-3 px-5 ${index === authorsTableData.length - 1
             ? ""
             : "border-b border-blue-gray-50"

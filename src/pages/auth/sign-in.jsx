@@ -18,6 +18,7 @@ import { NotificationDialog } from '../../widgets/modal/alert-popup';
 import { glb_sv } from '../../service';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
+import { toast } from 'react-toastify';
 
 export function SignIn() {
   const [loading, setLoading] = useState(false)
@@ -58,12 +59,13 @@ export function SignIn() {
         // const errorCode = error.code;
         // const errorMessage = error.message;
         // console.log('error', errorCode, errorMessage);
-        glb_sv.showAlert({
-          content: error,
-          handleCallback: null
-        })
-
+        // glb_sv.showAlert({
+        //   content: error,
+        //   handleCallback: null
+        // })
+        toast.error('Đăng nhập thất bại!')
       })
+      .finally(() => setLoading(false))
 
     // await signInWithEmailAndPassword(auth, `${user}@weaver.edu.vn`, password)
     //   .then(async (userCredential) => {

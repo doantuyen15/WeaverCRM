@@ -7,4 +7,4 @@ export * from "./classes";
 export * from "./programs";
 export * from "./staff";
 export * from "./student-table";
-export * from "./roles";
+export * from "./account";

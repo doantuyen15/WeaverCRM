@@ -177,7 +177,7 @@ export function StaffList() {
         setOpenCreate(false)
         if (ok) {
             if (!staff.isUpdate) {
-                useFirebase('create_staff', {...staff, id: 'WESTAFF' + (staffList?.length + 1)}).then(() => {
+                useFirebase('create_staff', {...staff, id: 'WESTAFF' + ('0' + staffList?.length)}).then(() => {
                     getStaffList()
                 })
             } else {
@@ -194,6 +194,13 @@ export function StaffList() {
     const handleEditStaff = (staff) => {
         setEditStaff(staff)
         setOpenCreate(true)
+    }
+
+    const handleRemoveStaff = (staff) => {
+        useFirebase('delete_staff', staff).then(() => {
+            toast.success('Xoá nhân viên thành công!')
+            getStaffList()
+        }).catch((err) => toast.error('error:' + err))
     }
 
     const handleOpenAttendance = (open) => {
@@ -271,7 +278,7 @@ export function StaffList() {
                     {openAttendance ? (
                         <Attendance setCalendar={setCalendar} calendar={calendar} staffList={staffList}/>
                     ) : (
-                        <StaffTable staffList={staffList} handleEditStaff={handleEditStaff}/>
+                        <StaffTable staffList={staffList} handleEditStaff={handleEditStaff} handleRemoveStaff={handleRemoveStaff}/>
                     )}
                 </CardBody>
                 <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
@@ -296,7 +303,7 @@ export function StaffList() {
 
 export default StaffList;
 
-const StaffTable = ({ staffList, handleEditStaff }) => {
+const StaffTable = ({ staffList, handleEditStaff, handleRemoveStaff }) => {
     const [keySort, setKeySort] = useState('')
     const [isAsc, setIsAsc] = useState(true)
     const staffRef = useRef(staffList || [])
@@ -479,9 +486,20 @@ const StaffTable = ({ staffList, handleEditStaff }) => {
                                     </Typography>
                                 </td>
                                 <td className={className}>
-                                    <IconButton variant="text" onClick={() => handleEditStaff(staffList[key])}>
+                                    {/* <IconButton variant="text" onClick={() => handleEditStaff(staffList[key])}>
                                         <PencilIcon className="h-4 w-4" />
-                                    </IconButton>
+                                    </IconButton> */}
+                                    <Menu placement="left-start">
+                                        <MenuHandler>
+                                            <IconButton variant="text">
+                                                <PencilIcon className="h-4 w-4" />
+                                            </IconButton>
+                                        </MenuHandler>
+                                        <MenuList>
+                                            <MenuItem onClick={() => handleEditStaff(staffList[key])}>Edit</MenuItem>
+                                            <MenuItem onClick={() => handleRemoveStaff(staffList[key])}>Remove</MenuItem>
+                                        </MenuList>
+                                    </Menu>
                                 </td>
                             </tr>
                         );

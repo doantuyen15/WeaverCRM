@@ -67,23 +67,7 @@ const TABLE_HEAD = [
     "Note"
 ];
 
-const ListStatus = [
-    {
-        type: 0,
-        status: 'Đã đăng ký',
-        color: 'green'
-    },
-    {
-        type: 1,
-        status: 'Chưa đăng ký',
-        color: 'red'
-    },
-    {
-        type: 2,
-        status: 'Đã nghỉ',
-        color: 'gray'
-    }
-]
+const ListStatus = glb_sv.ListStatus
 
 const Header = [
     'status_res', //0
@@ -310,9 +294,20 @@ export default function StudentTable() {
         }
     }
 
-    const handleRemove = () => {
-        console.log('handleRemove');
-        // setAlertModal(true)
+    const handleRemove = (item) => {
+        setLoading(true)
+        useFirebase('delete_student', item)
+        .then(() => {
+            toast.success("Xoá học viên thành công!")
+        })
+        .catch((err) => {
+            console.log(err);
+            toast.error(`Xoá học viên không thành công! Lỗi: ${err}`)
+        })
+        .finally(() => {
+            setLoading(false)
+            setOpenModalConfirm(false)
+        })
     }
 
     // const handleMakePayment = (ok, listPayment = []) => {
@@ -1613,7 +1608,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                         </MenuHandler>
                         <MenuList>
                             <MenuItem onClick={() => handleEdit(item, index)}>Edit</MenuItem>
-                            {userInfo.role === '1' && <MenuItem onClick={() => handleRemove(item, index)}>Remove</MenuItem>}
+                            {userInfo.roles == 1 && <MenuItem onClick={() => handleRemove(item, index)}>Remove</MenuItem>}
                         </MenuList>
                     </Menu>
                 </td>

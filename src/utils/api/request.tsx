@@ -45,9 +45,13 @@ export function useFirebase(service: string, params: any) {
         case 'get_staff_attendance': return getStaffAttendance()
         case 'add_student': return addStudent(params)
         case 'update_student': return updateStudent(params)
+        case 'delete_student': return deleteStudent(params)
         case 'create_staff': return createStaff(params)
         case 'update_staff': return updateStaff(params)
+        case 'delete_staff': return deleteStaff(params)
         case 'add_classes': return addClasses(params)
+        case 'update_class_info': return updateClassInfo(params)
+        case 'delete_class_info': return deleteClassInfo(params)
         case 'add_student_classes': return addStudentClasses(params)
         case 'create_user': return createUser(params)
         case 'delete_user': return deleteUser(params)
@@ -63,6 +67,62 @@ export function useFirebase(service: string, params: any) {
         default:
             return Promise.reject('Request rejected!');
     }
+}
+
+const deleteStaff = (staff: StaffInfo) => {
+    return new useRequest((resolve: any, reject: any) => {
+        deleteDoc(doc(db, 'staff', staff.id))
+            .then(res => {
+                resolve(res)
+            })
+            .catch((error: any) => {
+                console.log('error', error);
+                reject(error)
+            })
+    })
+}
+
+const deleteStudent = (student: StudentInfo) => {
+    return new useRequest((resolve: any, reject: any) => {
+        deleteDoc(doc(db, 'student', student.id))
+            .then(res => {
+                resolve(res)
+            })
+            .catch((error: any) => {
+                console.log('error', error);
+                reject(error)
+            })
+    })
+}
+
+const deleteClassInfo = (classInfo: ClassInfo) => {
+    return new useRequest((resolve: any, reject: any) => {
+        console.log('data', classInfo);
+
+        deleteDoc(doc(db, 'classes', classInfo.id))
+            .then(res => {
+                resolve(res)
+            })
+            .catch((error: any) => {
+                console.log('error', error);
+                reject(error)
+            })
+    })
+}
+
+const updateClassInfo = (classInfo: ClassInfo) => {
+    return new useRequest((resolve: any, reject: any) => {
+        console.log('data', classInfo);
+
+        updateDoc(doc(db, 'classes', classInfo.id), {...classInfo})
+            .then(res => {
+                resolve(res)
+            })
+            .catch((error: any) => {
+                console.log('error', error);
+                reject(error)
+            })
+    })
 }
 
 const staffCheckin = (params: any) => {
@@ -509,7 +569,7 @@ const getTokenLogin = (params = {}) => {
             })
             .catch((error) => {
                 console.log('getTokenLogin', error);
-                resolve(error)
+                reject(error)
             })
             .finally(() => clearTimeout(timeoutId))
 
@@ -583,8 +643,7 @@ const getStaffAccount = () => {
 
 const deleteUser = (account: Account) => {
     return new useRequest((resolve: any, reject: any) => {
-        // @ts-expect-error: aaa
-        deleteDoc(doc(db, "account", account.username))
+        deleteDoc(doc(db, "account", String(account.username)))
             .then(() => {
                 toast.success(`Delete account ${account.username} successful!`)
                 resolve('success')

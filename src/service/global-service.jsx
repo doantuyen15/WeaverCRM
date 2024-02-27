@@ -125,6 +125,28 @@ class globalService {
             "Advisor",
             "Note"
         ]
+        this.ListStatus = [
+            {
+                type: 0,
+                status: 'Đã đăng ký',
+                color: 'green'
+            },
+            {
+                type: 1,
+                status: 'Chưa đăng ký',
+                color: 'red'
+            },
+            {
+                type: 2,
+                status: 'Đã nghỉ',
+                color: 'gray'
+            },
+            {
+                type: 3,
+                status: 'Đang chờ lớp',
+                color: 'orange'
+            }
+        ]
     }
 }
 

@@ -35,9 +35,9 @@ import {
     ArrowPathIcon,
 } from "@heroicons/react/24/solid";
 import { Link } from "react-router-dom";
-import { ProfileInfoCard, MessageCard } from "./../../widgets/cards";
-import { platformSettingsData, conversationsData, projectsData } from "./../../data";
-import { authorsTableData, projectsTableData } from "./../../data";
+import { ProfileInfoCard, MessageCard } from "../../widgets/cards";
+import { platformSettingsData, conversationsData, projectsData } from "../../data";
+import { authorsTableData, projectsTableData } from "../../data";
 import React, { useEffect, useRef, useState } from 'react'
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { CreateAccount } from "../../widgets/modal/create-accout";
@@ -134,7 +134,7 @@ export function Roles() {
             setEditAccount({...account, isUpdate: true})
             setOpenCreate(true)
         } else {
-            useFirebase('delete_user', {type, account})
+            useFirebase('delete_user', account)
             .then(() => {
                 setLoading(false)
                 getStaffList()
