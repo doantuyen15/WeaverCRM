@@ -14,7 +14,7 @@
 		"releaseType": "release"
 	},
 	"license": "GPL-3.0",
-	"version": "1.0.14",
+	"version": "1.0.15",
 	"private": true,
 	"devDependencies": {
 		"@types/node": "^18.11.10",
@@ -77,12 +77,12 @@
 	"scripts": {
 		"dev": "concurrently \"npm run react:dev\" \"npm run electron:wait\"",
 		"electron:wait": "wait-on tcp:3000 && npm run electron:dev",
-		"prebuild": "rimraf build && rimraf dist",
 		"react:build": "react-scripts build",
 		"react:dev": "cross-env BROWSER=none react-scripts start",
-		"electron:build": "electron-builder build --mac --publish never",
-		"electron:deploy": "electron-builder build --win --publish always",
+		"electron:build": "electron-builder build --win --publish never",
+		"electron:deploy-win": "electron-builder build --win --publish always",
 		"electron:deploy-mac": "electron-builder build --mac --publish always",
+		"electron:deploy": "electron-builder build -mwl --publish always",
 		"electron:dev": "electron .",
 		"build": "npm run react:build && npm run electron:build",
 		"deploy": "npm run react:build && npm run electron:deploy",
@@ -100,8 +100,7 @@
 			"target": [
 				"dmg",
 				"zip"
-			],
-			"identity": null
+			]
 		}
 	},
 	"eslintConfig": {

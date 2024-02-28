@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
     MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
-import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, UserPlusIcon, ArrowUpTrayIcon, BackwardIcon, ArrowUturnLeftIcon, ArrowUturnDownIcon, ArrowPathIcon, PlusIcon, DocumentTextIcon } from "@heroicons/react/24/solid";
+import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, UserPlusIcon, ArrowUpTrayIcon, BackwardIcon, ArrowUturnLeftIcon, ArrowUturnDownIcon, ArrowPathIcon, PlusIcon, DocumentTextIcon, TableCellsIcon, RectangleGroupIcon, BanknotesIcon } from "@heroicons/react/24/solid";
 import {
     Card,
     CardHeader,
@@ -27,7 +27,9 @@ import {
     AccordionBody,
     Popover,
     PopoverContent,
-    PopoverHandler
+    PopoverHandler,
+    TabsBody,
+    TabPanel
 } from "@material-tailwind/react";
 import { ModalConfirmUpdate } from "../../widgets/modal/confirm-update-student";
 import { orderBy } from 'lodash'
@@ -46,7 +48,7 @@ import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import InputMask from 'react-input-mask';
-import DefaultSkeleton from './../../widgets/skeleton/index'
+import DefaultSkeleton from '../../widgets/skeleton/index'
 import { glb_sv } from "../../service";
 import exportExcelScore from "../../utils/exportExcel/exportScore";
 
@@ -143,6 +145,7 @@ export default function ReportScore() {
     const [controller] = useController();
     const { userInfo } = controller;
     const currentEditKey = useRef({})    
+    const [mod, setMod] = useState('score')
 
     useEffect(() => {
         getStudentList()
@@ -252,90 +255,111 @@ export default function ReportScore() {
 
     return (
         <>
+
             <Card className="h-full w-full">
                 <CardHeader floated={false} shadow={false} className="rounded-none pb-6">
-                    <div className="mb-8 flex items-center justify-between gap-8">
+                    <div className="mb-4 flex items-center justify-between gap-8">
                         <div>
                             <Typography variant="h5" color="blue-gray">
-                                Students list
+                                Report
                             </Typography>
-                        </div>
-                    </div>
-                    <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-                        <div className="w-full flex items-center justify-between">
-                            <div className="w-full md:w-72">
-                                <Input
-                                    className=""
-                                    placeholder="Student name"
-                                    label="Search student"
-                                    icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-                                    onChange={(e) => handleSearch(e.target.value)}
-                                />
-                            </div>
-                            <Button
-                                className="flex items-center gap-3"
-                                size="sm"
-                                onClick={() => getStudentList()}
-                            >
-                                <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
-                            </Button>
+                            <Typography color="gray" className="mt-1 font-normal">
+                                Export reports to Excel 
+                            </Typography>
                         </div>
                     </div>
                 </CardHeader>
                 <CardBody className="p-0 px-0 overflow-auto max-h-[70vh]">
-                    <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
-                        <thead>
-                            <tr>
-                                {TABLE_HEAD.map((head, index) => (
-                                    <th
-                                        onClick={() => handleSort(index)}
-                                        key={head}
-                                        className="z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors hover:bg-blue-gray-200"
-                                    >
-                                        <Typography
-                                            variant="small"
-                                            color="blue-gray"
-                                            className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
-                                        >
-                                            {head}{" "}
-                                            {(index === 1 || index === 3) && (
-                                                keySort !== index ? (
-                                                    <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
-                                                ) : keySort === index && isAsc ? (
-                                                    <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
-                                                ) : (
-                                                    <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
-                                                )
-                                            )}
-                                        </Typography>
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {studentList?.map(
-                                (item, index) => {
-                                    const testScore = item.score_table.find(item => item.class_id === 'test') || {}
-                                    const isLast = index === studentList.length - 1;
-                                    const classes = isLast
-                                        ? "py-2 px-4"
-                                        : "py-2 px-4 border-b border-blue-gray-50";
-                                    return (
-                                        <StudentRow
-                                            classes={classes}
-                                            item={item}
-                                            index={index}
-                                            handleEdit={handleEdit}
-                                            handleRemove={handleRemove}
-                                        />
-                                    );
-                                },
-                            )}
-                        </tbody>
-                    </table>
+                    <div className="flex right-0 top-30 absolute items-center justify-end gap-4">
+                        <Button
+                            className="flex items-center gap-3"
+                            size="sm"
+                            onClick={() => getStudentList()}
+                        >
+                            <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
+                        </Button>
+                    </div>
+                    <Tabs value={mod}>
+                        <TabsHeader className="max-w-max mx-auto">
+                            <Tab value="score" className="w-48 h-10">
+                                <TableCellsIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
+                                Score
+                            </Tab>
+                            <Tab value="tuition" className="w-48 h-10">
+                                <BanknotesIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
+                                Tuition
+                            </Tab>
+                        </TabsHeader>
+                        <TabsBody>
+                            <TabPanel key={'score'} value={'score'}>
+                                <div className="w-full md:w-72 mb-2">
+                                    <Input
+                                        className=""
+                                        placeholder="Student name"
+                                        label="Search student"
+                                        icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                                        onChange={(e) => handleSearch(e.target.value)}
+                                    />
+                                </div>
+                                <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
+                                    <thead>
+                                        <tr>
+                                            {TABLE_HEAD.map((head, index) => (
+                                                <th
+                                                    onClick={() => handleSort(index)}
+                                                    key={head}
+                                                    className="z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors hover:bg-blue-gray-200"
+                                                >
+                                                    <Typography
+                                                        variant="small"
+                                                        color="blue-gray"
+                                                        className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
+                                                    >
+                                                        {head}{" "}
+                                                        {(index === 1 || index === 3) && (
+                                                            keySort !== index ? (
+                                                                <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
+                                                            ) : keySort === index && isAsc ? (
+                                                                <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
+                                                            ) : (
+                                                                <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
+                                                            )
+                                                        )}
+                                                    </Typography>
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {studentList?.map(
+                                            (item, index) => {
+                                                const testScore = item.score_table.find(item => item.class_id === 'test') || {}
+                                                const isLast = index === studentList.length - 1;
+                                                const classes = isLast
+                                                    ? "py-2 px-4"
+                                                    : "py-2 px-4 border-b border-blue-gray-50";
+                                                return (
+                                                    <StudentRow
+                                                        classes={classes}
+                                                        item={item}
+                                                        index={index}
+                                                        handleEdit={handleEdit}
+                                                        handleRemove={handleRemove}
+                                                    />
+                                                );
+                                            },
+                                        )}
+                                    </tbody>
+                                </table>
+                            </TabPanel>
+                            <TabPanel key={'treemap'} value={'treemap'}>
+                                <></>
+                            </TabPanel>
+                        </TabsBody>
+                    </Tabs>
                 </CardBody>
-                <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-                </CardFooter>
+                {/* <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
+                </CardFooter> */}
                 <ModalConfirmUpdate
                     open={openModalConfirm}
                     handleOpen={setOpenModalConfirm}

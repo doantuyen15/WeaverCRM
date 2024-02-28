@@ -230,7 +230,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                     handleCallback(false)
                     setSelectedClass({})
                 }}
-                className="bg-transparent shadow-none w-min-w"
+                className={isShow ? "" : "pointer-events-none" + " bg-transparent shadow-none w-min-w"}
             >
                 <Card className="mx-auto w-full">
                     <CardBody className="flex flex-col">

@@ -76,11 +76,16 @@ export default class ClassInfo {
                 // })
                 Promise.all(this.student_list.map(docRef => getDoc(docRef)))
                     .then((res) => {
-                        const items = res.map(i => {
-                            return new StudentInfo ({
-                                ...i.data(),
-                                id: i.id
-                            })
+                        const items = []
+                        res.forEach(i => {
+                            if (i.data()) {
+                                items.push(
+                                    new StudentInfo({
+                                        ...i.data(),
+                                        id: i.id
+                                    })
+                                )
+                            }
                         })
                         this.student_list = items
                         this.converted = true

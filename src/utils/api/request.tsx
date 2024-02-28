@@ -435,8 +435,11 @@ const updateApproval = ({approval, ok}: any) => {
                 return
             }
             if (approval.type === 'add_student') {
-                let id = 0
-                await getDocs(collection(db, 'student')).then(snap => id = snap.docs.length);
+                let id: any = 0
+                await getDocs(collection(db, 'student')).then(snap => {
+                    const lastID = (snap.docs || [])?.at(-1)?.id || '';
+                    id = Number(lastID?.slice(2))
+                });
                 approval?.data?.forEach((student: any) => {
                     id += 1
                     const docId = 'WE' + ('00000' + id).slice(-5)

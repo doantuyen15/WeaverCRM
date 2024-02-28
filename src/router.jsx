@@ -14,12 +14,13 @@ import {
 	DocumentCheckIcon,
 	DocumentMagnifyingGlassIcon,
 	BriefcaseIcon,
+	SwatchIcon,
 } from "@heroicons/react/24/solid";
 import { Approval, Home, Notifications, Profile, Tuition, Class, Programs, StaffList } from "./pages/dashboard";
 import { SignIn, SignUp } from "./pages/auth";
 import Roles from "./pages/dashboard/account";
 import StudentTable from "./pages/dashboard/student-table";
-import ReportScore from "./pages/dashboard/report-score";
+import ReportScore from "./pages/dashboard/reports";
 
 export const Router = () => {
 	console.log('Router', typeof localStorage.getItem("userInfo"));
@@ -128,7 +129,7 @@ export const routes = [
 				roles: ["1", "4"]
 			},
 			{
-				icon: <TableCellsIcon {...menu} />,
+				icon: <SwatchIcon {...menu} />,
 				name: "programs",
 				path: "/programs",
 				element: <Programs />,

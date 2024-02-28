@@ -74,7 +74,7 @@ export function Home() {
           />
         ))}
       </div>
-      {/* <div className="mb-4 grid grid-cols-1 gap-6">
+      <div className="mb-4 grid grid-cols-1 gap-6">
         <Card className="overflow-hidden border border-blue-gray-100 shadow-sm">
           <CardHeader
             floated={false}
@@ -84,7 +84,7 @@ export function Home() {
           >
             <div>
               <Typography variant="h6" color="blue-gray" className="mb-1">
-                Projects
+                Bảng thông tin
               </Typography>
               <Typography
                 variant="small"
@@ -210,9 +210,9 @@ export function Home() {
             className="m-0 p-6"
           >
             <Typography variant="h6" color="blue-gray" className="mb-2">
-              Orders Overview
+              Task
             </Typography>
-            <Typography
+            {/* <Typography
               variant="small"
               className="flex items-center gap-1 font-normal text-blue-gray-600"
             >
@@ -221,7 +221,7 @@ export function Home() {
                 className="h-3.5 w-3.5 text-green-500"
               />
               <strong>24%</strong> this month
-            </Typography>
+            </Typography> */}
           </CardHeader>
           <CardBody className="pt-0">
             {ordersOverviewData.map(
@@ -259,7 +259,7 @@ export function Home() {
             )}
           </CardBody>
         </Card>
-      </div> */}
+      </div>
     </div>
   );
 }

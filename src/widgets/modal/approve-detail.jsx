@@ -21,21 +21,24 @@ const ListStatus = glb_sv.ListStatus
 
 const TABLE_HEAD = [
     "Tình trạng đăng ký",
+    "Họ",
+    "Tên",
+    "Ngày đăng ký",
     "Số điện thoại",
-    "Họ & tên",
     "Ngày sinh",
     "Số điện thoại phụ",
     "Địa chỉ",
     "Email",
     "Người giới thiệu",
-    "Người phụ trách tư vấn/hướng dẫn học sinh",
+    "Advisor",
     'Listening',
     'Speaking',
     'Reading',
-    'Writing'
+    'Writing',
+    'Grammar & Vocabulary'
 ];
 
-export function ModalApproveDetail({ handleOpen, open, data, typeApprove }) {
+export function ModalApproveDetail({ setOpen, open, data, typeApprove }) {
     console.log('ModalApproveDetail', data);
     return (
         <>
@@ -43,7 +46,7 @@ export function ModalApproveDetail({ handleOpen, open, data, typeApprove }) {
                 <Dialog
                     // size="xs"
                     open={open}
-                    handler={handleOpen}
+                    handler={() => setOpen('')}
                     className="bg-transparent shadow-none max-w-[80%]"
                 >
                     <Card className="h-full w-full">
@@ -72,8 +75,8 @@ export function ModalApproveDetail({ handleOpen, open, data, typeApprove }) {
                                         (item, index) => {
                                             const isLast = index === data.length - 1;
                                             const classes = isLast
-                                                ? "p-2"
-                                                : "p-2 border-b border-blue-gray-50";
+                                                ? "p-4"
+                                                : "p-4 border-b border-blue-gray-50";
                                             return (
                                                 <tr key={index} className="even:bg-blue-gray-50/50">
                                                     <td className={classes}>
@@ -100,18 +103,42 @@ export function ModalApproveDetail({ handleOpen, open, data, typeApprove }) {
                                                                 color="blue-gray"
                                                                 className="font-normal"
                                                             >
-                                                                {FormatPhone(item.phone)}
+                                                                {item.first_name}
                                                             </Typography>
                                                         </div>
                                                     </td>
                                                     <td className={classes}>
-                                                        <Typography
-                                                            variant="small"
-                                                            color="blue-gray"
-                                                            className="font-normal"
-                                                        >
-                                                            {item.full_name}
-                                                        </Typography>
+                                                        <div className="flex flex-col">
+                                                            <Typography
+                                                                variant="small"
+                                                                color="blue-gray"
+                                                                className="font-normal"
+                                                            >
+                                                                {item.last_name}
+                                                            </Typography>
+                                                        </div>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <div className="flex flex-col">
+                                                            <Typography
+                                                                variant="small"
+                                                                color="blue-gray"
+                                                                className="font-normal"
+                                                            >
+                                                                {formatDate(item.register_date)}
+                                                            </Typography>
+                                                        </div>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <div className="flex flex-col">
+                                                            <Typography
+                                                                variant="small"
+                                                                color="blue-gray"
+                                                                className="font-normal"
+                                                            >
+                                                                {FormatPhone(item.phone)}
+                                                            </Typography>
+                                                        </div>
                                                     </td>
                                                     <td className={classes}>
                                                         <Typography
@@ -173,7 +200,7 @@ export function ModalApproveDetail({ handleOpen, open, data, typeApprove }) {
                                                             color="blue-gray"
                                                             className="font-normal"
                                                         >
-                                                            {item.listening}
+                                                            {item.score_table[0]?.listening}
                                                         </Typography>
                                                     </td>
                                                     <td className={classes}>
@@ -182,7 +209,7 @@ export function ModalApproveDetail({ handleOpen, open, data, typeApprove }) {
                                                             color="blue-gray"
                                                             className="font-normal"
                                                         >
-                                                            {item.speaking}
+                                                            {item.score_table[0]?.speaking}
                                                         </Typography>
                                                     </td>
                                                     <td className={classes}>
@@ -191,7 +218,7 @@ export function ModalApproveDetail({ handleOpen, open, data, typeApprove }) {
                                                             color="blue-gray"
                                                             className="font-normal"
                                                         >
-                                                            {item.reading}
+                                                            {item.score_table[0]?.reading}
                                                         </Typography>
                                                     </td>
                                                     <td className={classes}>
@@ -200,7 +227,16 @@ export function ModalApproveDetail({ handleOpen, open, data, typeApprove }) {
                                                             color="blue-gray"
                                                             className="font-normal"
                                                         >
-                                                            {item.writing}
+                                                            {item.score_table[0]?.writing}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            color="blue-gray"
+                                                            className="font-normal"
+                                                        >
+                                                            {item.score_table[0]?.grammar}
                                                         </Typography>
                                                     </td>
                                                 </tr>
@@ -223,7 +259,7 @@ export function ModalApproveDetail({ handleOpen, open, data, typeApprove }) {
                     </Card>
                 </Dialog>
             ) : typeApprove === 'add_classes' ? (
-                <CreateClasses handleCallback={() => handleOpen()} classInfo={data[0]} open={open} isShow={false} />
+                <CreateClasses handleCallback={() => setOpen('')} classInfo={data[0]} open={open} isShow={false} />
             ) : <></>}
         </>
 

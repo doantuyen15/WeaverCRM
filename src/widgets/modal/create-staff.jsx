@@ -40,12 +40,11 @@ export function CreateStaff({ open, handleCallback, staffInfo }) {
 
     useEffect(() => {
         if (!staffInfo.id) {
-            const newStaffRef = new StaffInfo({})
+            const newStaffRef = new StaffInfo()
             setNewStaff(newStaffRef)
         } else {
             const editStaffRef = new StaffInfo({...staffInfo})
             editStaffRef.updateInfo('isUpdate', true)
-            console.log('editStaffRef', editStaffRef);
             setNewStaff(editStaffRef)
         }
     }, [open])
@@ -96,6 +95,7 @@ export function CreateStaff({ open, handleCallback, staffInfo }) {
                                         label="Tên nhân viên"
                                         value={newStaff.full_name}
                                         onChange={(e) => updateStaffList('full_name', e.target.value)}
+                                        required
                                     />
                                     <Input
                                         variant="outlined"
@@ -136,16 +136,35 @@ export function CreateStaff({ open, handleCallback, staffInfo }) {
                                             value={newStaff.email}
                                             onChange={(e) => updateStaffList('email', e.target.value)}
                                         />
-                                        <Input
-                                            variant="outlined"
-                                            label="Address"
-                                            value={newStaff.address}
-                                            onChange={(e) => updateStaffList('address', e.target.value)}
-                                        />
+                                        <Select
+                                            label="Phòng"
+                                            value={newStaff.department}
+                                            error={!newStaff.department?.toString()}
+                                            selected={(element) =>
+                                                element &&
+                                                React.cloneElement(element, {
+                                                    disabled: true,
+                                                    className:
+                                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                                })
+                                            }
+                                        >
+                                            {department.map((item, id) => (
+                                                <Option onClick={() => {
+                                                    updateStaffList('department', item)
+                                                    updateStaffList('department_id', id)
+                                                }}
+                                                    key={item} value={item} className="flex items-center gap-2">
+                                                    {item}
+                                                </Option>
+                                            ))}
+                                        </Select>
                                         <Select
                                             value={newStaff.roles?.toString()}
                                             label="Chức vụ"
+                                            error={!newStaff.roles?.toString()}
                                             selected={(element) =>
+                                                element &&
                                                 <Typography variant="small" className="flex truncate items-center opacity-100 px-0 gap-2 pointer-events-none">
                                                     {newStaff.roles?.toString()}
                                                 </Typography>
@@ -163,39 +182,22 @@ export function CreateStaff({ open, handleCallback, staffInfo }) {
                                                     key={item} value={item} className="flex items-center gap-1"
                                                 >
                                                     <div className="flex w-full items-center" onClick={(e) => {
-                                                        e.stopPropagation()
+                                                        // e.stopPropagation()
                                                         updateStaffList('roles', item)
                                                         updateStaffList('roles_id', id)
                                                     }}>
-                                                        <Checkbox
-                                                            className="w-4 h-4" checked={newStaff.roles?.includes(item)} />
+                                                        {/* <Checkbox className="w-4 h-4" checked={newStaff.roles?.includes(item)} /> */}
                                                         {item}
                                                     </div>
                                                 </Option>
                                             ))}
                                         </Select>
-                                        <Select
-                                            label="Phòng"
-                                            value={newStaff.department}
-                                            selected={(element) =>
-                                                element &&
-                                                React.cloneElement(element, {
-                                                    disabled: true,
-                                                    className:
-                                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                                })
-                                            }
-                                        >
-                                            {department.map((item, id) => (
-                                                <Option onClick={() => {
-                                                    updateStaffList('department', item)
-                                                    updateStaffList('department_id', id)
-                                                }} 
-                                                key={item} value={item} className="flex items-center gap-2">
-                                                    {item}
-                                                </Option>
-                                            ))}
-                                        </Select>
+                                        <Input
+                                            variant="outlined"
+                                            label="Address"
+                                            value={newStaff.address}
+                                            onChange={(e) => updateStaffList('address', e.target.value)}
+                                        />
                                         <Input
                                             variant="outlined"
                                             label="STK Ngân hàng"
@@ -291,7 +293,7 @@ export function CreateStaff({ open, handleCallback, staffInfo }) {
                                 Close
                             </Button>
                             <Button
-                                disabled={(newStaff.department_id === '' || newStaff.roles_id?.length === 0)}
+                                disabled={(!newStaff.full_name || newStaff.department_id < 0 || newStaff.roles_id < 0)}
                                 variant="gradient"
                                 onClick={() => handleCallback(true, newStaff)}
                             >

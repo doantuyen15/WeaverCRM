@@ -56,11 +56,12 @@ export function Programs() {
     const [openList, setOpenList] = useState([])
 
     useEffect(() => {
-        if (!glb_sv.classList) getClassList()
-        else {
-            tableRef.current = glb_sv.classList
-            setClassList(glb_sv.classList)
-        }
+        getClassList()
+        // if (!glb_sv.classList) getClassList()
+        // else {
+        //     tableRef.current = glb_sv.classList
+        //     setClassList(glb_sv.classList)
+        // }
     }, [])
 
     const getClassList = () => {

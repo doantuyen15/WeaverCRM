@@ -76,7 +76,7 @@ export function Class() {
                 // console.log('get_class_list', await data[0].getStudentList());
                 tableRef.current = data
                 setClassList(data)
-                
+                console.log('class', data);
                 // handleSort(1)
                 // glb_sv.classList = data
                 // useStorage('set', 'classList', data)

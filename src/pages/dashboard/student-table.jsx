@@ -215,7 +215,12 @@ export default function StudentTable() {
     const updateObjectNew = (index, key, value) => {
         try {
             // objectNew[index][key] = value
-            objectNew[index].updateInfo(key, value)
+            if (['listening', 'speaking', 'reading', 'writing', 'grammar'].includes(key)) {
+                objectNew[index].updateScore({key: key, score: value, classId: 'test', type: ''})
+            } else {
+                objectNew[index].updateInfo(key, value)
+            }
+            console.log('updateObjectNew', objectNew);
             setObjectNew(objectNew)
             forceUpdate()
         } catch (error) {
@@ -363,7 +368,13 @@ export default function StudentTable() {
                             </Typography>
                         </div>
                         <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                            <Button className="flex items-center gap-3" size="sm" onClick={handleConfirm} disabled={objectNew?.length < 1 && objectEdit.length < 1}>
+                            {console.log('check', objectEdit.findIndex(item => !item?.last_name || !item?.first_name))}
+                            <Button disabled={
+                                (objectNew?.length > 0 && objectNew.findIndex(item => !item.last_name || !item.first_name) > -1) || 
+                                (objectEdit?.length > 0 && objectEdit.findIndex(item => !item.last_name || !item.first_name) > -1 ) ||
+                                (objectNew?.length < 1 && objectEdit?.length < 1)
+                            } 
+                                className="flex items-center gap-3" size="sm" onClick={handleConfirm}>
                                 <ArrowUpTrayIcon strokeWidth={2} className="h-4 w-4" /> Confirm & Request
                             </Button>
                             <Button className="flex items-center gap-3" size="sm" onClick={handleAddStudent}>
@@ -977,8 +988,28 @@ export default function StudentTable() {
                                                     />
                                                 </td>
                                                 <td className={classes}>
+                                                    <Input
+                                                        variant="static"
+                                                        readOnly
+                                                        type="text"
+                                                        size="sm"
+                                                        placeholder={TABLE_HEAD[5]}
+                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                        containerProps={{
+                                                            className: 'min-w-[1px]'
+                                                        }}
+                                                        labelProps={{
+                                                            className: "before:content-none after:content-none",
+                                                        }}
+                                                        value={item[Header[5]]}
+                                                        onChange={(e) => {
+                                                            updateObjectNew(index, Header[5], e.target.value)
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td className={classes}>
                                                     <Button className="flex items-center gap-3" size="sm" 
-                                                    onClick={() => updateObjectNew(index, Header[5], !item?.has_score)}
+                                                    onClick={() => updateObjectNew(index, Header[6], !item?.has_score)}
                                                     >
                                                         Nhập Điểm
                                                     </Button>
@@ -995,9 +1026,9 @@ export default function StudentTable() {
                                                         labelProps={{
                                                             className: "before:content-none after:content-none",
                                                         }}
-                                                        value={item[Header[6]]}
+                                                        value={item[Header[7]]}
                                                         onChange={(e) => {
-                                                            updateObjectNew(index, Header[6], e.target.value)
+                                                            updateObjectNew(index, Header[7], e.target.value)
                                                         }}
                                                     />
                                                 </td>
@@ -1019,7 +1050,7 @@ export default function StudentTable() {
                                                         }}
                                                     />
                                                 </td>
-                                                <td className={classes}>
+                                                {/* <td className={classes}>
                                                     <Input
                                                         variant="static"
                                                         type="text"
@@ -1037,7 +1068,7 @@ export default function StudentTable() {
                                                             updateObjectNew(index, Header[8], e.target.value)
                                                         }}
                                                     />
-                                                </td>
+                                                </td> */}
                                                 <td className={classes}>
                                                     <Input
                                                         variant="static"
@@ -1114,6 +1145,44 @@ export default function StudentTable() {
                                                         }}
                                                     />
                                                 </td>
+                                                <td className={classes}>
+                                                    <Input
+                                                        variant="static"
+                                                        type="text"
+                                                        size="sm"
+                                                        placeholder={TABLE_HEAD[13]}
+                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                        containerProps={{
+                                                            className: 'min-w-[1px]'
+                                                        }}
+                                                        labelProps={{
+                                                            className: "before:content-none after:content-none",
+                                                        }}
+                                                        value={item[Header[13]]}
+                                                        onChange={(e) => {
+                                                            updateObjectNew(index, Header[13], e.target.value)
+                                                        }}
+                                                    />
+                                                </td>
+                                                <td className={classes}>
+                                                    <Input
+                                                        variant="static"
+                                                        type="text"
+                                                        size="sm"
+                                                        placeholder={TABLE_HEAD[14]}
+                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                        containerProps={{
+                                                            className: 'min-w-[1px]'
+                                                        }}
+                                                        labelProps={{
+                                                            className: "before:content-none after:content-none",
+                                                        }}
+                                                        value={item[Header[14]]}
+                                                        onChange={(e) => {
+                                                            updateObjectNew(index, Header[14], e.target.value)
+                                                        }}
+                                                    />
+                                                </td>
                                                 <td className={classes} onClick={() => handleCancelAdd(index)}>
                                                     <IconButton variant="text">
                                                         <ArrowUturnLeftIcon className="h-4 w-4" />
@@ -1140,9 +1209,9 @@ export default function StudentTable() {
                                                                     labelProps={{
                                                                         className: "before:content-none after:content-none",
                                                                     }}
-                                                                    value={item[Header[13]]}
+                                                                    value={item.score_table[0]?.writing}
                                                                     onChange={(e) => {
-                                                                        updateObjectNew(index, Header[13], e.target.value)
+                                                                        updateObjectNew(index, 'writing', e.target.value)
                                                                     }}
                                                                 />
                                                             </div>
@@ -1160,9 +1229,9 @@ export default function StudentTable() {
                                                                     labelProps={{
                                                                         className: "before:content-none after:content-none",
                                                                     }}
-                                                                    value={item[Header[14]]}
+                                                                    value={item.score_table[0]?.reading}
                                                                     onChange={(e) => {
-                                                                        updateObjectNew(index, Header[14], e.target.value)
+                                                                        updateObjectNew(index, 'reading', e.target.value)
                                                                     }}
                                                                 />
                                                             </div>
@@ -1180,9 +1249,9 @@ export default function StudentTable() {
                                                                     labelProps={{
                                                                         className: "before:content-none after:content-none",
                                                                     }}
-                                                                    value={item[Header[15]]}
+                                                                    value={item.score_table[0]?.speaking}
                                                                     onChange={(e) => {
-                                                                        updateObjectNew(index, Header[15], e.target.value)
+                                                                        updateObjectNew(index, 'speaking', e.target.value)
                                                                     }}
                                                                 />
                                                             </div>
@@ -1200,9 +1269,9 @@ export default function StudentTable() {
                                                                     labelProps={{
                                                                         className: "before:content-none after:content-none",
                                                                     }}
-                                                                    value={item[Header[16]]}
+                                                                    value={item.score_table[0]?.listening}
                                                                     onChange={(e) => {
-                                                                        updateObjectNew(index, Header[16], e.target.value)
+                                                                        updateObjectNew(index, 'listening', e.target.value)
                                                                     }}
                                                                 />
                                                             </div>
@@ -1220,9 +1289,9 @@ export default function StudentTable() {
                                                                     labelProps={{
                                                                         className: "before:content-none after:content-none",
                                                                     }}
-                                                                    value={item[Header[17]]}
+                                                                    value={item.score_table[0]?.grammar}
                                                                     onChange={(e) => {
-                                                                        updateObjectNew(index, Header[17], e.target.value)
+                                                                        updateObjectNew(index, 'grammar', e.target.value)
                                                                     }}
                                                                 />
                                                             </div>

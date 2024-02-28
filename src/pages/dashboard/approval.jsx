@@ -47,7 +47,8 @@ const header = [
 ]
 const headerMap = ["type_request", "created_at"]
 const typeList = {
-    'add_student': 'Add Student',
+    'add_student': 'Create Student',
+    'add_classes': 'Create Class',
     'staff_checkin': 'Staff check in'
 }
 const status = [
@@ -117,6 +118,12 @@ export function Approval() {
         setOpenDetail(true)
         setItemDetail(item)
         setTypeApprove(type)
+    }
+
+    const handleCloseDetail = () => {
+        setOpenDetail(false)
+        setItemDetail({})
+        setTypeApprove('')
     }
 
     return (
@@ -298,7 +305,7 @@ export function Approval() {
                     </CardBody>
                 </Card>
             </div>
-            <ModalApproveDetail open={openDetail} handleOpen={setOpenDetail} data={itemDetail} typeApprove={typeApprove}/>
+            <ModalApproveDetail open={openDetail} setOpen={setTypeApprove} data={itemDetail} typeApprove={typeApprove}/>
         </div>
     );
 }
