@@ -119,7 +119,7 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
     const [openDiary, setOpenDiary] = useState(false)
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
-
+    
     useEffect(() => {
         getStudent()
     }, [classList])
@@ -131,13 +131,7 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
                 setStudentList(res)
                 setLoading(false)
                 forceUpdate()
-        console.log('changeeeeee', res);
-
             })
-    }
-
-    const handleAttendance = () => {
-        console.log('handleAttendance');
     }
 
     const changeMode = (mode) => {
@@ -295,10 +289,9 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
                         ) : openAttendance ? (
                             <Attendance
                                 open={openAttendance}
-                                handleCallback={handleAttendance}
                                 studentList={studentList}
                                 classInfo={data}
-                                calendar={data.timetable}
+                                calendar={(data.timetable || []).sort(({day:a}, {day:b}) => b-a)}
                                 setCalendar={setCalendar}
                             />
                         ) : openInputScore ? (
@@ -363,91 +356,6 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
 const LessonDiary = ({ loading, open, handleCallback, data }) => {
     const [controller] = useController();
     const { userInfo } = controller;
-    const makeData = [
-        {
-            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
-            content: `• identify topic sentences
-            • identify main and supporting ideas 
-            • match headings with paragraphs
-            • use will and going to.
-            `,
-            homeword: 'Exam skills',
-            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
-            checked: false
-        },
-        {
-            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
-            content: `
-            • identify topic sentences
-            • identify main and supporting ideas 
-            • match headings with paragraphs
-            • use will and going to.
-            `,
-            homeword: 'Exam skills',
-            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
-            checked: false
-        },
-        {
-            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
-            content: `
-            • identify topic sentences
-            • identify main and supporting ideas 
-            • match headings with paragraphs
-            • use will and going to.
-            `,
-            homeword: 'Exam skills',
-            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
-            checked: false
-        },
-        {
-            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
-            content: `
-            • identify topic sentences
-            • identify main and supporting ideas 
-            • match headings with paragraphs
-            • use will and going to.
-            `,
-            homeword: 'Exam skills',
-            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
-            checked: false
-        },
-        {
-            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
-            content: `
-            • identify topic sentences
-            • identify main and supporting ideas 
-            • match headings with paragraphs
-            • use will and going to.
-            `,
-            homeword: 'Exam skills',
-            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
-            checked: false
-        },
-        {
-            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
-            content: `
-            • identify topic sentences
-            • identify main and supporting ideas 
-            • match headings with paragraphs
-            • use will and going to.
-            `,
-            homeword: 'Exam skills',
-            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
-            checked: false
-        },
-        {
-            lesson_id: 0, day: '20102021', teacher: 'NgocV', unit: '5. CONSUMERISM', unit_lesson: 'Reading',
-            content: `
-            • identify topic sentences
-            • identify main and supporting ideas 
-            • match headings with paragraphs
-            • use will and going to.
-            `,
-            homeword: 'Exam skills',
-            performance: 'Good overall. Bảo (the new student) does have a lot of potentials',
-            checked: false
-        }
-    ]
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
     const [classData, setClassData] = useState(data)
@@ -935,7 +843,7 @@ const TableStudent = ({ studentList, setStudentList }) => {
     )
 }
 
-const Attendance = ({open, handleCallback, studentList, classInfo, calendar, setCalendar}) => {
+const Attendance = ({open, studentList, classInfo, calendar, setCalendar}) => {
     return (
         <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
             <thead>

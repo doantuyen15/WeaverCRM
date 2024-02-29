@@ -43,6 +43,7 @@ export function useFirebase(service: string, params: any) {
         case 'get_student_score': return getStudentScore()
         case 'get_tuition_table': return getTuitionTable(params)
         case 'get_staff_attendance': return getStaffAttendance()
+        case 'get_all_course': return getAllCourse(params)
         case 'add_student': return addStudent(params)
         case 'update_student': return updateStudent(params)
         case 'delete_student': return deleteStudent(params)
@@ -61,12 +62,50 @@ export function useFirebase(service: string, params: any) {
         case 'update_staff_attendance': return updateStaffAttendance(params)
         case 'update_lessondiary': return updateLessonDiary(params)
         case 'update_student_score': return updateStudentScore(params)
+        case 'update_course_info': return updateCourseInfo(params)
         case 'make_tuition': return makeTuition(params)
         case 'staff_checkin': return staffCheckin(params)
         case 'update_approval': return updateApproval(params)
         default:
             return Promise.reject('Request rejected!');
     }
+}
+
+const updateCourseInfo = (params: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        const listUpdate: any[] = Object.values(params)
+        
+        const batch = writeBatch(db);
+        listUpdate.forEach(item => {
+            const coursesRef = doc(db, 'courses', item.course_id)
+            batch.update(coursesRef, {
+                [item.level_id?.replace(' ','')]: item
+            })
+        })
+        batch.commit()
+            .then(resolve)
+            .catch(reject)
+    });
+}
+
+const getAllCourse = (params: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        getDocs(collection(db, 'courses'))
+            .then(
+                (snap) => {
+                    try {
+                        if (params?.getId) {
+                            resolve(snap.docs)
+                        } else {
+                            resolve(snap.docs.map((doc => doc.data())) || [])
+                        }
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            )
+            .catch(reject)
+    });
 }
 
 const deleteStaff = (staff: StaffInfo) => {
@@ -126,12 +165,14 @@ const updateClassInfo = (classInfo: ClassInfo) => {
 }
 
 const staffCheckin = (params: any) => {
+    console.log('params', {...params});
+    
     return new useRequest((resolve: any, reject: any) => {
         addDoc(collection(db, 'approval'), {
             staff_checkin: {
-                'data': userInfo.staff_id,
+                'data': {...params},
                 'requesting_username': userInfo.displayName,
-                'created_at': moment().format('DDMMYYYY')
+                'created_at': moment().toString()
             }
         })
             .then(resolve)
@@ -203,7 +244,7 @@ const makeTuition = (list: any[]) => {
             make_tuition: {
                 'data': list,
                 'requesting_username': userInfo.displayName,
-                'created_at': moment().format('DDMMYYYY')
+                'created_at': moment().toString()
             }
         })
             .then(resolve)
@@ -276,7 +317,7 @@ const updateStudent = (list: any[]) => {
             update_student: {
                 'data': studentList,
                 'requesting_username': userInfo.displayName,
-                'created_at': moment().format('DDMMYYYY')
+                'created_at': moment().toString()
             }
         })
             .then(resolve)
@@ -372,7 +413,7 @@ const addClasses = (list: any[]) => {
             add_classes: {
                 'data': classList,
                 'requesting_username': userInfo.displayName,
-                'created_at': moment().format('DDMMYYYY')
+                'created_at': moment().toString()
             }
         })
             .then(resolve)
@@ -475,18 +516,49 @@ const updateApproval = ({approval, ok}: any) => {
             } else if (approval.type === 'make_tuition') {
                 // let id = 0
                 // await getDocs(collection(db, 'classes')).then(snap => id = snap.docs.length);
+                
                 approval?.data?.forEach((tuition: any) => {
                     const classId = tuition.id_class
-                    const date = formatDate(tuition.date, 'MMYYYY')
+                    const studentId = tuition.id_student
+                    const date = formatDate(tuition.date_ii || tuition.date, 'MMYYYY') || moment().format('MMYYYY')
                     const tuitionRef = doc(db, 'tuition', date)
                     batch.update(tuitionRef, {
-                        [classId]: arrayUnion(tuition)
+                        [`${classId}.${studentId}`]: tuition
                     })
                 })
                 batch.delete(approvalRef)
                 batch.commit()
                     .then(resolve)
-                    .catch(reject)
+                    .catch((err) => {
+                        if (err.code === 'not-found') {
+                            const newBatch = writeBatch(db)
+                            approval?.data?.forEach((tuition: any, index: number) => {
+                                const classId = tuition.id_class
+                                const studentId = tuition.id_student
+                                const date = formatDate(tuition.date, 'MMYYYY')
+                                const tuitionRef = doc(db, 'tuition', date)
+                                if (index === 0) {
+                                    newBatch.set(tuitionRef, {
+                                        [classId]: {
+                                            [studentId]: tuition
+                                        }
+                                    })
+                                } else {
+                                    newBatch.update(tuitionRef, {
+                                        [classId]: {
+                                            [studentId]: tuition
+                                        }
+                                    })
+                                }
+                            })
+                            newBatch.delete(approvalRef)
+                            newBatch.commit()
+                                .then(resolve)
+                                .catch(reject)
+                        } else {
+                            reject(err)
+                        }
+                    })
             } else if (approval.type === 'staff_checkin') {
                 if (!approval.data) reject('Không xác định được nhân viên')
                 const staffRef = doc(db, 'staff', 'timetable')
@@ -500,11 +572,11 @@ const updateApproval = ({approval, ok}: any) => {
                 //         [classId]: arrayUnion(tuition)
                 //     })
                 // })
+                console.log('approval.data.id', approval);
+                
                 batch.update(staffRef, {
-                    [month]: {
-                        [date]: {
-                            [approval.data]: 1
-                        }
+                    [`${month}.${date}`]: {
+                        [approval.data.id]: approval.data.status
                     }
                 })
                 batch.delete(approvalRef)
@@ -593,7 +665,7 @@ const createUser = (account: Account) => {
     return new useRequest((resolve: any, reject: any) => {
         const createUser = httpsCallable(functions, 'createUser');
         try {
-            createUser({ params: account })
+            createUser({ params: {...account} })
                 .then((result: any) => {
                     resolve(result)
                     toast.success(result.data?.message);
@@ -711,7 +783,7 @@ const addStudent = (list: any[]) => {
             add_student: {
                 'data': studentList,
                 'requesting_username': userInfo.displayName,
-                'created_at': moment().format('DDMMYYYY')
+                'created_at': moment().toString()
             }
         })
             .then(resolve)

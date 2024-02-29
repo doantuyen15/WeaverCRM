@@ -77,6 +77,7 @@ export default class StudentInfo {
             Number(scoreUpdate.writing)
         ) / 4, 1, 'overall')
         this.score_table['update_time'] = moment().format('DDMMYYYYHHmmss')
+        this.has_score = true
         // this.score_table[classId][type][key] = score
         // this.score_table[classId][type]['class_id'] = classId
         // this.score_table[classId][type]['total'] = formatNum((

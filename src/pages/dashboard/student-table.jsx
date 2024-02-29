@@ -304,6 +304,7 @@ export default function StudentTable() {
         useFirebase('delete_student', item)
         .then(() => {
             toast.success("Xoá học viên thành công!")
+            getStudentList()
         })
         .catch((err) => {
             console.log(err);
@@ -368,7 +369,6 @@ export default function StudentTable() {
                             </Typography>
                         </div>
                         <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                            {console.log('check', objectEdit.findIndex(item => !item?.last_name || !item?.first_name))}
                             <Button disabled={
                                 (objectNew?.length > 0 && objectNew.findIndex(item => !item.last_name || !item.first_name) > -1) || 
                                 (objectEdit?.length > 0 && objectEdit.findIndex(item => !item.last_name || !item.first_name) > -1 ) ||
@@ -1044,31 +1044,12 @@ export default function StudentTable() {
                                                         labelProps={{
                                                             className: "before:content-none after:content-none",
                                                         }}
-                                                        value={moment(item[Header[7]], 'DD/MM/YYYY').format('YYYY-MM-DD')}
+                                                        value={moment(item[Header[8]], 'DD/MM/YYYY').format('YYYY-MM-DD')}
                                                         onChange={(e) => {
-                                                            updateObjectNew(index, Header[7], moment(e.target.value, 'YYYY-MM-DD').format('DD/MM/YYYY'))
+                                                            updateObjectNew(index, Header[8], moment(e.target.value, 'YYYY-MM-DD').format('DD/MM/YYYY'))
                                                         }}
                                                     />
                                                 </td>
-                                                {/* <td className={classes}>
-                                                    <Input
-                                                        variant="static"
-                                                        type="text"
-                                                        size="sm"
-                                                        placeholder={TABLE_HEAD[8]}
-                                                        className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                                        containerProps={{
-                                                            className: 'min-w-[1px]'
-                                                        }}
-                                                        labelProps={{
-                                                            className: "before:content-none after:content-none",
-                                                        }}
-                                                        value={item[Header[8]]}
-                                                        onChange={(e) => {
-                                                            updateObjectNew(index, Header[8], e.target.value)
-                                                        }}
-                                                    />
-                                                </td> */}
                                                 <td className={classes}>
                                                     <Input
                                                         variant="static"

@@ -87,7 +87,9 @@ export function Roles() {
             email: "",
             username: "",
             uid: "",
-            roles: ""
+            roles: "",
+            staff_name: "",
+            staff_id: ""
         })
     }
 

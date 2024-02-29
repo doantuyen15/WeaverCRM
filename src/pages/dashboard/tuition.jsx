@@ -177,7 +177,7 @@ export function Tuition() {
                 <AccordionBody>
                   <List>
                     {classList.map((classInfo, index) => {
-                      const isPayAll = (tuitionTable[classInfo.id]?.length === classInfo.student_list?.length)
+                      const isPayAll = (Object.values(tuitionTable[classInfo.id] || {})?.length === classInfo.student_list?.length)
                       return (
                         classInfo.id.includes(item) ? (
                           <ListItem ripple={false} className="hover:bg-transparent focus:bg-transparent active:bg-transparent">
@@ -255,7 +255,7 @@ export function Tuition() {
                     </Button>
                 </CardFooter> */}
       </Card>
-      <PaymentPopup classList={classList} open={openPayment} handleCallback={handleMakePayment} loading={loading}/>
+      <PaymentPopup classList={classList} open={openPayment} handleCallback={handleMakePayment} loading={loading} tuitionTable={tuitionTable}/>
     </div>
   );
 }
@@ -266,17 +266,15 @@ export const TuitionTable = ({ filterTuition, classInfo, tuitionList }) => {
   const [classStudentList, setClassStudentList] = useState([])
   const classStudentListRef = useRef([])
   const tuitionDefault = glb_sv.getTuitionFee[classInfo.id.split('_')[0]][0].value
-  const [tuiList, setTuiList] = useState(tuitionList[classInfo.id] || [])
-  const isPayAll = (tuitionList.length === classInfo.student_list?.length)
 
   useEffect(() => {
-    const classTuition = tuitionList[classInfo.id] || []
+    const classTuition = tuitionList[classInfo.id] || {}
     classInfo.getStudentList()
       .then((list) => {
         setClassStudentList(list.map(item => {
           return {
             ...item,
-            ...classTuition.find(info => info.id_student === item.id)
+            ...classTuition[item.id]
           }
         }))
         // classStudentListRef.current = list
@@ -334,7 +332,6 @@ export const TuitionTable = ({ filterTuition, classInfo, tuitionList }) => {
       <tbody>
         {classStudentList?.map(({ id, full_name, tuition, date, note }, index) => {
           // const { tuition, date, note } = (tuiList || []).find(item => item.id_student === id) || {};
-          console.log('day==============', );
           const className = `py-3 px-5 ${index === authorsTableData.length - 1
             ? ""
             : "border-b border-blue-gray-50"

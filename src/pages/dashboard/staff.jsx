@@ -130,15 +130,18 @@ export function StaffList() {
     }, [])
 
     const getStaffAttendance = () => {
+        console.log('get_staff_attendance');
+
         setLoading(true)
         useFirebase('get_staff_attendance')
             .then((list) => {
                 setLoading(false)
+                console.log('get_staff_attendance', list);
                 calendarRef.current = list
-                setCalendar(list[currentMonth] || generateCalendar())
-                console.log('get_staff_attendance', Object.values(list[currentMonth]));
+                setCalendar(generateCalendar())
             })
-            .catch(() => setLoading(false))
+            .catch((err) => console.log('error', err))
+            .finally(() => setLoading(false))
         // const functions = getFunctions();
     }
     // console.log('get_staff_attendance', calendarRef.current, calendar);
@@ -152,7 +155,7 @@ export function StaffList() {
         for (let i = 0; i <= endDate.diff(startDate, 'days'); i++) {
             // days.push(startDate.clone().add(i, 'days'));
             const day = moment(startDate.clone().add(i, 'days')).format('DDMMYYYY')
-            timetable[day] = {}
+            timetable[day] = calendarRef.current[currentMonth]?.[day] || {}
         }
         console.log('timetable', timetable);
         return(timetable)
@@ -215,6 +218,7 @@ export function StaffList() {
 
     const handleTakeAttendance = () => {
         setLoading(true)
+        console.log('handleTakeAttendance', calendar);
         useFirebase('update_staff_attendance', {calendar: calendar, month: currentMonth})
             .then(() => {
                 getStaffAttendance()
@@ -517,7 +521,7 @@ const Attendance = ({open, handleCallback, staffList, classInfo, calendar, setCa
             <thead>
                 <tr>
                     <th className="bg-blue-gray-50/50 z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 p-4 transition-colors" />
-                    {Object.keys(calendar).map((item, index) => (
+                    {Object.keys(calendar).sort().map((item, index) => (
                         <th
                             // onClick={() => handleSort(index)}
                             key={index}
@@ -526,16 +530,16 @@ const Attendance = ({open, handleCallback, staffList, classInfo, calendar, setCa
                             <Typography
                                 variant="small"
                                 color="blue-gray"
-                                className={"text-center pb-1 gap-2 leading-none " + ((moment(item.day).format('DDMMYYYY') == moment().format('DDMMYYYY')) ? ' font-bold' : 'opacity-70')}
+                                className={"text-center pb-1 gap-2 leading-none " + ((item == moment().format('DDMMYYYY')) ? ' font-bold' : 'opacity-70')}
                             >
-                                {formatDate(item.day, 'dddd')}
+                                {formatDate(item, 'dddd')}
                             </Typography>
                             <Typography
                                 variant="small"
                                 color="blue-gray"
-                                className={"text-center gap-2 leading-none " + ((moment(item.day).format('DDMMYYYY') == moment().format('DDMMYYYY')) ? ' font-bold' : 'opacity-70')}
+                                className={"text-center gap-2 leading-none " + ((item == moment().format('DDMMYYYY')) ? ' font-bold' : 'opacity-70')}
                             >
-                                {formatDate(item.day)}
+                                {formatDate(item)}
                             </Typography>
                         </th>
                     ))}
@@ -559,7 +563,8 @@ const Attendance = ({open, handleCallback, staffList, classInfo, calendar, setCa
                                         {staff.full_name}
                                     </Typography>
                                 </td>
-                                {Object.values(calendar).map((dayAttendance, key) => {
+                                {Object.keys(calendar).sort().map((day, key) => {
+                                    const dayAttendance = calendar[day]
                                     const handleAttendance = (option) => {
                                         dayAttendance[staff.id] = option
                                         // forceUpdate()

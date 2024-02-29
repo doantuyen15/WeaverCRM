@@ -34,6 +34,7 @@ import { useState } from "react";
 import useStorage from "../../utils/localStorageHook";
 import { useFirebase } from "../../utils/api/request";
 import { toast } from "react-toastify";
+import { glb_sv } from "../../service";
 
 export function DashboardNavbar() {
   const [controller, dispatch] = useController();
@@ -55,16 +56,21 @@ export function DashboardNavbar() {
 
   const handleCheckIn = () => {
     // const checkedIn = useStorage('get', 'checkIn', false)
-    console.log('userInfo.id', userInfo.id);
     // if (!checkedIn) {
       setLoading(true)
-      useFirebase('staff_checkin', userInfo.id)
+      useFirebase('staff_checkin', {
+        displayName: glb_sv.userInfo.displayName || "",
+        photoURL: glb_sv.userInfo.photoURL || "",
+        roles: glb_sv.userInfo.roles || "",
+        id: glb_sv.userInfo.uid || "",
+        status: 1
+      })
         .then(() => {
           // useStorage('set', 'checkIn', true)
           toast.success('Điểm danh thành công, yêu cầu đang chờ duyệt!')
         })
-        .catch(() => {
-          toast.error('Điểm danh thất bại!')
+        .catch((err) => {
+          toast.error('Điểm danh thất bại! Lỗi: ' + err)
         })
         .finally(() => setLoading(false))
     // }

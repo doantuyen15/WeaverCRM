@@ -34,7 +34,9 @@ export function CreateAccount({ open, handleOpen, handleCallback, editAccount = 
         email: "",
         username: "",
         uid: "",
-        roles: ""
+        roles: "",
+        staff_name: "",
+        staff_id: ""
     })
 
     useEffect(() => {

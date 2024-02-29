@@ -100,7 +100,7 @@ export default class ClassInfo {
         if (this[key] !== undefined) {
             this[key] = value
             if (key === 'program' || key === 'level' || key === 'start_date') 
-                this.id = this.program.toUpperCase() + '_' + this.level.toUpperCase() + '_' + formatDate(this.start_date, 'DDMMYY')
+                this.id = this.program?.toUpperCase() + '_' + this.level?.toUpperCase() + '_' + formatDate(this.start_date, 'DDMMYY')
         }
     }
 

@@ -77,9 +77,10 @@
 	"scripts": {
 		"dev": "concurrently \"npm run react:dev\" \"npm run electron:wait\"",
 		"electron:wait": "wait-on tcp:3000 && npm run electron:dev",
+		"prebuild": "rimraf build && rimraf dist",
 		"react:build": "react-scripts build",
 		"react:dev": "cross-env BROWSER=none react-scripts start",
-		"electron:build": "electron-builder build --win --publish never",
+		"electron:build": "electron-builder build --mac --publish never",
 		"electron:deploy-win": "electron-builder build --win --publish always",
 		"electron:deploy-mac": "electron-builder build --mac --publish always",
 		"electron:deploy": "electron-builder build -mwl --publish always",

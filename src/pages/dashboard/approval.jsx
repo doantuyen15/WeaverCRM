@@ -45,8 +45,9 @@ const header = [
     "Chi tiết",
     "Note"
 ]
-const headerMap = ["type_request", "created_at"]
+const headerMap = ["", 'requesting_username', "created_at", "", ""]
 const typeList = {
+    'update_student': 'Update student',
     'add_student': 'Create Student',
     'add_classes': 'Create Class',
     'staff_checkin': 'Staff check in'
@@ -99,7 +100,7 @@ export function Approval() {
         // if (key === 'Member') {
         //     sorted = orderBy(TABLE_ROWS, ['name'], [isAsc ? 'asc' : 'desc'])
         // } else return
-        sorted = orderBy(tableRef.current, [header[indexCol]], [isAsc ? 'asc' : 'desc'])
+        sorted = orderBy(tableRef.current, [headerMap[indexCol]], [isAsc ? 'asc' : 'desc'])
         setList([...sorted])
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
@@ -109,15 +110,20 @@ export function Approval() {
         setLoading(true)
         useFirebase("update_approval", {approval: item, ok})
             .then(res => {
-                setLoading(false)
                 getApprovalList()
+                toast.success(ok ? 'Duyệt thành công!' : 'Huỷ duyệt thành công!')
             })
+            .catch(err => {
+                toast.error(err)
+                console.log(err.code);
+            })
+            .finally(() => setLoading(false))
     }
 
     const openApproveDetail = (item, type) => {
-        setOpenDetail(true)
         setItemDetail(item)
         setTypeApprove(type)
+        setOpenDetail(true)
     }
 
     const handleCloseDetail = () => {
@@ -193,7 +199,7 @@ export function Approval() {
                                                     className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
                                                 >
                                                     {head}{" "}
-                                                    {index !== header.length - 1 && (
+                                                    {/* {(index === 1 || index === 2) && (
                                                         keySort !== index ? (
                                                             <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
                                                         ) : keySort === index && isAsc ? (
@@ -201,7 +207,7 @@ export function Approval() {
                                                         ) : (
                                                             <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
                                                         )
-                                                    )}
+                                                    )} */}
                                                 </Typography>
                                             </th>
                                         )
@@ -264,7 +270,7 @@ export function Approval() {
                                                                 variant="small"
                                                                 className="text-xs font-medium text-blue-gray-600"
                                                             >
-                                                                {formatDate(item.created_at)}
+                                                                {formatDate(item.created_at, "HH:mm:SS - DD/MM/YYYY")}
                                                             </Typography>
                                                         </td>
                                                         <td className={className}>

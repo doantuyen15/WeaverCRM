@@ -34,18 +34,26 @@ import { toast } from "react-toastify";
 
 const classType = {
     'LIFE': [
-        'A1A1',
         'A1A2',
-        'A2B1',
-        'A2B2',
+        'A2B1'
     ],
     'IELTS': [
         'SILVERA',
         'SILVERB',
+        'GOLDA',
+        'GOLDB',
+        'DIAMONDA',
+        'DIAMONDB',
+        'MASTERA',
+        'MASTERB',
     ],
     'TEENS': [
-        'TEEN1',
-        'TEEN2',
+        '1A',
+        '1B',
+        '2A',
+        '2B',
+        '3A',
+        '3B',
     ]
 }
 
@@ -62,14 +70,17 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
     const [tuition, setTuition] = useState(useStorage('get', 'tuition') || [])
     const [studentList, setStudentList] = useState([])
     const [staffList, setStaffList] = useState([])
+    // const [courseList, setCourseList] = useState([])
+    // const [levelList, setLevelList] = useState([])
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
-
+    
     useEffect(() => {
         if (open) {
             getStudentList()
             getStaffList()
             handleAdd()
+            // getAllCourse()
         } else {
             setClassList([])
         }
@@ -86,6 +97,19 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
         //     // tableRef.current = studentList
         // }
     }, [open])
+
+    // const getAllCourse = () => {
+    //     useFirebase('get_all_course', {getId: true})
+    //         .then(data => {
+    //             console.log('getAllCourse', data.map(item => levelList[] item.data())).sort();
+                
+    //             // Object.keys(courseList.find(item => item.id === info.program).data()).sort()
+    //             setCourseList(data)
+    //             useStorage('set', 'programs', data)
+    //         })
+    //         .catch(err => console.log(err))
+    //         // .finally(() => setLoading(false))
+    // }
 
     const getStudentList = () => {
         setLoading(true)
@@ -180,7 +204,6 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
         forceUpdate()
         // setClassList(classList)
     }
-
     const handleAdd = () => {
         try {
             if (!classInfo.id) {
@@ -460,7 +483,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                     Close
                                 </Button>
                                 <Button
-                                    disabled={classList?.findIndex(item => !item.program || !item.level || !item.start_date || !item.end_date) > -1}
+                                    disabled={classList?.findIndex(item => !item.program || !item.level || !item.start_date || !item.end_date || !item.class_schedule) > -1}
                                     loading={loading}
                                     variant="gradient"
                                     onClick={() => isUpdate ? handleUpdateClass('update', classList[0]) : handleCallback(true, classList)}

@@ -124,6 +124,8 @@ const HeaderScore = [
     'Time'
 ]
 
+const HeaderTuition = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền còn lại', 'Ghi chú']
+
 export default function ReportScore() {
     const [openModalConfirm, setOpenModalConfirm] = React.useState(false);
     const [openModalEdit, setOpenModalEdit] = React.useState(false);
@@ -146,10 +148,32 @@ export default function ReportScore() {
     const { userInfo } = controller;
     const currentEditKey = useRef({})    
     const [mod, setMod] = useState('score')
+    const tuitionTable = useRef([])
+    const [classStudentList, setClassStudentList] = useState([])
+    const currentMonth = moment().format('MMYYYY')
 
     useEffect(() => {
         getStudentList()
     }, [])
+
+    const getTuitionTable = (month = '') => {
+        setLoading(true)
+        useFirebase('get_tuition_table', month || currentMonth)
+            .then(data => {
+                setLoading(false)
+                tuitionTable.current = data
+                // useStorage('set', 'classList', data)
+                console.log('getTuitionTable', data);
+                // setClassStudentList(list.map(item => {
+                //     return {
+                //       ...item,
+                //       ...classTuition[item.id]
+                //     }
+                // }
+            })
+            .catch(err => console.log(err))
+            .finally(() => setLoading(false))
+    }
 
     const getStudentList = () => {
         setLoading(true)
@@ -285,7 +309,7 @@ export default function ReportScore() {
                                 <TableCellsIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
                                 Score
                             </Tab>
-                            <Tab value="tuition" className="w-48 h-10">
+                            <Tab onClick={() => getTuitionTable()} value="tuition" className="w-48 h-10">
                                 <BanknotesIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
                                 Tuition
                             </Tab>
@@ -353,7 +377,64 @@ export default function ReportScore() {
                                 </table>
                             </TabPanel>
                             <TabPanel key={'treemap'} value={'treemap'}>
-                                <></>
+                                {/* <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0" >
+                                    <thead>
+                                        <tr>
+                                            {HeaderTuition.map((el) => (
+                                                <th
+                                                    key={el}
+                                                    className="border-b border-blue-gray-50 py-3 px-5 text-left"
+                                                >
+                                                    <Typography
+                                                        variant="small"
+                                                        className="text-[11px] font-bold uppercase text-blue-gray-400"
+                                                    >
+                                                        {el}
+                                                    </Typography>
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {classStudentList?.map(({ id, full_name, tuition, date, note }, index) => {
+                                            // const { tuition, date, note } = (tuiList || []).find(item => item.id_student === id) || {};
+                                            const className = `py-3 px-5 ${index === authorsTableData.length - 1
+                                                ? ""
+                                                : "border-b border-blue-gray-50"
+                                                }`;
+                                            // if ((tuitionDefault - tuition === 0) && !filterTuition) return (<></>)
+                                            return (
+                                                <tr key={index}>
+                                                    <td className={className}>
+                                                        <Typography className="text-xs font-normal text-blue-gray-500">
+                                                            {id}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={className}>
+                                                        <Typography className={`text-xs font-normal ${!tuition ? 'text-red-500' : 'text-blue-gray-500'}`}>
+                                                            {full_name}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={className}>
+                                                        <Typography className="text-xs font-normal text-blue-gray-600">
+                                                            {date ? formatDate(date) : ''}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={className}>
+                                                        <Typography className="text-xs font-semibold text-blue-gray-500">
+                                                            {typeof tuition === 'number' ? formatNum(tuitionDefault - tuition, 0, 'price') : formatNum(tuitionDefault, 0, 'price')}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={className}>
+                                                        <Typography className="text-xs font-normal text-blue-gray-500">
+                                                            {note}
+                                                        </Typography>
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </table> */}
                             </TabPanel>
                         </TabsBody>
                     </Tabs>

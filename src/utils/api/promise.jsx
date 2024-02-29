@@ -1,7 +1,7 @@
 import { toast } from "react-toastify";
 
 class useRequest extends Promise {
-    constructor(callback, timeout = 5000) {
+    constructor(callback, timeout = 15000) {
         const init = callback;
         super((resolve, reject) => {
             const timer = setTimeout(() => {

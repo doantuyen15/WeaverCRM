@@ -31,7 +31,7 @@ import { useEffect, useRef, useState } from "react";
 import { orderBy } from 'lodash';
 import { useFetch, useFirebase } from "../../utils/api/request";
 import { useController } from "../../context";
-import { ArrowPathIcon, MagnifyingGlassIcon, PhoneIcon, PlusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { ArrowPathIcon, MagnifyingGlassIcon, PhoneIcon, PlusIcon, UserPlusIcon, WrenchIcon } from "@heroicons/react/24/solid";
 import { PaymentPopup } from "../../widgets/modal/payment";
 import useStorage from "../../utils/localStorageHook";
 import formatDate from "../../utils/formatNumber/formatDate";
@@ -42,6 +42,7 @@ import DefaultSkeleton from "../../widgets/skeleton";
 import { TableScore } from "../../widgets/modal/table-score";
 import { ClassTable } from "./classes";
 import { toast } from "react-toastify";
+import { CourseManagement } from "../../widgets/modal/course-management";
 
 const Header = ['STT', 'Phone', 'Họ', 'Tên', 'Ngày sinh', "Email", 'Điểm', 'Ghi chú']
 
@@ -49,6 +50,7 @@ export function Programs() {
     const [controller] = useController();
     const { userInfo } = controller;
     const [openModal, setOpenModal] = useState(false)
+    const [openCourseEdit, setOpenCourseEdit] = useState(false)
     const [loading, setLoading] = useState(false)
     const tableRef = useRef([])
     const [classList, setClassList] = useState([])
@@ -131,21 +133,20 @@ export function Programs() {
         setOpenModal(true)
     }
 
-    // const handleOpenTable = (item, index) => {
-    //     // console.log('handleOpenTable', item?.getStudentList());
-    //     if (openList.includes(index)) setOpenList([...openList.filter(i => i !== index)])
-    //     else {
-    //         openList.push(index)
-    //         setOpenList([...openList])
-    //         return
-    //     }
-    //     item?.getStudentList()
-    //         .then((student_list) => {
-    //             classList[index].updateInfo('student_list', student_list)
-    //             setClassList([...classList])
-    //         })
-    //         .catch(e => console.error(e))
-    // }
+    const handleEditCallback = (ok, courses) => {
+        console.log('handleEditCallback', ok, courses);
+        if (!ok) {
+            setOpenCourseEdit(false)
+        } else {
+            setLoading(true)
+            useFirebase('update_course_info', courses)
+                .then(() => {
+                    toast.success('Cập nhật thành công!')
+                })
+                .catch(err => toast.error(err))
+                .finally(() => setLoading(false))
+        }
+    }
 
     return (
         <div className="mt-12 mb-8 flex flex-col gap-12">
@@ -161,6 +162,9 @@ export function Programs() {
                     <div className="flex justify-end pr-4 gap-2">
                         <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenModal(true)}>
                             <PlusIcon strokeWidth={2} className="h-4 w-4" /> Create new class
+                        </Button>
+                        <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenCourseEdit(true)}>
+                            <WrenchIcon strokeWidth={2} className="h-4 w-4" /> Course modification
                         </Button>
                         <Button
                             className="flex items-center gap-3"
@@ -356,6 +360,7 @@ export function Programs() {
                 </CardFooter> */}
             </Card>
             <CreateClasses classInfo={objectEdit} setClassInfo={setObjectEdit} handleUpdateClass={handleUpdateClass} open={openModal} handleOpen={setOpenModal} handleCallback={handleAddClasses} />
+            <CourseManagement loading={loading} open={openCourseEdit} handleCallback={handleEditCallback} />
         </div>
     );
 }

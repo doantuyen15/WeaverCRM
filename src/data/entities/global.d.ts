@@ -10,7 +10,9 @@ declare global {
         email?: String,
         username?: String,
         uid?: String,
-        roles?: String
+        roles?: String,
+        staff_name?: String,
+        staff_id?: String
     }
 }
 export { };

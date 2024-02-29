@@ -3,6 +3,7 @@ const formatDate = (dateInput, type = 'DD/MM/YYYY') => {
     if (moment(dateInput).isValid()) {
         return moment(dateInput).format(type);
     } 
+    else if (moment(dateInput, 'DDMMYYYYHHmmSS').isValid()) return moment(dateInput, 'DDMMYYYYHHmmSS').format(type);
     else if (moment(dateInput, "DD/MM/YYYY").isValid()) return moment(dateInput, 'DD/MM/YYYY').format(type);
     else if (moment(dateInput, 'YYYY-MM-DD').isValid()) return moment(dateInput, 'YYYY-MM-DD').format(type);
     else if (moment(dateInput, 'DDMMYYYY').isValid()) return moment(dateInput, 'DDMMYYYY').format(type);

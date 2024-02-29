@@ -17,42 +17,11 @@ import formatNum from "../../utils/formatNumber/formatNum";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { MinusCircleIcon } from "@heroicons/react/24/outline";
 import useStorage from "../../utils/localStorageHook";
-import {useFetch} from "../../utils/api/request";
+import {useFetch, useFirebase} from "../../utils/api/request";
 import moment from "moment";
 import { glb_sv } from "../../service";
 
-// const tuition = [
-//     {
-//         price: '5000000',
-//         classNm: 'TEENS1'
-//     },
-//     {
-//         price: '5300000',
-//         classNm: 'TEENS2'
-//     },
-//     {
-//         price: '5300000',
-//         classNm: 'TEENS3'
-//     },
-//     {
-//         price: '5600000',
-//         classNm: 'TEENS4'
-//     },
-//     {
-//         price: '5600000',
-//         classNm: 'TEENS5'
-//     },
-//     {
-//         price: '5900000',
-//         classNm: 'TEENS6'
-//     },
-//     {
-//         price: '5900000',
-//         classNm: 'TEENS7'
-//     }
-// ]
-
-export function PaymentPopup({ open, handleCallback, classList, loading }) {
+export function PaymentPopup({ open, handleCallback, classList, loading, tuitionTable }) {
     const [controller] = useController();
     const { userInfo } = controller;
     const [paymentList, setPaymentList] = useState([{
@@ -61,13 +30,21 @@ export function PaymentPopup({ open, handleCallback, classList, loading }) {
         tuition: '',
         id_class: '',
         note: '',
-        date: moment(Date.now()).format('YYYY-MM-DD'),
+        date: '',
+        date_ii: '',
         id_student: ''
     }])
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
+    const [allCourse, setAllCourse] = useState({})
+    const [studentList, setStudentList] = useState({})
+    const currentMonth = moment().format('MMYYYY')
 
     useEffect(() => {
+        if (open) {
+            console.log('?????');
+            getAllCourse()
+        }
         setPaymentList([{
             student_name: '',
             program: '',
@@ -79,6 +56,27 @@ export function PaymentPopup({ open, handleCallback, classList, loading }) {
         }])
     }, [open])
 
+    const getAllCourse = () => {
+        useFirebase('get_all_course')
+            .then(data => {
+                const list = data.reduce((accumulator, item) => {
+                    Object.values(item).map(price => {
+                        if (!accumulator[price.course_id]) accumulator[price.course_id] = {}
+                        if (!accumulator[price.course_id][price.level_id?.replace(' ','')]) accumulator[price.course_id][price.level_id?.replace(' ','')] = {}
+
+                        accumulator[price.course_id][price.level_id?.replace(' ','')] = price
+                    })
+        
+                    return accumulator;
+                }, {});
+                console.log('list========', list);
+                setAllCourse(list)
+
+            })
+            .catch(err => console.log(err))
+            // .finally(() => setLoading(false))
+    }
+
     const handleAdd = () => {
         const list = [...paymentList]
         list.push({
@@ -87,7 +85,8 @@ export function PaymentPopup({ open, handleCallback, classList, loading }) {
             tuition: '',
             id_class: '',
             note: '',
-            date: moment().format('DDMMYYYY'),
+            date: '',
+            date_ii: '',
             id_student: ''
         })
         setPaymentList(list)
@@ -95,6 +94,18 @@ export function PaymentPopup({ open, handleCallback, classList, loading }) {
 
     const updateListPayment = ({ key, index, value }) => {
         if (key === 'id_class') {
+            try {
+                const [program, level, _id] = value.id.split('_')
+                let maxtuition = Number(allCourse[program][level].tuition)
+                if ((tuitionTable || []).length > 0) {
+                    const list = value.student_list.filter((item) => tuitionTable[value.id][item.id]?.tuition !== maxtuition)
+                    studentList[index] = list
+                }
+                studentList[index] = value.student_list
+                setStudentList({...studentList})
+            } catch (error) {
+                console.log('maxtuition', error, tuitionTable);
+            }
             paymentList[index][key] = value.id
             paymentList[index]['program'] = value.program
             if (value.program !== 'IELTS') paymentList[index]['tuition'] = glb_sv.getTuitionFee[value.program][0]['value']
@@ -103,11 +114,24 @@ export function PaymentPopup({ open, handleCallback, classList, loading }) {
                 ...paymentList[index], 
                 student_name: value.full_name,
                 id_student: value.id,
-                date: moment(Date.now()).format('YYYY-MM-DD'),
             }
+        } else if (key === 'tuition') {
+            let date = ''
+            let currentTuition = 0
+            const currentInfo = paymentList[index] || {}
+            try {
+                currentTuition = tuitionTable[currentInfo['id_class']][currentInfo['id_student']]?.tuition || 0
+                date = tuitionTable[currentInfo['id_class']][currentInfo['id_student']]?.date || ''
+            } catch (error) {
+                console.log('error', error);
+            }
+            paymentList[index]['tuition'] = currentTuition + value
+            paymentList[index]['date'] = date || moment().format('DDMMYYYY')
+            if (date) paymentList[index]['date_ii'] = moment().format('DDMMYYYY')
         } else {
             paymentList[index][key] = value
         }
+        console.log('paymentList', paymentList[index]);
         setPaymentList(paymentList)
         forceUpdate()
     }
@@ -125,7 +149,10 @@ export function PaymentPopup({ open, handleCallback, classList, loading }) {
                 <Card className="mx-auto w-full">
                     <CardBody className="flex flex-col">
                         {paymentList.map((info, index) => {
-                            const prices = glb_sv.getTuitionFee?.[info.program]
+                            const program = info.program
+                            const level = info.id_class.split('_')[1]
+                            let tuition = ''
+                            if (info.program) tuition = Number(allCourse[program][level].tuition)
                             return (
                                 <div className="flex py-4 pl-4 border-b border-blue-gray-50 items-center">
                                     <div className="gap-6 flex w-full">
@@ -147,7 +174,7 @@ export function PaymentPopup({ open, handleCallback, classList, loading }) {
                                             ))}
                                         </Select>
                                         <Select
-                                            disabled={!info.id_class}
+                                            // disabled={!info.id_class}
                                             label="Select Student"
                                             selected={(element) =>
                                                 element &&
@@ -158,13 +185,34 @@ export function PaymentPopup({ open, handleCallback, classList, loading }) {
                                                 })
                                             }
                                         >
-                                            {(classList.find(classInfo => classInfo.id === info.id_class)?.student_list || []).map(item => (
+                                            {(studentList[index] || []).map(item => (
                                                 <Option onClick={() => updateListPayment({ key: 'student', value: item, index: index })} key={item.id} value={item.id + ' - ' + item.full_name} className="flex items-center gap-2">
                                                     {item.id + ' - ' + item.full_name}
                                                 </Option>
                                             ))}
                                         </Select>
-                                        {prices?.length > 1 ? (
+                                        <Select
+                                            label="Select Price"
+                                            selected={(element) =>
+                                                element ? (
+                                                    React.cloneElement(element, {
+                                                        disabled: true,
+                                                        className:
+                                                            "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                                    })
+                                                ) : <></>
+                                            }
+                                        >
+                                            <Option onClick={() => updateListPayment({ value: tuition, index: index, key: 'tuition' })} key={tuition} value={tuition} className="flex items-center gap-2">
+                                                {formatNum(tuition, 0, 'price')}
+                                            </Option>
+                                            {info.program === 'IELTS' ? (
+                                                <Option onClick={() => updateListPayment({ value: tuition / 2, index: index, key: 'tuition' })} key={tuition} value={tuition / 2} className="flex items-center gap-2">
+                                                    {formatNum(tuition / 2, 0, 'price')}
+                                                </Option>
+                                            ) : <></>}
+                                        </Select>
+                                        {/* {tuitionList[info.id_class]?.length > 1 ? (
                                             <Select
                                                 label="Select Price"
                                                 selected={(element) =>
@@ -191,7 +239,7 @@ export function PaymentPopup({ open, handleCallback, classList, loading }) {
                                                 value={prices ? (prices[0]?.key + ' - ' + formatNum(prices[0]?.value, 0, 'price')) : undefined}
                                                 placeholder="Outlined"
                                             />
-                                        )}
+                                        )} */}
                                         <Input
                                             variant="outlined"
                                             label="Note"
