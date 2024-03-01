@@ -14,7 +14,7 @@
 		"releaseType": "release"
 	},
 	"license": "GPL-3.0",
-	"version": "1.0.15",
+	"version": "1.0.16",
 	"private": true,
 	"devDependencies": {
 		"@types/node": "^18.11.10",
@@ -88,6 +88,7 @@
 		"build": "npm run react:build && npm run electron:build",
 		"deploy": "npm run react:build && npm run electron:deploy",
 		"deploy-mac": "npm run react:build && npm run electron:deploy-mac",
+		"deploy-win": "npm run react:build && npm run electron:deploy-win",
 		"format": "prettier --write .",
 		"update": "taze latest -w"
 	},
