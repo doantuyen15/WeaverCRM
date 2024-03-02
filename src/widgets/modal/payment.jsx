@@ -21,7 +21,7 @@ import {useFetch, useFirebase} from "../../utils/api/request";
 import moment from "moment";
 import { glb_sv } from "../../service";
 
-export function PaymentPopup({ open, handleCallback, classList, loading, tuitionTable }) {
+export function PaymentPopup({ selectedMonth, open, handleCallback, classList, loading, tuitionTable }) {
     const [controller] = useController();
     const { userInfo } = controller;
     const [paymentList, setPaymentList] = useState([{
@@ -52,7 +52,8 @@ export function PaymentPopup({ open, handleCallback, classList, loading, tuition
             id_class: '',
             note: '',
             date: moment().format('DDMMYYYY'),
-            id_student: ''
+            id_student: '',
+            month: selectedMonth
         }])
     }, [open])
 

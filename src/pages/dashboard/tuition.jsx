@@ -15,11 +15,18 @@ import {
   ListItem,
   AccordionBody,
   Accordion,
+  Select,
+  Option,
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
+  Input,
 } from "@material-tailwind/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { authorsTableData, projectsTableData } from "../../data";
 import moment from "moment";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { orderBy } from 'lodash';
 import { useFetch, useFirebase } from "../../utils/api/request";
 import { useController } from "../../context";
@@ -47,8 +54,10 @@ export function Tuition() {
   const [openList, setOpenList] = useState([])
   const [openSubList, setOpenSubList] = useState([])
   const currentMonth = moment().format('MMYYYY')
+  const [selectedMonth, setSelectedMonth] = useState(moment().format('MMYYYY'))
   const [tuitionTable, setTuitionTable] = useState([])
   const [filterTuition, setFilterTuition] = useState(false)
+  const [isShowAll, setIsShowAll] = useState(false)
 
   useEffect(() => {
     getClassList()
@@ -112,35 +121,82 @@ export function Tuition() {
     }
   }
 
+  const changeMonth = (month) => {
+    setSelectedMonth(month)
+    getTuitionTable(moment().month(month).format('MMYYYY'))
+  }
+
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card>
         <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
           <div className="flex justify-between">
             <Typography variant="h6" color="white">
-              DANH SÁCH ĐÓNG HỌC PHÍ - Tháng {moment().format('MM')}
+              DANH SÁCH ĐÓNG HỌC PHÍ - Tháng {moment(selectedMonth, 'MMYYYY').format('MM')}
             </Typography>
           </div>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2 max-h-[65vh]">
           <div className="flex justify-between pr-4">
-            <div className="flex items-center py-2">
-              <Typography className="text-xs px-3 font-normal text-blue-gray-500">
-                Ẩn đã đóng
-              </Typography>
-              <Switch
-                key={'filter'}
-                ripple={false}
-                checked={!filterTuition}
-                onClick={() => setFilterTuition(prev => !prev)}
-                className="h-full w-full checked:bg-[#fd5f00] py-2"
-                containerProps={{
-                  className: "w-10 h-5",
-                }}
-                circleProps={{
-                  className: "before:hidden h-4 w-4 left-1 border-none",
-                }}
-              />
+            <div className="flex">
+              <div className="flex items-center pr-2 border-r">
+                <Typography className="text-xs px-3 font-normal text-blue-gray-500">
+                  Ẩn đã đóng
+                </Typography>
+                <Switch
+                  key={'filter'}
+                  ripple={false}
+                  checked={!filterTuition}
+                  onClick={() => setFilterTuition(prev => !prev)}
+                  className="h-full w-full checked:bg-[#fd5f00] py-2"
+                  containerProps={{
+                    className: "w-10 h-5",
+                  }}
+                  circleProps={{
+                    className: "before:hidden h-4 w-4 left-1 border-none",
+                  }}
+                />
+              </div>
+              <div className="flex items-center pr-2 border-r">
+                <Typography className="text-xs px-3 font-normal text-blue-gray-500">
+                  Lọc chưa đến hạn
+                </Typography>
+                <Switch
+                  key={'filter'}
+                  ripple={false}
+                  checked={!isShowAll}
+                  onClick={() => setIsShowAll(prev => !prev)}
+                  className="h-full w-full checked:bg-[#fd5f00] py-2"
+                  containerProps={{
+                    className: "w-10 h-5",
+                  }}
+                  circleProps={{
+                    className: "before:hidden h-4 w-4 left-1 border-none",
+                  }}
+                />
+              </div>
+              <div className="pl-2 flex items-center grow">
+                <Typography className="text-xs pr-2 min-w-max font-normal text-blue-gray-500">
+                  Chuyển tháng
+                </Typography>
+                <Input
+                  variant="static"
+                  type="month"
+                  className="!border-t-blue-gray-200 focus:!border-t-gray-900"
+                  containerProps={{
+                    className: 'h-7'
+                  }}
+                  labelProps={{
+                    className: "before:content-none after:content-none",
+                  }}
+                  value={moment(selectedMonth, 'MMYYYY').format('YYYY-MM')}
+                  onChange={(e) => {
+                    if (!e.target.value) setSelectedMonth(moment().format('MMYYYY'))
+                    else setSelectedMonth(moment(e.target.value, 'YYYY-MM').format('MMYYYY'))
+                    getTuitionTable(moment(e.target.value, 'YYYY-MM').format('MMYYYY'))
+                  }}
+                />
+              </div>
             </div>
             <div className="flex justify-end gap-2">
               <Button disabled={loading} className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
@@ -177,26 +233,29 @@ export function Tuition() {
                 <AccordionBody>
                   <List>
                     {classList.map((classInfo, index) => {
+                      let isShow = isShowAll || 
+                        moment(selectedMonth, 'MMYYYY').isBetween(moment(classInfo.start_date, 'DD/MM/YYYY'), moment(classInfo.end_date, 'DD/MM/YYYY')) &&
+                        Number(moment(classInfo.start_date, 'DD/MM/YYYY').format('D')) - Number(moment().format('D')) <= 1
                       const isPayAll = (Object.values(tuitionTable[classInfo.id] || {})?.length === classInfo.student_list?.length)
                       return (
-                        classInfo.id.includes(item) ? (
+                        classInfo.id.includes(item) && isShow ? (
                           <ListItem ripple={false} className="hover:bg-transparent focus:bg-transparent active:bg-transparent">
                             <Accordion
                               open={!openSubList.includes(index)}
                             >
                               <AccordionHeader
-                                onClick={() => (!isPayAll || filterTuition) && handleOpenSubList(index)}
+                                onClick={() => handleOpenSubList(index)}
                               >
                                 <div className="flex justify-between items-center w-full">
                                   <div className="flex gap-2 items-center justify-between">
                                     <Typography variant="h6" color="blue-gray">
                                       {classInfo.id}
                                     </Typography>
-                                    {(!isPayAll || filterTuition) ? (openSubList.includes(index) ? (
+                                    {(openSubList.includes(index) ? (
                                       <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
                                     ) : (
                                       <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
-                                    )) : <></>}
+                                    ))}
                                   </div>
                                   <div className="flex gap-4 items-center">
                                     <Typography
@@ -204,6 +263,12 @@ export function Tuition() {
                                       className="text-[11px] font-bold text-blue-gray-400"
                                     >
                                       Start at: {formatDate(classInfo.start_date)}
+                                    </Typography>
+                                    <Typography
+                                      variant="small"
+                                      className="text-[11px] font-bold text-blue-gray-400"
+                                    >
+                                      Start at: {formatDate(classInfo.end_date)}
                                     </Typography>
                                     <Typography
                                       variant="small"
@@ -224,9 +289,7 @@ export function Tuition() {
                                 </div>
                               </AccordionHeader>
                               <AccordionBody>
-                                {moment(classInfo.start_date, 'DD/MM/YYYY').diff(moment(), 'hours') <= 24 ? (
                                   <TuitionTable filterTuition={filterTuition} classInfo={classInfo} tuitionList={tuitionTable} />
-                                ) : null}
                                 {/* {!isPayAll || !filterTuition ?
                                 } */}
                               </AccordionBody>
@@ -255,7 +318,7 @@ export function Tuition() {
                     </Button>
                 </CardFooter> */}
       </Card>
-      <PaymentPopup classList={classList} open={openPayment} handleCallback={handleMakePayment} loading={loading} tuitionTable={tuitionTable}/>
+      <PaymentPopup selectedMonth={selectedMonth} classList={classList} open={openPayment} handleCallback={handleMakePayment} loading={loading} tuitionTable={tuitionTable}/>
     </div>
   );
 }

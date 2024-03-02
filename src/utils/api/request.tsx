@@ -520,7 +520,7 @@ const updateApproval = ({approval, ok}: any) => {
                 approval?.data?.forEach((tuition: any) => {
                     const classId = tuition.id_class
                     const studentId = tuition.id_student
-                    const date = formatDate(tuition.date_ii || tuition.date, 'MMYYYY') || moment().format('MMYYYY')
+                    const date = tuition.month
                     const tuitionRef = doc(db, 'tuition', date)
                     batch.update(tuitionRef, {
                         [`${classId}.${studentId}`]: tuition
@@ -535,7 +535,7 @@ const updateApproval = ({approval, ok}: any) => {
                             approval?.data?.forEach((tuition: any, index: number) => {
                                 const classId = tuition.id_class
                                 const studentId = tuition.id_student
-                                const date = formatDate(tuition.date, 'MMYYYY')
+                                const date = tuition.month
                                 const tuitionRef = doc(db, 'tuition', date)
                                 if (index === 0) {
                                     newBatch.set(tuitionRef, {
