@@ -21,6 +21,8 @@ import { SignIn, SignUp } from "./pages/auth";
 import Roles from "./pages/dashboard/account";
 import StudentTable from "./pages/dashboard/student-table";
 import ReportScore from "./pages/dashboard/reports";
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import Finance from "./pages/dashboard/finance";
 
 export const Router = () => {
 	console.log('Router', typeof localStorage.getItem("userInfo"));
@@ -134,6 +136,13 @@ export const routes = [
 				path: "/programs",
 				element: <Programs />,
 				roles: ["1", "4"]
+			},
+			{
+				icon: <AttachMoneyIcon {...menu} />,
+				name: "Finance",
+				path: "/finance",
+				element: <Finance />,
+				roles: ["1"]
 			},
 			// {
 			// 	icon: <InformationCircleIcon {...menu} />,

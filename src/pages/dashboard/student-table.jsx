@@ -30,7 +30,7 @@ import {
     PopoverHandler
 } from "@material-tailwind/react";
 import { ModalConfirmUpdate } from "../../widgets/modal/confirm-update-student";
-import { orderBy } from 'lodash'
+import { orderBy, deburr } from 'lodash'
 import StudentInfo from "../../data/entities/studentInfo";
 import { ModalEditStudent } from "../../widgets/modal/edit-student";
 import { useFetch, useFirebase } from "../../utils/api/request";
@@ -190,7 +190,7 @@ export default function StudentTable() {
 
     const handleSort = (indexCol) => {
         let sorted
-        sorted = orderBy(tableRef.current, [Header[indexCol]], [isAsc ? 'asc' : 'desc'])
+        sorted = orderBy(tableRef.current, (item) => { return deburr(item[Header[indexCol]]) }, [isAsc ? 'asc' : 'desc'])
         setStudentList([...sorted])
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
@@ -1323,30 +1323,6 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
     const [scoreTable, setScoreTable] = useState([])
     const [loading, setLoading] = useState(false)
 
-    const getStudentScore = () => {
-        // const wait = setTimeout(() => {
-        //     setLoading(true)
-        // }, 150);
-        // useFirebase('get_student_score')
-        //     .then((data) => {
-        //         console.log('get_student_score', data);
-        //         setScoreTable(data)
-        //     })
-        //     .catch(err => toast.error(err))
-        //     .finally(() => {
-        //         clearTimeout(wait)
-        //         setLoading(false)
-        //     })
-    }
- 
-    // const triggers = {
-    //   onMouseEnter: () => {
-    //     console.log('onMouseEnter');
-    //     setOpenPopover(true)
-    //   },
-    //   onMouseLeave: () => setOpenPopover(false),
-    // };
-
     const TableScore = ({scoreTable = []}) => {
         return (
             <table className="text-left">
@@ -1473,12 +1449,12 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                                     size="sm"
                                     value={
                                         <div className="flex items-center justify-center">
-                                            {ListStatus[Number(item.status_res)].status}
+                                            {ListStatus[Number(item.status_res)]?.status}
                                             {/* <ChevronDownIcon strokeWidth={2} className="w-2.5 h-2.5" /> */}
                                         </div>
                                     }
                                     className="min-w-32"
-                                    color={ListStatus[Number(item.status_res)].color}
+                                    color={ListStatus[Number(item.status_res)]?.color}
                                 />
                             </div>
                         </MenuHandler>

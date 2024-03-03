@@ -10,6 +10,7 @@ import ClassInfo from "../../data/entities/classesInfo";
 import StudentInfo from "../../data/entities/studentInfo";
 import formatDate from "../formatNumber/formatDate";
 import StaffInfo from "../../data/entities/staffInfo";
+import Finance from "../../data/entities/finance";
 
 const controller = new AbortController();
 const timeout = setTimeout(() => controller.abort(), 10000);
@@ -44,6 +45,7 @@ export function useFirebase(service: string, params: any) {
         case 'get_tuition_table': return getTuitionTable(params)
         case 'get_staff_attendance': return getStaffAttendance()
         case 'get_all_course': return getAllCourse(params)
+        case 'get_finance_table': return getFinanceTable(params)
         case 'add_student': return addStudent(params)
         case 'update_student': return updateStudent(params)
         case 'delete_student': return deleteStudent(params)
@@ -64,11 +66,42 @@ export function useFirebase(service: string, params: any) {
         case 'update_student_score': return updateStudentScore(params)
         case 'update_course_info': return updateCourseInfo(params)
         case 'make_tuition': return makeTuition(params)
+        case 'make_finance': return makeFinance(params)
         case 'staff_checkin': return staffCheckin(params)
         case 'update_approval': return updateApproval(params)
         default:
             return Promise.reject('Request rejected!');
     }
+}
+
+const getFinanceTable = (params: string) => {
+    return new useRequest((resolve: any, reject: any) => {
+        getDoc(doc(db, 'finance', 'timetable'))
+            .then(
+                (snap) => {
+                    try {
+                        resolve(snap.get(params))
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            )
+            .catch(reject)
+    });
+}
+
+const makeFinance = (finance: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        addDoc(collection(db, 'approval'), {
+            make_finance: {
+                'data': {...finance},
+                'requesting_username': userInfo.displayName,
+                'created_at': moment().toString()
+            }
+        })
+            .then(resolve)
+            .catch(reject)
+    })
 }
 
 const updateCourseInfo = (params: any) => {
@@ -500,8 +533,7 @@ const updateApproval = ({approval, ok}: any) => {
                 batch.commit()
                     .then(resolve)
                     .catch(reject)
-            } 
-            else if (approval.type === 'add_classes') {
+            } else if (approval.type === 'add_classes') {
                 // let id = 0
                 // await getDocs(collection(db, 'classes')).then(snap => id = snap.docs.length);
                 approval?.data?.forEach((classInfo: ClassInfo) => {
@@ -522,10 +554,33 @@ const updateApproval = ({approval, ok}: any) => {
                     const studentId = tuition.id_student
                     const date = tuition.month
                     const tuitionRef = doc(db, 'tuition', date)
+                    const financeRef = doc(db, 'finance', 'timetable')
+                    const month = formatDate(tuition.create_date, date)
+                    const time = formatDate(tuition.date_ii || tuition.date, 'DDMMYYYY-HHmmSS')
+                    const financeInfo = new Finance({
+                        create_date: time,
+                        type_id: 0,
+                        type: glb_sv.billType['receive'][1],
+                        id_student: tuition.id_student,
+                        staff_name: tuition.requesting_username,
+                        explain: 'Thu tiền học phí',
+                        account_type_id: tuition.method_id,
+                        amount: tuition['tuition'],
+                        approver: userInfo.displayName
+                    })
+
+
                     batch.update(tuitionRef, {
                         [`${classId}.${studentId}`]: tuition
                     })
+
+                    batch.update(financeRef, {
+                        [`${month}.${date}`]: {
+                            [financeInfo.code]: {...financeInfo}
+                        }
+                    })
                 })
+                
                 batch.delete(approvalRef)
                 batch.commit()
                     .then(resolve)
@@ -564,19 +619,27 @@ const updateApproval = ({approval, ok}: any) => {
                 const staffRef = doc(db, 'staff', 'timetable')
                 const month = formatDate(approval.created_at, 'MMYYYY')
                 const date = formatDate(approval.created_at, 'DDMMYYYY')
-                // approval?.data?.forEach((tuition: any) => {
-                //     const classId = tuition.id_class
-                //     const date = formatDate(tuition.date, 'MMYYYY')
-                //     const tuitionRef = doc(db, 'tuition', date)
-                //     batch.update(tuitionRef, {
-                //         [classId]: arrayUnion(tuition)
-                //     })
-                // })
-                console.log('approval.data.id', approval);
                 
                 batch.update(staffRef, {
                     [`${month}.${date}`]: {
                         [approval.data.id]: approval.data.status
+                    }
+                })
+                batch.delete(approvalRef)
+                batch.commit()
+                    .then(resolve)
+                    .catch(reject)
+            } else if (approval.type === 'make_finance') {
+                const financeRef = doc(db, 'finance', 'timetable')
+                const month = formatDate(approval.data?.create_date, 'MMYYYY')
+                const date = formatDate(approval.data?.create_date, 'DDMMYYYY')
+                
+                batch.update(financeRef, {
+                    [`${month}.${date}`]: {
+                        [approval.data.code]: {
+                            ...approval.data,
+                            approver: userInfo.displayName
+                        }
                     }
                 })
                 batch.delete(approvalRef)

@@ -28,6 +28,17 @@ class globalService {
         this.showAlert = ({ content, handleCallback }) => {
             this.commonEvent.next({ type: 'SHOW_ALERT', params: { content: content, handleCallback: handleCallback } })
         }
+        this.billType = {
+            'pay': [
+                'Loại khác',
+                'Chi tiền vật tư / thiết bị',
+                'Chi tiền lương',
+            ],
+            'receive': [
+                'Loại khác',
+                'Thu tiền học phí',
+            ],
+        }
         this.roles = [
             'CEO',
             'Kế toán',

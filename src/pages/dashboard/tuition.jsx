@@ -57,7 +57,7 @@ export function Tuition() {
   const [selectedMonth, setSelectedMonth] = useState(moment().format('MMYYYY'))
   const [tuitionTable, setTuitionTable] = useState([])
   const [filterTuition, setFilterTuition] = useState(false)
-  const [isShowAll, setIsShowAll] = useState(false)
+  const [isTuitionDate, setIsTuitionDate] = useState(true)
 
   useEffect(() => {
     getClassList()
@@ -164,8 +164,8 @@ export function Tuition() {
                 <Switch
                   key={'filter'}
                   ripple={false}
-                  checked={!isShowAll}
-                  onClick={() => setIsShowAll(prev => !prev)}
+                  checked={isTuitionDate}
+                  onClick={() => setIsTuitionDate(prev => !prev)}
                   className="h-full w-full checked:bg-[#fd5f00] py-2"
                   containerProps={{
                     className: "w-10 h-5",
@@ -233,9 +233,10 @@ export function Tuition() {
                 <AccordionBody>
                   <List>
                     {classList.map((classInfo, index) => {
-                      let isShow = isShowAll || 
-                        moment(selectedMonth, 'MMYYYY').isBetween(moment(classInfo.start_date, 'DD/MM/YYYY'), moment(classInfo.end_date, 'DD/MM/YYYY')) &&
-                        Number(moment(classInfo.start_date, 'DD/MM/YYYY').format('D')) - Number(moment().format('D')) <= 1
+                      const tuitiondate = classInfo.start_date.slice(0,2)
+                      let isShow = isTuitionDate ? 
+                        moment(tuitiondate + selectedMonth, 'DDMMYYYY').diff(moment(), 'day') <= 1 :
+                        moment(selectedMonth, 'MMYYYY').isBetween(moment(classInfo.start_date, 'DD/MM/YYYY').startOf('month').subtract(1, "day"), moment(classInfo.end_date, 'DD/MM/YYYY'))
                       const isPayAll = (Object.values(tuitionTable[classInfo.id] || {})?.length === classInfo.student_list?.length)
                       return (
                         classInfo.id.includes(item) && isShow ? (
@@ -268,7 +269,7 @@ export function Tuition() {
                                       variant="small"
                                       className="text-[11px] font-bold text-blue-gray-400"
                                     >
-                                      Start at: {formatDate(classInfo.end_date)}
+                                      End at: {formatDate(classInfo.end_date)}
                                     </Typography>
                                     <Typography
                                       variant="small"

@@ -50,7 +50,9 @@ const typeList = {
     'update_student': 'Update student',
     'add_student': 'Create Student',
     'add_classes': 'Create Class',
-    'staff_checkin': 'Staff check in'
+    'staff_checkin': 'Staff check in',
+    'make_tuition': 'Make tuition',
+    'make_finance': 'Finance'
 }
 const status = [
     'Duyệt',

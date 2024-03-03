@@ -363,6 +363,8 @@ export function ModalApproveDetail({ setOpen, open, data, typeApprove }) {
                         </CardBody>
                     </Card>
                 </Dialog>
+            ) : typeApprove === 'make_finance' ? (
+                <></>
             ) : <></>}
         </>
 

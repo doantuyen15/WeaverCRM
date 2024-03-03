@@ -16,7 +16,7 @@ import {
 } from "@material-tailwind/react";
 import { useController } from "../../context";
 import useStorage from "../../utils/localStorageHook";
-import { orderBy } from 'lodash'
+import { orderBy, deburr } from 'lodash'
 import { ArrowsPointingInIcon, ArrowsPointingOutIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
 import DefaultSkeleton, { TableSkeleton } from "../skeleton";
 import { StudentRow } from "../../pages/dashboard";
@@ -68,7 +68,6 @@ const SCORE_FIELD = [
 
 
 const Header = [
-    // 'status_res',
     'id',
     "first_name",
     "last_name",
@@ -781,28 +780,29 @@ const TableStudent = ({ studentList, setStudentList }) => {
 
     const handleSort = (indexCol) => {
         let sorted
-        sorted = orderBy(tableRef.current, [Header[indexCol]], [isAsc ? 'asc' : 'desc'])
-        setStudentList([sorted])
+        sorted = orderBy(tableRef.current, (item) => { return deburr(item[Header[indexCol]]) }, [isAsc ? 'asc' : 'desc'])
+        setStudentList(sorted)
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
     }
+
     return (
         <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
             <thead>
                 <tr>
                     {HEADER_STUDENT.map((head, index) => (
                         <th
-                            onClick={() => handleSort(index)}
                             key={head}
                             className="z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors hover:bg-blue-gray-200"
                         >
                             <Typography
+                                onClick={() => (index === 0 || index === 2) && handleSort(index)}
                                 variant="small"
                                 color="blue-gray"
                                 className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
                             >
                                 {head}{" "}
-                                {(index === 0 || index === 1 || index === 3) && (
+                                {(index === 0 || index === 2) && (
                                     keySort !== index ? (
                                         <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
                                     ) : keySort === index && isAsc ? (
