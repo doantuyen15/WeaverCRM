@@ -12,6 +12,7 @@ import {
     Select,
     Option,
     Badge,
+    Spinner,
 } from "@material-tailwind/react";
 import { useController } from "../../context";
 import formatNum from "../../utils/formatNumber/formatNum";
@@ -49,7 +50,7 @@ const AccountType = [
     'Chuyển khoản'
 ]
 
-export function FinancePopup({ open, handleCallback, staffInfo = {}, isPayment }) {
+export function FinancePopup({ open, handleCallback, isPayment = false, dataClass = [] }) {
     const [controller] = useController();
     const { userInfo } = controller;
     const [newBill, setNewBill] = useState({})
@@ -57,12 +58,22 @@ export function FinancePopup({ open, handleCallback, staffInfo = {}, isPayment }
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
     const [staffList, setStaffList] = useState([])
+    const [classList, setClassList] = useState([])
+    const [loadingTuition, setLoadingTuition] = useState(false)
+    const [tuitionData, setTuitionData] = useState([])
+    const [tuitionDate, setTuitionDate] = useState([])
+    const courseTuition = useRef({})
+    const currentClassInfo = useRef({})
 
     useEffect(() => {
         if (open) {
+            dataClass.map(item => item.getStudentList().then(setClassList(dataClass)))
             getStaffList()
             setNewBill(new Finance({ 
-                isPayment: isPayment
+                isPayment: isPayment,
+                type_id: !isPayment ? 1 : 0,
+                type: !isPayment ? BillType['receive'][1] : '',
+                tuition_date: moment().format('MMYYYY')
             }))
         } else {
             setNewBill({})
@@ -85,6 +96,63 @@ export function FinancePopup({ open, handleCallback, staffInfo = {}, isPayment }
             })
             .catch(err => console.log(err))
         // .finally(() => setLoading(false))
+    }
+
+    const getTuitionForCustomer = (id) => {
+        setLoadingTuition(true)
+        useFirebase('query_tuition', id)
+            .then(data => {
+                const { program, level, start_date, end_date } = currentClassInfo.current
+                const tuitionFee = Number(courseTuition.current[program]?.[level]?.['tuition'])
+                let totalTuition = 0
+
+                if (data?.length != 0) {
+                    data.forEach(item => {
+                        if (!item.isPayment) totalTuition += Number(item.amount)
+                        else totalTuition -= Number(item.amount)
+                    })
+                }
+
+                console.log('totalTuition', data, totalTuition);
+
+                if (program === 'IELTS') {
+                    if (Number(totalTuition) >= tuitionFee) {
+                        setTuitionData([])
+                    } else if (Number(totalTuition) > 0) {
+                        setTuitionData([
+                            tuitionFee / 2,
+                        ])
+                    } else {
+                        setTuitionData([
+                            tuitionFee,
+                            tuitionFee / 2
+                        ])
+                    }
+                } else {
+                    const totalMonth = moment(end_date, 'DD/MM/YYYY').diff(moment(start_date, 'DD/MM/YYYY'), 'months')
+                    const option = []
+                    const startMonth = moment(start_date, 'DD/MM/YYYY').clone()
+                    for(var i = 0; i < totalMonth; i++) {
+                        option.push(startMonth.add(i, 'month').format('MMYYYY'))
+                    }
+                    setTuitionDate(option)
+                    setTuitionData([
+                        tuitionFee
+                    ])
+                }
+                setLoadingTuition(false)
+            })
+            .catch(err => console.log(err))
+    }
+
+    const getCourseTuition = () => {
+        useFirebase('get_all_course', {getId: true})
+            .then(data => {
+                data.forEach(item => {
+                    courseTuition.current[item.id] = item.data()
+                })
+            })
+            .catch(err => console.log(err))
     }
 
     return (
@@ -192,22 +260,25 @@ export function FinancePopup({ open, handleCallback, staffInfo = {}, isPayment }
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-3 self-center">
-                                            <div className="max-w-max relative self-center">
-                                                <Typography variant="small" color="black">
-                                                    Giá trị
-                                                </Typography>
-                                                <span className="absolute -top-1 -right-2 text-red-500">*</span>
+                                        {isPayment && (
+                                            <div className="grid grid-cols-3 self-center">
+                                                <div className="max-w-max relative self-center">
+                                                    <Typography variant="small" color="black">
+                                                        Số tiền
+                                                    </Typography>
+                                                    <span className="absolute -top-1 -right-2 text-red-500">*</span>
+                                                </div>
+                                                <div className="col-span-2 pb-3">
+                                                    <Input
+                                                        variant="standard"
+                                                        className="px-4"
+                                                        value={formatNum(newBill.amount, 0, 'price')}
+                                                        onChange={(e) => updateFinance('amount', e.target.value.replace(/[^\d.-]+/g, ''))}
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="col-span-2 pb-3">
-                                                <Input
-                                                    variant="standard"
-                                                    className="px-4"
-                                                    value={formatNum(newBill.amount, 0, 'price')}
-                                                    onChange={(e) => updateFinance('amount', e.target.value.replace(/[^\d.-]+/g, ''))}
-                                                />
-                                            </div>
-                                        </div>
+                                        )}
+
                                         <div className="grid grid-cols-3 self-center">
                                             <div className="max-w-max relative self-center">
                                                 <Typography variant="small" color="black">
@@ -242,14 +313,157 @@ export function FinancePopup({ open, handleCallback, staffInfo = {}, isPayment }
                                                 </Select>
                                             </div>
                                         </div>
+
+                                        {!isPayment ? (
+                                            <>
+                                                <div className="grid grid-cols-3 self-center">
+                                                    <div className="max-w-max relative self-center">
+                                                        <Typography variant="small" color="black">
+                                                            Mã lớp học
+                                                        </Typography>
+                                                        <span className="absolute -top-1 -right-2 text-red-500">*</span>
+                                                    </div>
+                                                    <div className="col-span-2 pb-3">
+                                                        <Select
+                                                            placeholder="Chọn quỹ"
+                                                            variant="standard"
+                                                            value={newBill.class_id}
+                                                            // error={!newBill.account_type?.toString()}
+                                                            selected={(element) =>
+                                                                <Typography className="flex items-center opacity-100 px-4 gap-2 pointer-events-none" variant="small" color="black">
+                                                                    {newBill.class_id}
+                                                                </Typography>
+                                                            }
+                                                        >
+                                                            {classList.map(item => (
+                                                                <Option onClick={() => {
+                                                                    updateFinance('customer', '')
+                                                                    updateFinance('customer_id', '')
+                                                                    updateFinance('class_id', item.id)
+                                                                    currentClassInfo.current = item
+                                                                    if (Object.keys(courseTuition.current).length === 0) getCourseTuition()
+                                                                }}
+                                                                    key={item.id} value={item.id} className="flex items-center gap-2">
+                                                                    {item.id}
+                                                                </Option>
+                                                            ))}
+                                                        </Select>
+                                                    </div>
+                                                </div>
+                                                {newBill.class_id && (
+                                                    <div className="grid grid-cols-3 self-center">
+                                                        <div className="max-w-max relative self-center">
+                                                            <Typography variant="small" color="black">
+                                                                Khách hàng
+                                                            </Typography>
+                                                            <span className="absolute -top-1 -right-2 text-red-500">*</span>
+                                                        </div>
+                                                        <div className="col-span-2 pb-3">
+                                                            <Select
+                                                                placeholder="Chọn quỹ"
+                                                                variant="standard"
+                                                                value={newBill.customer}
+                                                                // error={!newBill.account_type?.toString()}
+                                                                selected={(element) =>
+                                                                    <Typography className="flex items-center opacity-100 px-4 gap-2 pointer-events-none" variant="small" color="black">
+                                                                        {newBill.customer}
+                                                                    </Typography>
+                                                                }
+                                                            >
+                                                                {currentClassInfo.current?.student_list?.map(item => (
+                                                                    <Option onClick={() => {
+                                                                        updateFinance('customer', item.full_name)
+                                                                        updateFinance('customer_id', item.id)
+                                                                        getTuitionForCustomer(item.id)
+                                                                    }}
+                                                                        key={item.id} value={item.full_name} className="flex items-center gap-2">
+                                                                        {item.full_name}
+                                                                    </Option>
+                                                                ))}
+                                                            </Select>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {newBill.customer_id && (
+                                                    <>
+                                                        <div className="grid grid-cols-3 self-center">
+                                                            <div className="max-w-max relative flex items-center self-center">
+                                                                <Typography variant="small" color="black">
+                                                                    Số tiền
+                                                                </Typography>
+                                                                <span className="absolute -top-1 -right-2 text-red-500">*</span>
+                                                                {loadingTuition && <Spinner className="w-4 h-4 ml-2" />}
+                                                            </div>
+                                                            <div className="col-span-2 pb-3">
+                                                                <Select
+                                                                    placeholder="Chọn quỹ"
+                                                                    variant="standard"
+                                                                    value={newBill.amount}
+                                                                    // error={!newBill.account_type?.toString()}
+                                                                    selected={(element) =>
+                                                                        <Typography className="flex items-center opacity-100 px-4 gap-2 pointer-events-none" variant="small" color="black">
+                                                                            {formatNum(newBill.amount, 0, 'price')}
+                                                                        </Typography>
+                                                                    }
+                                                                >
+                                                                    {tuitionData.map(item => (
+                                                                        <Option onClick={() => {
+                                                                            updateFinance('amount', item)
+                                                                        }}
+                                                                            key={item} value={item} className="flex items-center gap-2">
+                                                                            {formatNum(item, 0, 'price')}
+                                                                        </Option>
+                                                                    ))}
+                                                                </Select>
+                                                            </div>
+                                                        </div>
+                                                        {tuitionDate.length > 0 && (
+                                                            <div className="grid grid-cols-3 self-center">
+                                                                <div className="max-w-max relative flex items-center self-center">
+                                                                    <Typography variant="small" color="black">
+                                                                        Học phí tháng
+                                                                    </Typography>
+                                                                    <span className="absolute -top-1 -right-2 text-red-500">*</span>
+                                                                </div>
+                                                                <div className="col-span-2 pb-3">
+                                                                    <Select
+                                                                        placeholder="Chọn quỹ"
+                                                                        variant="standard"
+                                                                        value={newBill.tuition_date}
+                                                                        // error={!newBill.account_type?.toString()}
+                                                                        selected={(element) =>
+                                                                            <Typography className="flex items-center opacity-100 px-4 gap-2 pointer-events-none" variant="small" color="black">
+                                                                                {newBill.tuition_date ? moment(newBill.tuition_date, 'MMYYYY').format('MMMM YYYY') : ''}
+                                                                            </Typography>
+                                                                        }
+                                                                    >
+                                                                        {tuitionDate.map(item => (
+                                                                            <Option onClick={() => {
+                                                                                updateFinance('tuition_date', item)
+                                                                            }}
+                                                                                key={item} value={item} className="flex items-center gap-2">
+                                                                                {moment(item, 'MMYYYY').format('MMMM YYYY')}
+                                                                            </Option>
+                                                                        ))}
+                                                                    </Select>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </>
+                                        ) : null}
+                                        
                                     </div>
                                 </div>
 
                                 <div className="text-center flex flex-row grid gap-x-1 gap-y-3 pl-6">
-                                    <Typography variant="h6" color="black">
-                                        THÔNG TIN NHÂN SỰ
-                                    </Typography>
                                     <div className="grid gap-3 pb-3">
+                                        <Typography variant="h6" color="black">
+                                            THÔNG TIN NHÂN SỰ
+                                        </Typography>
+
                                         <div className="grid grid-cols-3 self-center">
                                             <div className="max-w-max relative self-center">
                                                 <Typography variant="small" color="black">

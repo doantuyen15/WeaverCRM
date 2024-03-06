@@ -412,6 +412,8 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                         />
                                         <Input
                                             type="date"
+                                            disabled={!info.start_date}
+                                            min={formatDate(info.start_date, 'YYYY-MM-DD')}
                                             variant="outlined"
                                             label="End Date"
                                             value={formatDate(info.end_date, 'YYYY-MM-DD')}

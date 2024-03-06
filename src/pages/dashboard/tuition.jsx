@@ -39,6 +39,7 @@ import formatNum from "../../utils/formatNumber/formatNum";
 import formatDate from "../../utils/formatNumber/formatDate";
 import { glb_sv } from "../../service";
 import { toast } from "react-toastify";
+import { FinancePopup } from "../../widgets/modal/finance-popup";
 
 const Header = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền còn lại', 'Ghi chú']
 
@@ -91,7 +92,7 @@ export function Tuition() {
       .finally(() => setLoading(false))
   }
 
-  const handleMakePayment = (ok, listPayment = []) => {
+  const handleMakePayment = (ok, listPayment = {}) => {
     console.log('handleMakePayment', ok, listPayment);
     if (ok) {
       setLoading(true)
@@ -319,7 +320,8 @@ export function Tuition() {
                     </Button>
                 </CardFooter> */}
       </Card>
-      <PaymentPopup selectedMonth={selectedMonth} classList={classList} open={openPayment} handleCallback={handleMakePayment} loading={loading} tuitionTable={tuitionTable}/>
+      {/* <PaymentPopup selectedMonth={selectedMonth} classList={classList} open={openPayment} handleCallback={handleMakePayment} loading={loading} tuitionTable={tuitionTable}/> */}
+      <FinancePopup open={openPayment} handleCallback={handleMakePayment} dataClass={classList}/>
     </div>
   );
 }

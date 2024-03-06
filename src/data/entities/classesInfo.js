@@ -68,7 +68,7 @@ export default class ClassInfo {
     getStudentList() {
         return new Promise((resolve, reject) => {
             if (this.converted) resolve(this.student_list)
-            if (this.student_list.length === 0) resolve([])
+            else if (this.student_list.length === 0) resolve([])
             else if (this.student_list.length > 0) {
                 // this.student_list.forEach(async doc => {
                 //     const student = await getDoc(doc)

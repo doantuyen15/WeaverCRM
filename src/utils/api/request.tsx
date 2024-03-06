@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import { getDocs, collection, getFirestore, doc, getDoc, query, deleteDoc, Firestore, updateDoc, addDoc, DocumentReference, writeBatch, setDoc, arrayUnion } from "firebase/firestore";
+import { getDocs, collection, getFirestore, doc, getDoc, query, deleteDoc, Firestore, updateDoc, addDoc, DocumentReference, writeBatch, setDoc, arrayUnion, collectionGroup, where } from "firebase/firestore";
 import glb_sv from '../../service/global-service'
 import { Functions, getFunctions, httpsCallable } from 'firebase/functions';
 import { getAuth, signInWithCustomToken, updateProfile, Auth } from "firebase/auth";
@@ -46,6 +46,7 @@ export function useFirebase(service: string, params: any) {
         case 'get_staff_attendance': return getStaffAttendance()
         case 'get_all_course': return getAllCourse(params)
         case 'get_finance_table': return getFinanceTable(params)
+        case 'query_tuition': return queryTuition(params)
         case 'add_student': return addStudent(params)
         case 'update_student': return updateStudent(params)
         case 'delete_student': return deleteStudent(params)
@@ -73,6 +74,24 @@ export function useFirebase(service: string, params: any) {
             return Promise.reject('Request rejected!');
     }
 }
+
+const queryTuition = (params: string) => {
+    return new useRequest((resolve: any, reject: any) => {
+        const q = query(collectionGroup(db, 'tuition'), where('customer_id', '==', params));
+        getDocs(q)
+            .then(
+                (snap) => {
+                    try {
+                        resolve(snap.docs.map(item => item.data()));
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            )
+            .catch(reject)
+    });
+}
+
 
 const getFinanceTable = (params: string) => {
     return new useRequest((resolve: any, reject: any) => {
@@ -271,11 +290,11 @@ const changePassword = (params: any) => {
     })
 }
 
-const makeTuition = (list: any[]) => {
+const makeTuition = (list: any) => {
     return new useRequest((resolve: any, reject: any) => {
         addDoc(collection(db, 'approval'), {
             make_tuition: {
-                'data': list,
+                'data': {...list},
                 'requesting_username': userInfo.displayName,
                 'created_at': moment().toString()
             }
@@ -500,6 +519,7 @@ const updateApproval = ({approval, ok}: any) => {
     return new useRequest(async (resolve: any, reject: any) => {
         const approvalRef = doc(db, 'approval', approval?.id)
         const batch = writeBatch(db);
+
         if (!ok) {
             deleteDoc(approvalRef).then(resolve).catch(reject)
         }
@@ -546,74 +566,80 @@ const updateApproval = ({approval, ok}: any) => {
                     .then(resolve)
                     .catch(reject)
             } else if (approval.type === 'make_tuition') {
+                const month = approval?.data?.tuition_date
+                const billId = approval?.data?.code
+                const financeRef = doc(db, `finance/${month}/tuition`, billId)
+                
                 // let id = 0
                 // await getDocs(collection(db, 'classes')).then(snap => id = snap.docs.length);
-                
-                approval?.data?.forEach((tuition: any) => {
-                    const classId = tuition.id_class
-                    const studentId = tuition.id_student
-                    const date = tuition.month
-                    const tuitionRef = doc(db, 'tuition', date)
-                    const financeRef = doc(db, 'finance', 'timetable')
-                    const month = formatDate(tuition.create_date, date)
-                    const time = formatDate(tuition.date_ii || tuition.date, 'DDMMYYYY-HHmmSS')
-                    const financeInfo = new Finance({
-                        create_date: time,
-                        type_id: 0,
-                        type: glb_sv.billType['receive'][1],
-                        id_student: tuition.id_student,
-                        staff_name: tuition.requesting_username,
-                        explain: 'Thu tiền học phí',
-                        account_type_id: tuition.method_id,
-                        amount: tuition['tuition'],
-                        approver: userInfo.displayName
-                    })
+
+                // approval?.data?.forEach((tuition: any) => {
+                //     const classId = tuition.id_class
+                //     const studentId = tuition.id_student
+                //     const date = tuition.month
+                //     const tuitionRef = doc(db, 'tuition', date)
+                //     const financeRef = doc(db, 'finance', 'timetable')
+                //     const month = formatDate(tuition.create_date, date)
+                //     const time = formatDate(tuition.date_ii || tuition.date, 'DDMMYYYY-HHmmSS')
+                //     const financeInfo = new Finance({
+                //         create_date: time,
+                //         type_id: 0,
+                //         type: glb_sv.billType['receive'][1],
+                //         id_student: tuition.id_student,
+                //         staff_name: tuition.requesting_username,
+                //         explain: 'Thu tiền học phí',
+                //         account_type_id: tuition.method_id,
+                //         amount: tuition['tuition'],
+                //         approver: userInfo.displayName
+                //     })
 
 
-                    batch.update(tuitionRef, {
-                        [`${classId}.${studentId}`]: tuition
-                    })
+                //     batch.update(tuitionRef, {
+                //         [`${classId}.${studentId}`]: tuition
+                //     })
 
-                    batch.update(financeRef, {
-                        [`${month}.${date}`]: {
-                            [financeInfo.code]: {...financeInfo}
-                        }
-                    })
-                })
-                
+                //     batch.update(financeRef, {
+                //         [`${month}.${date}`]: {
+                //             [financeInfo.code]: {...financeInfo}
+                //         }
+                //     })
+                // })
+
+                batch.set(financeRef, approval?.data)
                 batch.delete(approvalRef)
                 batch.commit()
                     .then(resolve)
-                    .catch((err) => {
-                        if (err.code === 'not-found') {
-                            const newBatch = writeBatch(db)
-                            approval?.data?.forEach((tuition: any, index: number) => {
-                                const classId = tuition.id_class
-                                const studentId = tuition.id_student
-                                const date = tuition.month
-                                const tuitionRef = doc(db, 'tuition', date)
-                                if (index === 0) {
-                                    newBatch.set(tuitionRef, {
-                                        [classId]: {
-                                            [studentId]: tuition
-                                        }
-                                    })
-                                } else {
-                                    newBatch.update(tuitionRef, {
-                                        [classId]: {
-                                            [studentId]: tuition
-                                        }
-                                    })
-                                }
-                            })
-                            newBatch.delete(approvalRef)
-                            newBatch.commit()
-                                .then(resolve)
-                                .catch(reject)
-                        } else {
-                            reject(err)
-                        }
-                    })
+                    .catch(reject)
+                    // .catch((err) => {
+                    //     if (err.code === 'not-found') {
+                    //         const newBatch = writeBatch(db)
+                    //         approval?.data?.forEach((tuition: any, index: number) => {
+                    //             const classId = tuition.id_class
+                    //             const studentId = tuition.id_student
+                    //             const date = tuition.month
+                    //             const tuitionRef = doc(db, 'tuition', date)
+                    //             if (index === 0) {
+                    //                 newBatch.set(tuitionRef, {
+                    //                     [classId]: {
+                    //                         [studentId]: tuition
+                    //                     }
+                    //                 })
+                    //             } else {
+                    //                 newBatch.update(tuitionRef, {
+                    //                     [classId]: {
+                    //                         [studentId]: tuition
+                    //                     }
+                    //                 })
+                    //             }
+                    //         })
+                    //         newBatch.delete(approvalRef)
+                    //         newBatch.commit()
+                    //             .then(resolve)
+                    //             .catch(reject)
+                    //     } else {
+                    //         reject(err)
+                    //     }
+                    // })
             } else if (approval.type === 'staff_checkin') {
                 if (!approval.data) reject('Không xác định được nhân viên')
                 const staffRef = doc(db, 'staff', 'timetable')

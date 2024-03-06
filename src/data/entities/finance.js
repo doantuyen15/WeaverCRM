@@ -14,9 +14,12 @@ export default class Finance {
         this.department_id = info?.department_id || -1
         this.staff_name = info?.staff_name || ''
         this.staff_id = info?.staff_id || -1
-        this.explain = info?.explain || '',
-        this.approver = info?.approver || '',
-        this.id_student = info?.id_student || ""
+        this.explain = info?.explain || ''
+        this.approver = info?.approver || ''
+        this.class_id = info?.class_id || ''
+        this.customer = info?.customer || ''
+        this.customer_id = info?.customer_id || ''
+        this.tuition_date = info?.tuition_date || ''
     }
     updateInfo(key, value) {
         if (this[key] !== undefined) {
