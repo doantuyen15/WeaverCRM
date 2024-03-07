@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import { getDocs, collection, getFirestore, doc, getDoc, query, deleteDoc, Firestore, updateDoc, addDoc, DocumentReference, writeBatch, setDoc, arrayUnion, collectionGroup, where } from "firebase/firestore";
+import { getDocs, collection, getFirestore, doc, getDoc, query, deleteDoc, Firestore, updateDoc, addDoc, DocumentReference, writeBatch, setDoc, arrayUnion, collectionGroup, where, increment } from "firebase/firestore";
 import glb_sv from '../../service/global-service'
 import { Functions, getFunctions, httpsCallable } from 'firebase/functions';
 import { getAuth, signInWithCustomToken, updateProfile, Auth } from "firebase/auth";
@@ -554,22 +554,36 @@ const updateApproval = ({approval, ok}: any) => {
                     .then(resolve)
                     .catch(reject)
             } else if (approval.type === 'add_classes') {
-                // let id = 0
-                // await getDocs(collection(db, 'classes')).then(snap => id = snap.docs.length);
-                approval?.data?.forEach((classInfo: ClassInfo) => {
-                    const docId = classInfo.id
-                    const classRef = doc(db, 'classes', docId)
-                    batch.set(classRef, classInfo)
+                const classInfo = approval?.data[0] || {}
+                let docId = classInfo.id
+                let classRef = doc(db, 'classes', docId)
+                const isExists = (await getDoc(classRef)).exists()
+                if (isExists) {
+                    docId = classInfo.id + '_' + moment().format('SS')
+                    classInfo.id = docId
+                    classRef = doc(db, 'classes', docId)
+                }
+
+                batch.set(classRef, {...classInfo})
+                batch.update(classRef, {
+                    tuition: doc(db, `classes/${docId}`),
                 })
                 batch.delete(approvalRef)
                 batch.commit()
                     .then(resolve)
                     .catch(reject)
             } else if (approval.type === 'make_tuition') {
-                const month = approval?.data?.tuition_date
-                const billId = approval?.data?.code
-                const financeRef = doc(db, `finance/${month}/tuition`, billId)
+                const { amount, class_id, customer_id, code, tuition_date, create_date, explain } =  approval?.data
+                console.log('amount, classId, studentId, code, tuition_date', amount, class_id, customer_id, code, tuition_date);
                 
+                const financeRef = doc(db, `finance/${tuition_date}/tuition`, code)
+                const classRef = doc(db, 'classes', class_id)
+                let currentTuition = 0
+                if (class_id.split('_')[0] === 'IELTS') {
+                    const snap = await getDoc(classRef)
+                    currentTuition = snap.data()?.tuition?.[tuition_date]?.[customer_id].amount || 0
+                }
+
                 // let id = 0
                 // await getDocs(collection(db, 'classes')).then(snap => id = snap.docs.length);
 
@@ -606,6 +620,20 @@ const updateApproval = ({approval, ok}: any) => {
                 // })
 
                 batch.set(financeRef, approval?.data)
+                batch.update(classRef, {
+                    tuition: {
+                        [tuition_date]: {
+                            [customer_id]: {
+                                class_id,
+                                customer_id,
+                                code,
+                                create_date,
+                                explain,
+                                amount: currentTuition + amount
+                            }
+                        }
+                    }
+                })
                 batch.delete(approvalRef)
                 batch.commit()
                     .then(resolve)

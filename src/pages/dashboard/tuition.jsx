@@ -40,6 +40,7 @@ import formatDate from "../../utils/formatNumber/formatDate";
 import { glb_sv } from "../../service";
 import { toast } from "react-toastify";
 import { FinancePopup } from "../../widgets/modal/finance-popup";
+import ClassInfo from "../../data/entities/classesInfo";
 
 const Header = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền còn lại', 'Ghi chú']
 
@@ -80,16 +81,25 @@ export function Tuition() {
   }
 
   const getTuitionTable = (month = '') => {
-    setLoading(true)
-    useFirebase('get_tuition_table', month || currentMonth)
-      .then(data => {
-        setLoading(false)
-        setTuitionTable(data)
-        // useStorage('set', 'classList', data)
-        console.log('getTuitionTable', data);
-      })
-      .catch(err => console.log(err))
-      .finally(() => setLoading(false))
+    // setLoading(true)
+    // tableRef.current.forEach(classInfo => {
+    //   const classTemp = new ClassInfo(classInfo)
+    //   if (moment(classTemp.end_date, 'DD/MM/YYYY').diff(moment(), 'days') >= -5) {
+    //     // classTemp.getTuitionTable(currentMonth)
+    //       // .then(table => {
+    //       //   setTuitionTable
+    //       // })
+    //   }
+    // })
+    // useFirebase('get_tuition_table', month || currentMonth)
+    //   .then(data => {
+    //     setLoading(false)
+    //     setTuitionTable(data)
+    //     // useStorage('set', 'classList', data)
+    //     console.log('getTuitionTable', data);
+    //   })
+    //   .catch(err => console.log(err))
+    //   .finally(() => setLoading(false))
   }
 
   const handleMakePayment = (ok, listPayment = {}) => {
@@ -238,7 +248,7 @@ export function Tuition() {
                       let isShow = isTuitionDate ? 
                         moment(tuitiondate + selectedMonth, 'DDMMYYYY').diff(moment(), 'day') <= 1 :
                         moment(selectedMonth, 'MMYYYY').isBetween(moment(classInfo.start_date, 'DD/MM/YYYY').startOf('month').subtract(1, "day"), moment(classInfo.end_date, 'DD/MM/YYYY'))
-                      const isPayAll = (Object.values(tuitionTable[classInfo.id] || {})?.length === classInfo.student_list?.length)
+                      // const isPayAll = (Object.values(tuitionTable[classInfo.id] || {})?.length === classInfo.student_list?.length)
                       return (
                         classInfo.id.includes(item) && isShow ? (
                           <ListItem ripple={false} className="hover:bg-transparent focus:bg-transparent active:bg-transparent">
@@ -284,14 +294,14 @@ export function Tuition() {
                                     >
                                       Total student: {classInfo.student_list?.length || 0}
                                     </Typography>
-                                    {isPayAll ? (
+                                    {/* {isPayAll ? (
                                         <DoneAllIcon style={{ fontSize: '1.5rem', color: '#fd5f00' }}/>
-                                      ) : <></>}
+                                      ) : <></>} */}
                                   </div>
                                 </div>
                               </AccordionHeader>
                               <AccordionBody>
-                                  <TuitionTable filterTuition={filterTuition} classInfo={classInfo} tuitionList={tuitionTable} />
+                                  <TuitionTable filterTuition={filterTuition} classInfo={classInfo} selectedMonth={selectedMonth} />
                                 {/* {!isPayAll || !filterTuition ?
                                 } */}
                               </AccordionBody>
@@ -328,19 +338,20 @@ export function Tuition() {
 
 export default Tuition;
 
-export const TuitionTable = ({ filterTuition, classInfo, tuitionList }) => {
-  const [classStudentList, setClassStudentList] = useState([])
+export const TuitionTable = ({ filterTuition, classInfo, selectedMonth }) => {
+  const [studentTuitionList, setStudentTuitionList] = useState([])
   const classStudentListRef = useRef([])
   const tuitionDefault = glb_sv.getTuitionFee[classInfo.id.split('_')[0]][0].value
 
   useEffect(() => {
-    const classTuition = tuitionList[classInfo.id] || {}
+    // const classTuition = tuitionList[classInfo.id] || {}
+    const classTuition = classInfo.tuition
     classInfo.getStudentList()
       .then((list) => {
-        setClassStudentList(list.map(item => {
+        setStudentTuitionList(list.map(item => {
           return {
             ...item,
-            ...classTuition[item.id]
+            ...classTuition[selectedMonth]?.[item.id]
           }
         }))
         // classStudentListRef.current = list
@@ -367,7 +378,7 @@ export const TuitionTable = ({ filterTuition, classInfo, tuitionList }) => {
   //   } else {
   //     setClassStudentList(classStudentListRef.current)
   //   }
-  }, [tuitionList])
+  }, [])
 
   const filterNopay = (tuition) => {
     if (typeof tuition !== 'number') return true
@@ -396,13 +407,13 @@ export const TuitionTable = ({ filterTuition, classInfo, tuitionList }) => {
         </tr>
       </thead>
       <tbody>
-        {classStudentList?.map(({ id, full_name, tuition, date, note }, index) => {
+        {studentTuitionList?.map(({ id, full_name, amount, create_date, explain }, index) => {
           // const { tuition, date, note } = (tuiList || []).find(item => item.id_student === id) || {};
           const className = `py-3 px-5 ${index === authorsTableData.length - 1
             ? ""
             : "border-b border-blue-gray-50"
             }`;
-          if ((tuitionDefault - tuition === 0) && !filterTuition) return (<></>)
+          if ((tuitionDefault - amount === 0) && !filterTuition) return (<></>)
           return (
             <tr key={index}>
               <td className={className}>
@@ -411,23 +422,24 @@ export const TuitionTable = ({ filterTuition, classInfo, tuitionList }) => {
                 </Typography>
               </td>
               <td className={className}>
-                <Typography className={`text-xs font-normal ${!tuition ? 'text-red-500' : 'text-blue-gray-500'}`}>
+                <Typography className={`text-xs font-normal ${!amount ? 'text-red-500' : 'text-blue-gray-500'}`}>
                   {full_name}
                 </Typography>
               </td>
               <td className={className}>
                 <Typography className="text-xs font-normal text-blue-gray-600">
-                  {date ? formatDate(date) : ''}
+                  {create_date ? formatDate(create_date) : ''}
                 </Typography>
               </td>
               <td className={className}>
                 <Typography className="text-xs font-semibold text-blue-gray-500">
-                  {typeof tuition === 'number' ? formatNum(tuitionDefault - tuition, 0, 'price') : formatNum(tuitionDefault, 0, 'price')}
+                  {!amount ? formatNum(tuitionDefault, 0, 'price') : formatNum(tuitionDefault - amount, 0, 'price')}
+                  {/* {typeof tuition === 'number' ? formatNum(tuitionDefault - tuition, 0, 'price') : formatNum(tuitionDefault, 0, 'price')} */}
                 </Typography>
               </td>
               <td className={className}>
                 <Typography className="text-xs font-normal text-blue-gray-500">
-                  {note}
+                  {explain}
                 </Typography>
               </td>
             </tr>

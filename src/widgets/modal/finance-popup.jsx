@@ -325,7 +325,6 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                     </div>
                                                     <div className="col-span-2 pb-3">
                                                         <Select
-                                                            placeholder="Chọn quỹ"
                                                             variant="standard"
                                                             value={newBill.class_id}
                                                             // error={!newBill.account_type?.toString()}
@@ -360,7 +359,6 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                         </div>
                                                         <div className="col-span-2 pb-3">
                                                             <Select
-                                                                placeholder="Chọn quỹ"
                                                                 variant="standard"
                                                                 value={newBill.customer}
                                                                 // error={!newBill.account_type?.toString()}

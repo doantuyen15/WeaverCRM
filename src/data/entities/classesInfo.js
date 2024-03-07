@@ -1,4 +1,4 @@
-import { getDoc } from "firebase/firestore"
+import { getDoc, getDocs } from "firebase/firestore"
 import moment from "moment"
 import StudentInfo from "./studentInfo"
 import formatDate from "../../utils/formatNumber/formatDate"
@@ -27,7 +27,7 @@ export default class ClassInfo {
         this.cs_staff_id = data?.cs_staff_id || '',
         this.class_code = data?.class_code || '',
         this.textbooks = data?.textbooks ||'',
-        this.tuition = data?.tuition || []
+        this.tuition = data?.tuition || {}
         // this.attendance = data?.attendance || [],
         // this.lesson_diary = data?.lesson_diary || [{
         //         lesson_id: 1,
@@ -95,6 +95,20 @@ export default class ClassInfo {
             }
         })
     }
+
+    // getTuitionTable(month) {
+    //     return new Promise((resolve, reject) => {
+    //         if (this.tuition[month]) resolve(this.tuition[month])
+    //         // else if (this.student_list.length === 0) resolve([])
+    //         else {
+    //             getDocs(this.tuition)
+    //                 .then(snap => snap.docs.forEach(item => {
+    //                     this.tuition[item.id] = item.data()
+    //                 }))
+    //             resolve(this.tuition[month])
+    //         }
+    //     })
+    // }
 
     updateInfo(key, value) {
         if (this[key] !== undefined) {
