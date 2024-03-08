@@ -64,16 +64,19 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
     const [tuitionDate, setTuitionDate] = useState([])
     const courseTuition = useRef({})
     const currentClassInfo = useRef({})
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         if (open) {
-            dataClass.map(item => item.getStudentList().then(setClassList(dataClass)))
+            getClassList()
             getStaffList()
-            setNewBill(new Finance({ 
+            setNewBill(new Finance({
                 isPayment: isPayment,
                 type_id: !isPayment ? 1 : 0,
-                type: !isPayment ? BillType['receive'][1] : '',
-                tuition_date: moment().format('MMYYYY')
+                type: !isPayment ? BillType['receive'][1] : BillType['pay'][0],
+                tuition_date: moment().format('MMYYYY'),
+                account_type: AccountType[0],
+                account_type_id: 0
             }))
         } else {
             setNewBill({})
@@ -96,6 +99,21 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
             })
             .catch(err => console.log(err))
         // .finally(() => setLoading(false))
+    }
+
+    const getClassList = () => {
+        if (dataClass.length === 0) {
+            useFirebase('get_class_list')
+            .then(data => {
+              setLoading(false)
+              data?.map(item => item.getStudentList().then(setClassList(data)))
+            })
+            .catch(err => console.log(err))
+            .finally(() => setLoading(false))
+        }
+        else dataClass.map(item => item.getStudentList().then(setClassList(dataClass)))
+        setLoading(true)
+
     }
 
     const getTuitionForCustomer = (id) => {
@@ -465,13 +483,12 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                         <div className="grid grid-cols-3 self-center">
                                             <div className="max-w-max relative self-center">
                                                 <Typography variant="small" color="black">
-                                                    Phòng ban nộp
+                                                    Phòng ban
                                                 </Typography>
                                                 <span className="absolute -top-1 -right-2 text-red-500">*</span>
                                             </div>
                                             <div className="col-span-2 pb-3">
                                                 <Select
-                                                    // label="Phòng ban nộp"
                                                     variant="standard"
                                                     value={newBill.department}
                                                     // error={!newBill.department?.toString()}

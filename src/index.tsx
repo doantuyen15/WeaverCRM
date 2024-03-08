@@ -15,6 +15,7 @@ import customTheme from "./styles/css/customTheme";
 import { BackgroundService } from "./service/background-service";
 import { BrowserRouter } from 'react-router-dom';
 import theme from "./styles/css/theme";
+import 'moment/locale/vi'
 
 const root = ReactDOM.createRoot(
 	document.getElementById("root") as HTMLElement,

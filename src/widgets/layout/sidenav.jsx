@@ -60,21 +60,23 @@ export function Sidenav({ brandName, routes }) {
     <aside
       className={`${sidenavTypes[sidenavType]} 
       ${showSidenav ? "translate-x-0" : collapsedSidenav ? "-translate-x-80 lg:-translate-x-20" : "-translate-x-80 lg:-translate-x-0"}
-      ${collapsedSidenav ? "max-h-[60vh] w-20" : "ml-4 w-72 max-h-[calc(100vh-32px)]"} 
+      ${collapsedSidenav ? "max-h-max w-20" : "ml-4 w-72 max-h-[calc(100vh-32px)]"} 
       fixed inset-0 z-50 my-auto rounded-xl transition-all duration-500 border border-blue-gray-100`}
       onMouseLeave={() => collapsedSidenav && setShowSidenav(dispatch, false)}
     >
       <div
         className={`relative`}
       >
-        <div className="py-6 px-8 text-center">
-          <div className="flex items-center justify-center">
-            <img
-              className={`object-cover transition-all duration-200 ${collapsedSidenav ? 'opacity-0 h-1' : 'h-20 pr-4'}`}
-              src={sidenavType === "dark" ? LogoLight : LogoDark}
-            />
+        {!collapsedSidenav && (
+          <div className="py-6 px-8 text-center">
+            <div className="flex items-center justify-center">
+              <img
+                className={`object-cover transition-all duration-200 ${collapsedSidenav ? 'opacity-0 h-1' : 'h-20 pr-4'}`}
+                src={sidenavType === "dark" ? LogoLight : LogoDark}
+              />
+            </div>
           </div>
-        </div>
+        )}
         <IconButton
           variant="text"
           color="white"
@@ -86,7 +88,7 @@ export function Sidenav({ brandName, routes }) {
           <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-white" />
         </IconButton>
       </div>
-      <div className={collapsedSidenav ? 'm-1' : 'm-4'}>
+      <div className={collapsedSidenav ? 'm-1 mt-2' : 'm-4'}>
         {routes.map(({ layout, title, pages }, key) => (
           <ul key={key} className="mb-4 flex flex-col gap-1">
             {title && (
@@ -106,7 +108,7 @@ export function Sidenav({ brandName, routes }) {
             )}
             {pages.map(({ icon, name, path, subpath, roles }, key) => (
               roles?.includes(userInfo.roles || '8') && (
-                <li key={name} style={{ visibility: userInfo.uid && layout === 'auth' ? 'hidden' : 'visible'}}>
+                <li key={name} style={{ display: userInfo.uid && layout === 'auth' ? 'none' : 'block'}}>
                   {subpath?.length >= 1 ? (
                     <Accordion open={open?.includes(name)}>
                       <ListItem className="p-0" selected={open === `/${layout}${path}`}>

@@ -95,11 +95,11 @@ const queryTuition = (params: string) => {
 
 const getFinanceTable = (params: string) => {
     return new useRequest((resolve: any, reject: any) => {
-        getDoc(doc(db, 'finance', 'timetable'))
+        getDocs(collection(db, `finance/${params}/tuition`))
             .then(
                 (snap) => {
                     try {
-                        resolve(snap.get(params))
+                        resolve(snap.docs.map(item => item.data()))
                     } catch (error) {
                         reject(error)
                     }
@@ -581,7 +581,7 @@ const updateApproval = ({approval, ok}: any) => {
                 let currentTuition = 0
                 if (class_id.split('_')[0] === 'IELTS') {
                     const snap = await getDoc(classRef)
-                    currentTuition = snap.data()?.tuition?.[tuition_date]?.[customer_id].amount || 0
+                    currentTuition = snap.data()?.tuition?.[tuition_date]?.[customer_id]?.amount || 0
                 }
 
                 // let id = 0
@@ -619,7 +619,11 @@ const updateApproval = ({approval, ok}: any) => {
                 //     })
                 // })
 
-                batch.set(financeRef, approval?.data)
+                batch.set(financeRef, {
+                    ...approval.data,
+                    approver: userInfo.displayName,
+                    approver_id: userInfo.uid
+                })
                 batch.update(classRef, {
                     tuition: {
                         [tuition_date]: {
@@ -684,17 +688,15 @@ const updateApproval = ({approval, ok}: any) => {
                     .then(resolve)
                     .catch(reject)
             } else if (approval.type === 'make_finance') {
-                const financeRef = doc(db, 'finance', 'timetable')
                 const month = formatDate(approval.data?.create_date, 'MMYYYY')
                 const date = formatDate(approval.data?.create_date, 'DDMMYYYY')
+                const code = approval.data?.code
+                const financeRef = doc(db, `finance/${month}/tuition`, code)
                 
-                batch.update(financeRef, {
-                    [`${month}.${date}`]: {
-                        [approval.data.code]: {
-                            ...approval.data,
-                            approver: userInfo.displayName
-                        }
-                    }
+                batch.set(financeRef, {
+                    ...approval.data,
+                    approver: userInfo.displayName,
+                    approver_id: userInfo.uid
                 })
                 batch.delete(approvalRef)
                 batch.commit()

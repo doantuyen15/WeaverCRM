@@ -18,6 +18,7 @@ import { ArrowUpTrayIcon, ArrowUturnLeftIcon, ChevronDownIcon, ChevronUpDownIcon
 import { CreateClasses } from "./create-class";
 import { glb_sv } from "../../service";
 import formatNum from "../../utils/formatNumber/formatNum";
+import { ModalFinanceDetail } from "../../pages/dashboard/finance";
 
 const ListStatus = glb_sv.ListStatus
 
@@ -264,7 +265,38 @@ export function ModalApproveDetail({ setOpen, open, data, typeApprove }) {
                 </Dialog>
             ) : typeApprove === 'add_classes' ? (
                 <CreateClasses handleCallback={() => setOpen('')} classInfo={data[0]} open={open} isShow={false} />
-            ) : typeApprove === 'make_tuition' ? (
+            ) : typeApprove === 'staff_checkin' ? (
+                <Dialog
+                    // size="xs"
+                    open={open}
+                    handler={() => setOpen('')}
+                    className="bg-transparent shadow-none h-[50px] w-[20vw]"
+                >
+                    <Card className="w-full h-full">
+                        <CardBody className="p-0 px-0 h-full">
+                            <div className="flex h-full justify-around items-center">
+                                <Typography
+                                    variant="h6"
+                                    color="blue-gray"
+                                    className="font-normal"
+                                >
+                                    Fullname: {data.displayName}
+                                </Typography>
+                                <Typography
+                                    variant="h6"
+                                    color="blue-gray"
+                                    className="font-normal"
+                                >
+                                    Roles: {glb_sv.roles[Number(data.roles) - 1]}
+                                </Typography>
+                            </div>
+                        </CardBody>
+                    </Card>
+                </Dialog>
+            ) : typeApprove === 'make_finance' || typeApprove === 'make_tuition' ? (
+                <ModalFinanceDetail open={open} handleOpen={setOpen} data={data}/>
+            ) : <></>}
+            {/* : typeApprove === 'make_tuition' ? (
                 <Dialog
                     // size="xs"
                     open={open}
@@ -335,38 +367,7 @@ export function ModalApproveDetail({ setOpen, open, data, typeApprove }) {
                         </CardBody>
                     </Card>
                 </Dialog>
-            ) : typeApprove === 'staff_checkin' ? (
-                <Dialog
-                    // size="xs"
-                    open={open}
-                    handler={() => setOpen('')}
-                    className="bg-transparent shadow-none h-[50px] w-[20vw]"
-                >
-                    <Card className="w-full h-full">
-                        <CardBody className="p-0 px-0 h-full">
-                            <div className="flex h-full justify-around items-center">
-                                <Typography
-                                    variant="h6"
-                                    color="blue-gray"
-                                    className="font-normal"
-                                >
-                                    Fullname: {data.displayName}
-                                </Typography>
-                                <Typography
-                                    variant="h6"
-                                    color="blue-gray"
-                                    className="font-normal"
-                                >
-                                    Roles: {glb_sv.roles[Number(data.roles) - 1]}
-                                </Typography>
-                            </div>
-                        </CardBody>
-                    </Card>
-                </Dialog>
-            ) : typeApprove === 'make_finance' ? (
-                <></>
-            ) : <></>}
+            ) */}
         </>
-
     );
 }

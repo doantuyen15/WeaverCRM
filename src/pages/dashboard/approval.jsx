@@ -36,6 +36,7 @@ import { orderBy } from 'lodash';
 import formatDate from "../../utils/formatNumber/formatDate";
 import { Slide, toast } from "react-toastify";
 import { ModalApproveDetail } from "../../widgets/modal/approve-detail";
+import moment from "moment";
 
 const header = [
     "STT", 
@@ -272,7 +273,7 @@ export function Approval() {
                                                                 variant="small"
                                                                 className="text-xs font-medium text-blue-gray-600"
                                                             >
-                                                                {formatDate(item.created_at, "HH:mm:SS - DD/MM/YYYY")}
+                                                                {moment(item.created_at).format("HH:mm:SS - DD/MM/YYYY")}
                                                             </Typography>
                                                         </td>
                                                         <td className={className}>

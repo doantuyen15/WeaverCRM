@@ -16,6 +16,7 @@ export default class Finance {
         this.staff_id = info?.staff_id || -1
         this.explain = info?.explain || ''
         this.approver = info?.approver || ''
+        this.approver_id = info?.approver_id || ''
         this.class_id = info?.class_id || ''
         this.customer = info?.customer || ''
         this.customer_id = info?.customer_id || ''

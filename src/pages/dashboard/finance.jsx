@@ -29,7 +29,11 @@ import {
   PopoverContent,
   PopoverHandler,
   TabsBody,
-  TabPanel
+  TabPanel,
+  Dialog,
+  DialogBody,
+  DialogHeader,
+  DialogFooter
 } from "@material-tailwind/react";
 import { ModalConfirmUpdate } from "../../widgets/modal/confirm-update-student";
 import { orderBy } from 'lodash'
@@ -65,8 +69,8 @@ const TABLE_HEAD = [
 ];
 
 const BillType = [
-  'Phiếu thu',
-  'Phiếu chi'
+  'Phiếu chi',
+  'Phiếu thu'
 ]
 
 const Header = [
@@ -91,18 +95,6 @@ const Header = [
   // 'listening',
   // 'grammar',
   // 'total',
-]
-
-const HeaderScore = [
-  '',
-  'Semester',
-  'Grammar',
-  'Listening',
-  'Speaking',
-  'Reading',
-  'Writing',
-  'Total',
-  'Time'
 ]
 
 export default function Finance() {
@@ -134,29 +126,37 @@ export default function Finance() {
   const [isPayment, setIsPayment] = useState(false)
   const [totalPay, setTotalPay] = useState(0)
   const [totalReceive, setTotalReceive] = useState(0)
+  const [openModalDetail, setOpenModalDetail] = useState(false)
+  const [objectDetail, setObjectDetail] = useState({})
 
   useEffect(() => {
     // getStudentList()
     getFinanceTable()
   }, [])
 
-  const getFinanceTable = (date = '') => {
+  const getFinanceTable = (date = currentMonth) => {
     setLoading(true)
-    useFirebase('get_finance_table', currentMonth)
+    useFirebase('get_finance_table', date)
       .then(data => {
         setLoading(false)
-        if (data) {
-          const convert =
-            Object.values(data)
-              .reduce((acc, x) =>  acc.concat(Object.values(x)), [])
-          financeTable.current = convert
-          convert.forEach(item => {
-            if (item.type_id) setTotalPay(prev => prev += Number(item.amount || 0))
-            else setTotalReceive(prev => prev += Number(item.amount || 0))
-          })
-          setFinanceTable(convert)
-          console.log('getFinanceTable', convert);
-        }
+        // if (data) {
+        //   const convert =
+        //     Object.values(data)
+        //       .reduce((acc, x) =>  acc.concat(Object.values(x)), [])
+        //   financeTable.current = convert
+        //   convert.forEach(item => {
+        //     if (item.type_id) setTotalPay(prev => prev += Number(item.amount || 0))
+        //     else setTotalReceive(prev => prev += Number(item.amount || 0))
+        //   })
+        //   setFinanceTable(convert)
+        //   console.log('getFinanceTable', convert);
+        // }
+        console.log('get_finance_table', data);
+        setFinanceTable(data)
+        data?.forEach(item => {
+          if (item.type_id) setTotalReceive(prev => prev += Number(item.amount || 0))
+          else setTotalPay(prev => prev += Number(item.amount || 0))
+        })
       })
       .catch(err => console.log(err))
       .finally(() => setLoading(false))
@@ -293,13 +293,18 @@ export default function Finance() {
     setOpenModal(true)
   }
 
+  const handleOpenModalDetail = (item) => {
+    setOpenModalDetail(true)
+    setObjectDetail(item)
+  }
+
   return (
     <>
       <Card className="h-full w-full">
         <CardHeader floated={false} shadow={false} className="rounded-none pb-2">
           <div className="mb-4 flex flex-col items-center justify-center py-4">
             <Typography variant="h5" color="blue-gray">
-              {moment(selectedMonth, 'MMYYYY').format(`MMMM - [Q]Q - YYYY`)}
+              {moment(selectedMonth, 'MMYYYY').locale('vi').format(`MMMM - [Q]Q - YYYY`).toLocaleUpperCase()}
             </Typography>
             <Typography color="gray" className="mt-1 font-normal">
               Tổng thu: {formatNum(totalReceive)} &emsp; | &emsp; Tổng chi: {formatNum(totalPay)}
@@ -319,19 +324,20 @@ export default function Finance() {
           <Tabs value={mod}>
             <TabsHeader className="max-w-max mx-auto">
               <Tab value="month" onClick={() => changeMode('month')} className="w-48 h-10">
-                Month
+                Tháng
               </Tab>
               <Tab onClick={() => changeMode('quarter')} value="quarter" className="w-48 h-10">
-                Quarter
+                Quý
               </Tab>
               <Tab onClick={() => changeMode('year')} value="year" className="w-48 h-10">
-                Year
+                Năm
               </Tab>
             </TabsHeader>
             <TabsBody>
               <TabPanel key={mod} value={mod}>
                 <FinanceTable
                   // handleRemove={handleRemove}
+                  openModalDetail={handleOpenModalDetail}
                   financeData={financeTable}
                 />
               </TabPanel>
@@ -352,141 +358,130 @@ export default function Finance() {
               onClick={() => handleOpenModal(false)}
             >
               <PlusCircleIcon strokeWidth={2} className="h-5 w-5" /> 
-              Make a receipt
+              Lập phiếu thu
             </Button>
             <Button variant="gradient" color="blue-gray" className="flex items-center gap-3" size="sm"
               onClick={() => handleOpenModal(true)}
             >
               <MinusCircleIcon strokeWidth={2} className="h-5 w-5" />
-              Make a payment
+              Lập phiếu chi
             </Button>
           </div>
         </CardFooter>
       </Card>
       <FinancePopup open={openModal} handleCallback={handleFinanceCallback} isPayment={isPayment}/>
+      <ModalFinanceDetail open={openModalDetail} handleOpen={setOpenModalDetail} data={objectDetail}/>
     </>
   );
 }
 
-const FinanceTable = ({ financeData = [] }) => {
+export const ModalFinanceDetail = ({open, handleOpen, data}) => {
+  return (
+    <Dialog
+      size="sm"
+      open={open}
+      handler={handleOpen}
+      className="max-w-[80%]"
+    >
+      <DialogHeader className="justify-center">{`Chi tiết ${BillType[data.type_id]}`}</DialogHeader>
+      <DialogBody>
+        <div className="p-4 border-b border-blue-gray-100 flex justify-between">
+          <Typography variant="small" color="black">
+            Mã phiếu (tự tạo)
+          </Typography>
+          <Typography variant="small" color="black" className="font-bold">
+            {data.code}
+          </Typography>
+        </div>
+        <div className="p-4 border-b border-blue-gray-100 flex justify-between">
+          <Typography variant="small" color="black">
+            Ngày lập phiếu
+          </Typography>
+          <Typography variant="small" color="black" className="font-bold">
+            {formatDate(data.create_date, 'YYYY-MM-DD')}
+          </Typography>
+        </div>
+        <div className="p-4 border-b border-blue-gray-100 flex justify-between">
+          <Typography variant="small" color="black">
+            Loại
+          </Typography>
+          <Typography variant="small" color="black" className="font-bold">
+            {data.type}
+          </Typography>
+        </div>
+        <div className="p-4 border-b border-blue-gray-100 flex justify-between">
+          <Typography variant="small" color="black">
+            Số tiền
+          </Typography>
+          <Typography variant="small" color="black" className="font-bold">
+            {formatNum(data.amount, 0, 'price')}
+          </Typography>
+        </div>
+        <div className="p-4 border-b border-blue-gray-100 flex justify-between">
+          <Typography variant="small" color="black">
+            Quỹ
+          </Typography>
+          <Typography variant="small" color="black" className="font-bold">
+            {data.account_type}
+          </Typography>
+        </div>
+        <div className="p-4 border-b border-blue-gray-100 flex justify-between">
+          <Typography variant="small" color="black">
+            Mã lớp học
+          </Typography>
+          <Typography variant="small" color="black" className="font-bold">
+            {data.class_id}
+          </Typography>
+        </div>
+        <div className="p-4 border-b border-blue-gray-100 flex justify-between">
+          <Typography variant="small" color="black">
+            Khách hàng
+          </Typography>
+          <Typography variant="small" color="black" className="font-bold">
+            {data.customer}
+          </Typography>
+        </div>
+        <div className="p-4 border-b border-blue-gray-100 flex justify-between">
+          <Typography variant="small" color="black">
+            Số tiền
+          </Typography>
+          <Typography variant="small" color="black" className="font-bold">
+            {formatNum(data.amount, 0, 'price')}
+          </Typography>
+        </div>
+        {data.tuition_date && (
+          <div className="p-4 border-b border-blue-gray-100 flex justify-between">
+            <Typography variant="small" color="black">
+              Học phí tháng
+            </Typography>
+            <Typography variant="small" color="black" className="font-bold">
+              {moment(data.tuition_date, 'MMYYYY').format('MM')}
+            </Typography>
+          </div>
+        )}
+        <div className="p-4 border-b border-blue-gray-100 flex justify-between">
+          <Typography variant="small" color="black">
+            Người duyệt
+          </Typography>
+          <Typography variant="small" color="black" className="font-bold">
+            {data.approver}
+          </Typography>
+        </div>
+      </DialogBody>
+      <DialogFooter className="space-x-2">
+        <Button variant="gradient" color="deep-orange" onClick={() => handleOpen(prev => !prev)}>
+          confirm
+        </Button>
+      </DialogFooter>
+    </Dialog>
+  )
+}
+
+const FinanceTable = ({ financeData = [], openModalDetail }) => {
   const [controller] = useController();
   const { userInfo } = controller;
   const [keySort, setKeySort] = useState('')
   const [isAsc, setIsAsc] = useState(true)
-
-  const TableScore = ({ scoreTable = [] }) => {
-    return (
-      <table className="text-left">
-        <thead>
-          <tr>
-            {HeaderScore.map((head) => (
-              <th
-                key={head}
-                className="border-b p-4"
-              >
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="font-bold leading-none opacity-70"
-                >
-                  {head}
-                </Typography>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {scoreTable.map((score, index) => {
-            return (
-              <tr key={'scorebody'}>
-                <td className='p-4'>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal"
-                  >
-                    {score.class_id?.toUpperCase() || 'Test'}
-                  </Typography>
-                </td>
-                <td className='p-4'>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal"
-                  >
-                    {glb_sv.semester.MAP[score.term]}
-                  </Typography>
-                </td>
-                <td className='p-4'>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal"
-                  >
-                    {score.grammar}
-                  </Typography>
-                </td>
-                <td className='p-4'>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal"
-                  >
-                    {score.listening}
-                  </Typography>
-                </td>
-                <td className='p-4'>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal"
-                  >
-                    {score.speaking}
-                  </Typography>
-                </td>
-                <td className='p-4'>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-medium"
-                  >
-                    {score.reading}
-                  </Typography>
-                </td>
-                <td className='p-4'>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-medium"
-                  >
-                    {score.writing}
-                  </Typography>
-                </td>
-                <td className='p-4'>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-medium"
-                  >
-                    {score.total}
-                  </Typography>
-                </td>
-                <td className='p-4'>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-medium"
-                  >
-                    {formatDate(score.update_time, 'DD/MM/YYYY')}
-                  </Typography>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    )
-  }
 
   return (
     <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
@@ -541,9 +536,11 @@ const FinanceTable = ({ financeData = [] }) => {
                 <td className={classes}>
                   <div className="flex flex-col">
                     <Typography
+                      as={"a"}
+                      onClick={() => openModalDetail(item)}
                       variant="small"
                       color="blue-gray"
-                      className="font-normal"
+                      className="py-0.5 px-1 font-normal text-inherit transition-colors text-blue-500 cursor-pointer"
                     >
                       {item.code}
                     </Typography>
