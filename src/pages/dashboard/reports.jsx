@@ -51,8 +51,9 @@ import InputMask from 'react-input-mask';
 import DefaultSkeleton from '../../widgets/skeleton/index'
 import { glb_sv } from "../../service";
 import exportExcelScore from "../../utils/exportExcel/exportScore";
+import formatNum from "../../utils/formatNumber/formatNum";
 
-const TABLE_HEAD = [
+const STUDENT_HEAD = [
     "Export",
     "ID",
     "Họ",
@@ -69,6 +70,8 @@ const TABLE_HEAD = [
     "Advisor",
     "Note"
 ];
+
+const HEADER_TUITION = ['Export', 'Mã HS', 'Tên', 'Ngày lập phiếu', 'Số tiền', 'Ghi chú']
 
 const ListStatus = [
     {
@@ -148,28 +151,36 @@ export default function ReportScore() {
     const { userInfo } = controller;
     const currentEditKey = useRef({})    
     const [mod, setMod] = useState('score')
-    const tuitionTable = useRef([])
-    const [classStudentList, setClassStudentList] = useState([])
+    const tuitionTableRef = useRef([])
+    const [tuitionTable, setTuitionTable] = useState([])
     const currentMonth = moment().format('MMYYYY')
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth)
+    const courseTuition = useRef({})
+    const [init, setInit] = useState(false)
 
     useEffect(() => {
         getStudentList()
     }, [])
+
+    const getCourseTuition = () => {
+        if (Object.keys(courseTuition.current).length > 0) return
+        useFirebase('get_all_course', { getId: true })
+            .then(data => {
+                data.forEach(item => {
+                    courseTuition.current[item.id] = item.data()
+                })
+            })
+            .catch(err => console.log(err))
+    }
 
     const getTuitionTable = (month = '') => {
         setLoading(true)
         useFirebase('get_tuition_table', month || currentMonth)
             .then(data => {
                 setLoading(false)
-                tuitionTable.current = data
-                // useStorage('set', 'classList', data)
-                console.log('getTuitionTable', data);
-                // setClassStudentList(list.map(item => {
-                //     return {
-                //       ...item,
-                //       ...classTuition[item.id]
-                //     }
-                // }
+                tuitionTableRef.current = data
+                setTuitionTable(data?.filter(item => item.type_id === 1))
+                console.log('table', data?.filter(item => item.type_id === 1));
             })
             .catch(err => console.log(err))
             .finally(() => setLoading(false))
@@ -278,44 +289,40 @@ export default function ReportScore() {
     }
 
     return (
-        <>
-
-            <Card className="h-full w-full">
-                <CardHeader floated={false} shadow={false} className="rounded-none pb-6">
-                    <div className="mb-4 flex items-center justify-between gap-8">
-                        <div>
-                            <Typography variant="h5" color="blue-gray">
-                                Report
-                            </Typography>
-                            <Typography color="gray" className="mt-1 font-normal">
-                                Export reports to Excel 
-                            </Typography>
-                        </div>
+        <Card className="h-full w-full">
+            <CardHeader floated={false} shadow={false} className="rounded-none pb-6">
+                <div className="mb-4 flex items-center justify-between gap-8">
+                    <div>
+                        <Typography variant="h5" color="blue-gray">
+                            Report
+                        </Typography>
+                        <Typography color="gray" className="mt-1 font-normal">
+                            Export reports to Excel
+                        </Typography>
                     </div>
-                </CardHeader>
-                <CardBody className="p-0 px-0 overflow-auto max-h-[70vh]">
-                    <div className="flex right-0 top-30 absolute items-center justify-end gap-4">
-                        <Button
-                            className="flex items-center gap-3"
-                            size="sm"
-                            onClick={() => getStudentList()}
-                        >
-                            <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
-                        </Button>
-                    </div>
-                    <Tabs value={mod}>
-                        <TabsHeader className="max-w-max mx-auto">
-                            <Tab value="score" className="w-48 h-10">
-                                <TableCellsIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
-                                Score
-                            </Tab>
-                            <Tab onClick={() => getTuitionTable()} value="tuition" className="w-48 h-10">
-                                <BanknotesIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
-                                Tuition
-                            </Tab>
-                        </TabsHeader>
-                        <TabsBody>
-                            <TabPanel key={'score'} value={'score'}>
+                </div>
+            </CardHeader>
+            <CardBody className="p-0 px-0 overflow-auto max-h-[70vh]">
+                <Tabs value={mod}>
+                    <TabsHeader className="max-w-max mx-auto">
+                        <Tab value="score" className="w-48 h-10">
+                            <TableCellsIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
+                            Score
+                        </Tab>
+                        <Tab onClick={() => {
+                            // getCourseTuition()
+                            if (!init) {
+                                getTuitionTable(selectedMonth)
+                                setInit(true)
+                            }
+                        }} value="tuition" className="w-48 h-10">
+                            <BanknotesIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
+                            Tuition
+                        </Tab>
+                    </TabsHeader>
+                    <TabsBody>
+                        <TabPanel key={'score'} value={'score'}>
+                            <div className="flex justify-between items-center">
                                 <div className="w-full md:w-72 mb-2">
                                     <Input
                                         className=""
@@ -325,10 +332,19 @@ export default function ReportScore() {
                                         onChange={(e) => handleSearch(e.target.value)}
                                     />
                                 </div>
+                                <Button
+                                    className="h-8"
+                                    size="sm"
+                                    onClick={() => getTuitionTable(selectedMonth)}
+                                >
+                                    <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
+                                </Button>
+                            </div>
+                            <div className="flex flex-col p-0 px-0 overflow-auto max-h-[55vh]">
                                 <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
                                     <thead>
                                         <tr>
-                                            {TABLE_HEAD.map((head, index) => (
+                                            {STUDENT_HEAD.map((head, index) => (
                                                 <th
                                                     onClick={() => handleSort(index)}
                                                     key={head}
@@ -375,83 +391,66 @@ export default function ReportScore() {
                                         )}
                                     </tbody>
                                 </table>
-                            </TabPanel>
-                            <TabPanel key={'treemap'} value={'treemap'}>
-                                {/* <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0" >
-                                    <thead>
-                                        <tr>
-                                            {HeaderTuition.map((el) => (
-                                                <th
-                                                    key={el}
-                                                    className="border-b border-blue-gray-50 py-3 px-5 text-left"
-                                                >
-                                                    <Typography
-                                                        variant="small"
-                                                        className="text-[11px] font-bold uppercase text-blue-gray-400"
-                                                    >
-                                                        {el}
-                                                    </Typography>
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {classStudentList?.map(({ id, full_name, tuition, date, note }, index) => {
-                                            // const { tuition, date, note } = (tuiList || []).find(item => item.id_student === id) || {};
-                                            const className = `py-3 px-5 ${index === authorsTableData.length - 1
-                                                ? ""
-                                                : "border-b border-blue-gray-50"
-                                                }`;
-                                            // if ((tuitionDefault - tuition === 0) && !filterTuition) return (<></>)
-                                            return (
-                                                <tr key={index}>
-                                                    <td className={className}>
-                                                        <Typography className="text-xs font-normal text-blue-gray-500">
-                                                            {id}
-                                                        </Typography>
-                                                    </td>
-                                                    <td className={className}>
-                                                        <Typography className={`text-xs font-normal ${!tuition ? 'text-red-500' : 'text-blue-gray-500'}`}>
-                                                            {full_name}
-                                                        </Typography>
-                                                    </td>
-                                                    <td className={className}>
-                                                        <Typography className="text-xs font-normal text-blue-gray-600">
-                                                            {date ? formatDate(date) : ''}
-                                                        </Typography>
-                                                    </td>
-                                                    <td className={className}>
-                                                        <Typography className="text-xs font-semibold text-blue-gray-500">
-                                                            {typeof tuition === 'number' ? formatNum(tuitionDefault - tuition, 0, 'price') : formatNum(tuitionDefault, 0, 'price')}
-                                                        </Typography>
-                                                    </td>
-                                                    <td className={className}>
-                                                        <Typography className="text-xs font-normal text-blue-gray-500">
-                                                            {note}
-                                                        </Typography>
-                                                    </td>
-                                                </tr>
-                                            )
-                                        })}
-                                    </tbody>
-                                </table> */}
-                            </TabPanel>
-                        </TabsBody>
-                    </Tabs>
-                </CardBody>
-                {/* <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
+                            </div>
+                        </TabPanel>
+                        <TabPanel key={'tuition'} value={'tuition'}>
+                            <div className="grid grid-cols-3">
+                                <div className="flex col-start-2 mb-2">
+                                    <Input
+                                        type="month"
+                                        value={moment(selectedMonth, 'MMYYYY').format('YYYY-MM')}
+                                        onChange={(e) => {
+                                            if (!e.target.value) setSelectedMonth(moment().format('MMYYYY'))
+                                            else setSelectedMonth(moment(e.target.value, 'YYYY-MM').format('MMYYYY'))
+                                            getTuitionTable(moment(e.target.value, 'YYYY-MM').format('MMYYYY'))
+                                        }}
+                                        className="rounded-r-none !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                        labelProps={{
+                                            className: "before:content-none after:content-none",
+                                        }}
+                                        containerProps={{
+                                            className: "min-w-0",
+                                        }}
+                                    />
+                                    <Button
+                                        size="sm"
+                                        ripple={false}
+                                        // color={email ? "gray" : "blue-gray"}
+                                        // disabled={!email}
+                                        className="rounded-l-none"
+                                    >
+                                        Export
+                                    </Button>
+                                </div>
+                                <div className="col-start-3 justify-self-end self-center">
+                                    <Button
+                                        className="h-8"
+                                        size="sm"
+                                        onClick={() => getTuitionTable(selectedMonth)}
+                                    >
+                                        <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
+                                    </Button>
+                                </div>
+                            </div>
+                            <div className="flex flex-col p-0 px-0 overflow-auto max-h-[55vh]">
+                                <TuitionTable tuitionTable={tuitionTable} setTuitionTable={setTuitionTable} courseTuition={courseTuition.current} />
+                            </div>
+                        </TabPanel>
+                    </TabsBody>
+                </Tabs>
+            </CardBody>
+            {/* <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
                 </CardFooter> */}
-                <ModalConfirmUpdate
-                    open={openModalConfirm}
-                    handleOpen={setOpenModalConfirm}
-                    objectNew={objectNew}
-                    objectEdit={objectEdit}
-                    handleConfirmCallback={handleConfirmCallback}
-                    loading={loading}
-                    StudentRow={StudentRow}
-                />
-            </Card>
-        </>
+            <ModalConfirmUpdate
+                open={openModalConfirm}
+                handleOpen={setOpenModalConfirm}
+                objectNew={objectNew}
+                objectEdit={objectEdit}
+                handleConfirmCallback={handleConfirmCallback}
+                loading={loading}
+                StudentRow={StudentRow}
+            />
+        </Card>
     );
 }
 
@@ -735,5 +734,100 @@ const StudentRow = ({ hideColumn = false, classes, index, item, handleEdit = () 
                 </Typography>
             </td>
         </tr>
+    )
+}
+
+const TuitionTable = ({ tuitionTable, setTuitionTable, courseTuition }) => {
+    const [keySort, setKeySort] = useState('')
+    const [isAsc, setIsAsc] = useState(true)
+    const tableRef = useRef(tuitionTable)
+
+    const handleSortTuition = (indexCol) => {
+        let sorted
+        sorted = orderBy(tuitionTable, 'customer', [isAsc ? 'asc' : 'desc'])
+        setTuitionTable([...sorted])
+        setKeySort(indexCol)
+        setIsAsc(prev => !prev)
+    }
+
+    return (
+        <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
+            <thead>
+                <tr>
+                    {HEADER_TUITION.map((head, index) => (
+                        <th
+                            onClick={() => handleSortTuition(index)}
+                            key={head}
+                            className="z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors hover:bg-blue-gray-200"
+                        >
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
+                            >
+                                {head}{" "}
+                                {(index === 2) && (
+                                    keySort !== index ? (
+                                        <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
+                                    ) : keySort === index && isAsc ? (
+                                        <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
+                                    ) : (
+                                        <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
+                                    )
+                                )}
+                            </Typography>
+                        </th>
+                    ))}
+                </tr>
+            </thead>
+            <tbody>
+                {tuitionTable?.map(
+                    (item, index) => {
+                        // const [program, level, id] = item.class_id.split('_')
+                        // const tuitionDefault = courseTuition[program]?.[level]?.['tuition']
+                        const isLast = index === tuitionTable.length - 1;
+                        const classes = isLast
+                            ? "py-2 px-4"
+                            : "py-2 px-4 border-b border-blue-gray-50";
+                        return (
+                            <tr key={index} className="even:bg-blue-gray-50/50">
+                                <td className={classes + ' cursor-pointer'}>
+                                    <DocumentTextIcon
+                                        onClick={() => exportExcelScore(item)}
+                                        className="w-5 h-5"
+                                    />
+                                </td>
+                                <td className={classes}>
+                                    <Typography className="text-xs font-normal text-blue-gray-500">
+                                        {item.customer_id}
+                                    </Typography>
+                                </td>
+                                <td className={classes}>
+                                    <Typography className={`text-xs font-normal ${!item.amount ? 'text-red-500' : 'text-blue-gray-500'}`}>
+                                        {item.customer}
+                                    </Typography>
+                                </td>
+                                <td className={classes}>
+                                    <Typography className="text-xs font-normal text-blue-gray-600">
+                                        {item.create_date ? formatDate(item.create_date) : ''}
+                                    </Typography>
+                                </td>
+                                <td className={classes}>
+                                    <Typography className="text-xs font-semibold text-blue-gray-500">
+                                        {/* {!item.amount ? formatNum(tuitionDefault, 0, 'price') : formatNum(tuitionDefault - item.amount, 0, 'price')} */}
+                                        {formatNum(item.amount, 0, 'price')}
+                                    </Typography>
+                                </td>
+                                <td className={classes}>
+                                    <Typography className="text-xs font-normal text-blue-gray-500">
+                                        {item.explain}
+                                    </Typography>
+                                </td>
+                            </tr>
+                        );
+                    },
+                )}
+            </tbody>
+        </table>
     )
 }

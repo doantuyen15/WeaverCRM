@@ -8,7 +8,7 @@ const exportExcelScore = (dataStudent) => {
     dataStudent.score_table.forEach((score, index) => {
         if(score.class_id !== 'test') {
             const startRow = 4*index + 1
-            worksheet.addRow([score.class_id + ' - ' + glb_sv.semester.MAP(score.term)])
+            worksheet.addRow([score.class_id + ' - ' + glb_sv.semester.MAP[score.term]])
             worksheet.mergeCells(startRow, 1, startRow, 5);
             worksheet.addRow(['speaking', 'reading', 'writing', 'listening', 'total'])
             worksheet.addRow([score.speaking, score.reading, score.writing, score.listening, score.total])

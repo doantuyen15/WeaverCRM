@@ -36,6 +36,7 @@ const roles = glb_sv.roles
 const BillType = {
     'pay': [
         'Loại khác',
+        'Refunds',
         'Chi tiền vật tư / thiết bị',
         'Chi tiền lương',
     ],
@@ -50,7 +51,7 @@ const AccountType = [
     'Chuyển khoản'
 ]
 
-export function FinancePopup({ open, handleCallback, isPayment = false, dataClass = [] }) {
+export function FinancePopup({ open, handleCallback, isPayment = false, dataClass = [], dataStudent }) {
     const [controller] = useController();
     const { userInfo } = controller;
     const [newBill, setNewBill] = useState({})
@@ -65,27 +66,51 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
     const courseTuition = useRef({})
     const currentClassInfo = useRef({})
     const [loading, setLoading] = useState(false)
+    const currentMonth = moment().format('MMYYYY')
+    const newBillRef = useRef({})
 
     useEffect(() => {
         if (open) {
             getClassList()
             getStaffList()
-            setNewBill(new Finance({
-                isPayment: isPayment,
-                type_id: !isPayment ? 1 : 0,
-                type: !isPayment ? BillType['receive'][1] : BillType['pay'][0],
-                tuition_date: moment().format('MMYYYY'),
-                account_type: AccountType[0],
-                account_type_id: 0
-            }))
+            if (!dataStudent?.id_class) {
+                const createBill = new Finance({
+                    isPayment: isPayment,
+                    type_id: !isPayment ? 1 : 0,
+                    type: !isPayment ? BillType['receive'][1] : BillType['pay'][0],
+                    tuition_date: currentMonth,
+                    account_type: AccountType[0],
+                    account_type_id: 0
+                })
+                newBillRef.current = createBill
+                setNewBill(createBill)
+            } else {
+                const createBill = new Finance({
+                    isPayment: isPayment,
+                    type_id: !isPayment ? 1 : 0,
+                    type: !isPayment ? BillType['receive'][1] : BillType['pay'][0],
+                    tuition_date: currentMonth,
+                    account_type: AccountType[0],
+                    account_type_id: 0,
+                    customer_id: dataStudent.id_student,
+                    customer: dataStudent.full_name,
+                    class_id: dataStudent.id_class,
+                })
+                getCourseTuition()
+                newBillRef.current = createBill
+                setNewBill(createBill)
+                currentClassInfo.current = dataClass.find(item => item.id === dataStudent.id_class) || {}
+                getTuitionForCustomer(dataStudent.month, dataStudent.id_student)
+            }
         } else {
             setNewBill({})
+            setLoadingTuition(false)
         }
     }, [open])
 
     const updateFinance = (key, value) => {
-        newBill.updateInfo(key, value)
-        setNewBill(newBill)
+        newBillRef.current?.updateInfo(key, value)
+        setNewBill(newBillRef.current)
         forceUpdate()
     }
 
@@ -116,11 +141,15 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
 
     }
 
-    const getTuitionForCustomer = (id) => {
+    const getTuitionForCustomer = (month, customer_id) => {
         setLoadingTuition(true)
-        useFirebase('query_tuition', id)
+        const { id, program, level, start_date, end_date } = currentClassInfo.current
+        useFirebase('query_tuition', {
+            customer_id, 
+            class_id: id,
+            month
+        })
             .then(data => {
-                const { program, level, start_date, end_date } = currentClassInfo.current
                 const tuitionFee = Number(courseTuition.current[program]?.[level]?.['tuition'])
                 let totalTuition = 0
 
@@ -130,8 +159,6 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                         else totalTuition -= Number(item.amount)
                     })
                 }
-
-                console.log('totalTuition', data, totalTuition);
 
                 if (program === 'IELTS') {
                     if (Number(totalTuition) >= tuitionFee) {
@@ -149,18 +176,27 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                 } else {
                     const totalMonth = moment(end_date, 'DD/MM/YYYY').diff(moment(start_date, 'DD/MM/YYYY'), 'months')
                     const option = []
-                    const startMonth = moment(start_date, 'DD/MM/YYYY').clone()
+                    // const startMonth = moment(start_date, 'DD/MM/YYYY').clone()
                     for(var i = 0; i < totalMonth; i++) {
-                        option.push(startMonth.add(i, 'month').format('MMYYYY'))
+                        option.push(moment(start_date, 'DD/MM/YYYY').clone().add(i, 'month').format('MMYYYY'))
                     }
                     setTuitionDate(option)
-                    setTuitionData([
-                        tuitionFee
-                    ])
+                    if (totalTuition === 0) {
+                        updateFinance('amount', tuitionFee)
+                        console.log('tuitionFee', tuitionFee);
+                        setTuitionData([
+                            tuitionFee
+                        ])
+                    } else {
+                        updateFinance('amount', 0)
+                        setTuitionData([])
+                    }
                 }
-                setLoadingTuition(false)
             })
-            .catch(err => console.log(err))
+            .catch(err => {
+                console.log(err)
+            })
+            .finally(() => setLoadingTuition(false))
     }
 
     const getCourseTuition = () => {
@@ -390,7 +426,8 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                                     <Option onClick={() => {
                                                                         updateFinance('customer', item.full_name)
                                                                         updateFinance('customer_id', item.id)
-                                                                        getTuitionForCustomer(item.id)
+                                                                        getTuitionForCustomer(currentMonth, newBill.customer_id)
+                                                                        currentClassInfo.current?.program === 'IELTS' && getTuitionForCustomer(item.id)
                                                                     }}
                                                                         key={item.id} value={item.full_name} className="flex items-center gap-2">
                                                                         {item.full_name}
@@ -401,73 +438,73 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                     </div>
                                                 )}
 
-                                                {newBill.customer_id && (
-                                                    <>
+                                                {newBill.customer_id && currentClassInfo.current?.program !== 'IELTS' && (
+                                                    tuitionDate.length > 0 && (
                                                         <div className="grid grid-cols-3 self-center">
                                                             <div className="max-w-max relative flex items-center self-center">
                                                                 <Typography variant="small" color="black">
-                                                                    Số tiền
+                                                                    Học phí tháng
                                                                 </Typography>
                                                                 <span className="absolute -top-1 -right-2 text-red-500">*</span>
-                                                                {loadingTuition && <Spinner className="w-4 h-4 ml-2" />}
                                                             </div>
                                                             <div className="col-span-2 pb-3">
                                                                 <Select
                                                                     placeholder="Chọn quỹ"
                                                                     variant="standard"
-                                                                    value={newBill.amount}
+                                                                    value={newBill.tuition_date}
                                                                     // error={!newBill.account_type?.toString()}
                                                                     selected={(element) =>
                                                                         <Typography className="flex items-center opacity-100 px-4 gap-2 pointer-events-none" variant="small" color="black">
-                                                                            {formatNum(newBill.amount, 0, 'price')}
+                                                                            {newBill.tuition_date ? moment(newBill.tuition_date, 'MMYYYY').format('MMMM YYYY') : ''}
                                                                         </Typography>
                                                                     }
                                                                 >
-                                                                    {tuitionData.map(item => (
+                                                                    {tuitionDate.map(month => (
                                                                         <Option onClick={() => {
-                                                                            updateFinance('amount', item)
+                                                                            updateFinance('tuition_date', month)
+                                                                            updateFinance('amount', 0)
+                                                                            getTuitionForCustomer(month, newBill.customer_id)
                                                                         }}
-                                                                            key={item} value={item} className="flex items-center gap-2">
-                                                                            {formatNum(item, 0, 'price')}
+                                                                            key={month} value={month} className="flex items-center gap-2">
+                                                                            {moment(month, 'MMYYYY').format('MMMM YYYY')}
                                                                         </Option>
                                                                     ))}
                                                                 </Select>
                                                             </div>
                                                         </div>
-                                                        {tuitionDate.length > 0 && (
-                                                            <div className="grid grid-cols-3 self-center">
-                                                                <div className="max-w-max relative flex items-center self-center">
-                                                                    <Typography variant="small" color="black">
-                                                                        Học phí tháng
-                                                                    </Typography>
-                                                                    <span className="absolute -top-1 -right-2 text-red-500">*</span>
-                                                                </div>
-                                                                <div className="col-span-2 pb-3">
-                                                                    <Select
-                                                                        placeholder="Chọn quỹ"
-                                                                        variant="standard"
-                                                                        value={newBill.tuition_date}
-                                                                        // error={!newBill.account_type?.toString()}
-                                                                        selected={(element) =>
-                                                                            <Typography className="flex items-center opacity-100 px-4 gap-2 pointer-events-none" variant="small" color="black">
-                                                                                {newBill.tuition_date ? moment(newBill.tuition_date, 'MMYYYY').format('MMMM YYYY') : ''}
-                                                                            </Typography>
-                                                                        }
-                                                                    >
-                                                                        {tuitionDate.map(item => (
-                                                                            <Option onClick={() => {
-                                                                                updateFinance('tuition_date', item)
-                                                                            }}
-                                                                                key={item} value={item} className="flex items-center gap-2">
-                                                                                {moment(item, 'MMYYYY').format('MMMM YYYY')}
-                                                                            </Option>
-                                                                        ))}
-                                                                    </Select>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </>
+                                                    )
                                                 )}
+                                                <div className="grid grid-cols-3 self-center">
+                                                    <div className="max-w-max relative flex items-center self-center">
+                                                        <Typography variant="small" color="black">
+                                                            Số tiền
+                                                        </Typography>
+                                                        <span className="absolute -top-1 -right-2 text-red-500">*</span>
+                                                        {loadingTuition && <Spinner className="w-4 h-4 ml-2" />}
+                                                    </div>
+                                                    <div className="col-span-2 pb-3">
+                                                        <Select
+                                                            placeholder="Chọn quỹ"
+                                                            variant="standard"
+                                                            value={newBill.amount}
+                                                            // error={!newBill.account_type?.toString()}
+                                                            selected={(element) =>
+                                                                <Typography className="flex items-center opacity-100 px-4 gap-2 pointer-events-none" variant="small" color="black">
+                                                                    {formatNum(newBill.amount, 0, 'price')}
+                                                                </Typography>
+                                                            }
+                                                        >
+                                                            {tuitionData.map(item => (
+                                                                <Option onClick={() => {
+                                                                    updateFinance('amount', item)
+                                                                }}
+                                                                    key={item} value={item} className="flex items-center gap-2">
+                                                                    {formatNum(item, 0, 'price')}
+                                                                </Option>
+                                                            ))}
+                                                        </Select>
+                                                    </div>
+                                                </div>
                                             </>
                                         ) : null}
                                         

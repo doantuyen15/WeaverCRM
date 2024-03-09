@@ -45,7 +45,7 @@ export function useFirebase(service: string, params: any) {
         case 'get_tuition_table': return getTuitionTable(params)
         case 'get_staff_attendance': return getStaffAttendance()
         case 'get_all_course': return getAllCourse(params)
-        case 'get_finance_table': return getFinanceTable(params)
+        case 'query_finance_table': return queryFinanceTable(params)
         case 'query_tuition': return queryTuition(params)
         case 'add_student': return addStudent(params)
         case 'update_student': return updateStudent(params)
@@ -75,9 +75,17 @@ export function useFirebase(service: string, params: any) {
     }
 }
 
-const queryTuition = (params: string) => {
+const queryTuition = (params: any) => {
     return new useRequest((resolve: any, reject: any) => {
-        const q = query(collectionGroup(db, 'tuition'), where('customer_id', '==', params));
+        let queryMonth
+        if (params.class_id.includes('IELTS')) queryMonth = where("tuition_date", "!=", '')
+        else queryMonth = where("tuition_date", "==", params.month)    
+        const q = query(
+            collectionGroup(db, 'tuition'),
+            where('customer_id', '==', params.customer_id),
+            queryMonth,
+            where("class_id", "==", params.class_id)
+        );
         getDocs(q)
             .then(
                 (snap) => {
@@ -93,13 +101,14 @@ const queryTuition = (params: string) => {
 }
 
 
-const getFinanceTable = (params: string) => {
+const queryFinanceTable = (params: string[]) => {
     return new useRequest((resolve: any, reject: any) => {
-        getDocs(collection(db, `finance/${params}/tuition`))
+        const q = query(collectionGroup(db, 'tuition'), where('month', 'in', params));
+        getDocs(q)
             .then(
                 (snap) => {
                     try {
-                        resolve(snap.docs.map(item => item.data()))
+                        resolve(snap.docs.map(item => item.data()));
                     } catch (error) {
                         reject(error)
                     }
@@ -306,11 +315,11 @@ const makeTuition = (list: any) => {
 
 const getTuitionTable = (params: any) => {
     return new useRequest((resolve: any, reject: any) => {
-        getDoc(doc(db, 'tuition', params))
+        getDocs(collection(db, `finance/${params}/tuition`))
             .then(
                 (snap) => {
                     try {
-                        resolve(snap.data() || [])
+                        resolve(snap.docs.map(item => item.data()))
                     } catch (error) {
                         reject(error)
                     }
@@ -574,8 +583,6 @@ const updateApproval = ({approval, ok}: any) => {
                     .catch(reject)
             } else if (approval.type === 'make_tuition') {
                 const { amount, class_id, customer_id, code, tuition_date, create_date, explain } =  approval?.data
-                console.log('amount, classId, studentId, code, tuition_date', amount, class_id, customer_id, code, tuition_date);
-                
                 const financeRef = doc(db, `finance/${tuition_date}/tuition`, code)
                 const classRef = doc(db, 'classes', class_id)
                 let currentTuition = 0
@@ -689,7 +696,6 @@ const updateApproval = ({approval, ok}: any) => {
                     .catch(reject)
             } else if (approval.type === 'make_finance') {
                 const month = formatDate(approval.data?.create_date, 'MMYYYY')
-                const date = formatDate(approval.data?.create_date, 'DDMMYYYY')
                 const code = approval.data?.code
                 const financeRef = doc(db, `finance/${month}/tuition`, code)
                 

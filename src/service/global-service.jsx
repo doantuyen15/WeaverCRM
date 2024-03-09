@@ -158,6 +158,7 @@ class globalService {
                 color: 'orange'
             }
         ]
+        this.HEADER_TUITION = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền còn lại', 'Ghi chú']
     }
 }
 

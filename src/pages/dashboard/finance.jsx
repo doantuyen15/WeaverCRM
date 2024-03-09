@@ -128,16 +128,18 @@ export default function Finance() {
   const [totalReceive, setTotalReceive] = useState(0)
   const [openModalDetail, setOpenModalDetail] = useState(false)
   const [objectDetail, setObjectDetail] = useState({})
+  const selectDate = useRef([currentMonth])
 
   useEffect(() => {
-    // getStudentList()
     getFinanceTable()
   }, [])
 
-  const getFinanceTable = (date = currentMonth) => {
+  const getFinanceTable = () => {
     setLoading(true)
-    useFirebase('get_finance_table', date)
+    console.log('selectDate.current', selectDate.current);
+    useFirebase('query_finance_table', [].concat(selectDate.current))
       .then(data => {
+        setTotalReceive(0)
         setLoading(false)
         // if (data) {
         //   const convert =
@@ -151,7 +153,7 @@ export default function Finance() {
         //   setFinanceTable(convert)
         //   console.log('getFinanceTable', convert);
         // }
-        console.log('get_finance_table', data);
+        console.log('query_finance_table', data);
         setFinanceTable(data)
         data?.forEach(item => {
           if (item.type_id) setTotalReceive(prev => prev += Number(item.amount || 0))
@@ -162,110 +164,21 @@ export default function Finance() {
       .finally(() => setLoading(false))
   }
 
-  // const getStudentList = () => {
-  //   setLoading(true)
-  //   useFirebase('get_student')
-  //     .then(data => {
-  //       console.log('getStudentList', data);
-  //       tableRef.current = data
-  //       setStudentList(data)
-  //       // useStorage('set', 'studentInfo', data)
-  //     })
-  //     .catch(err => console.log(err))
-  //     .finally(() => setLoading(false))
-  // }
-
-  const handleAddStudent = () => {
-    setOnAdd(true)
-    const list = [...objectNew]
-    const newStudent = new StudentInfo()
-    list.push(newStudent)
-    setObjectNew(list)
-  }
-
-  const handleCancelAdd = (removeIndex) => {
-    setObjectNew(objectNew.filter((item, index) => index !== removeIndex))
-  }
-
-  const handleSearch = (searchValue) => {
-    try {
-      var search = tableRef.current.filter(item => item.full_name.toLowerCase().includes(searchValue.toLowerCase()));
-      setStudentList(search)
-    } catch (error) {
-      console.log('error', error);
-    }
-  }
-
-  const handleSort = (indexCol) => {
-    let sorted
-    sorted = orderBy(tableRef.current, [Header[indexCol]], [isAsc ? 'asc' : 'desc'])
-    setStudentList([...sorted])
-    setKeySort(indexCol)
-    setIsAsc(prev => !prev)
-  }
-
-  const handleConfirmCallback = (ok) => {
-    if (ok) {
-      sendRequestAddStudent()
-    } else {
-      setOpenModalConfirm(false)
-    }
-  }
-
-  const handleEdit = (item, index) => {
-    objectEdit.push(item)
-    currentEditKey.current = {
-      ...currentEditKey.current,
-      [index]: objectEdit?.length - 1
-    }
-    setObjectEdit(objectEdit)
-    editKey.push(index)
-    setEditKey([...editKey])
-    setEditMode(true)
-  }
-
-  const sendRequestAddStudent = () => {
-    setLoading(true)
-    if (objectNew.length > 0) {
-      useFirebase('add_student', objectNew)
-        .then(() => {
-          toast.success("Thêm học viên thành công! Yêu cầu đang chờ duyệt")
-        })
-        .catch((err) => {
-          console.log(err);
-          toast.error(`Thêm học viên không thành công! Lỗi: ${err}`)
-        })
-        .finally(() => {
-          setObjectNew([])
-          setLoading(false)
-          setOpenModalConfirm(false)
-        })
-    }
-    if (objectEdit.length > 0) {
-      console.log('objectEdit', objectEdit);
-      useFirebase('update_student', objectEdit)
-        .then(() => {
-          toast.success("Sửa thông tin học viên thành công! Yêu cầu đang chờ duyệt")
-        })
-        .catch((err) => {
-          console.log(err);
-          toast.error(`Sửa thông tin học viên không thành công! Lỗi: ${err}`)
-        })
-        .finally(() => {
-          setObjectEdit([])
-          setLoading(false)
-          setOpenModalConfirm(false)
-        })
-    }
-  }
-
-  const handleRemove = () => {
-    console.log('handleRemove');
-    // setAlertModal(true)
-  }
-
   const changeMode = (mode) => {
     setMod(mode)
+    selectDate.current = []
+    if (mode === 'quarter') {
+      const currentMonth = moment();
+      const currentQuarter = currentMonth.quarter();
+      for (let i = 0; i < 3; i++) {
+        selectDate.current.push(moment().quarter(currentQuarter).month(i).format('MMYYYY'));
+      }
+    } else if (mode === 'year') {
+      for (let i = 0; i < 12; i++) {
+        selectDate.current.push(moment().month(i).format('MMYYYY'))
+      }
+    } else selectDate.current = [currentMonth]
+    getFinanceTable()
   }
 
   const handleFinanceCallback = (ok, data) => {
@@ -273,7 +186,9 @@ export default function Finance() {
       setOpenModal(false)
     } else {
       setLoading(true)
-      useFirebase('make_finance', data)
+      let service = 'make_finance'
+      if (data.type_id === 1 && !data.isPayment) service = 'make_tuition'
+      useFirebase(service, data)
       .then(() => {
         setOpenModal(false)
         toast.success("Nhập dữ liệu tài chính thành công! Yêu cầu đang chờ duyệt")

@@ -42,7 +42,7 @@ import { toast } from "react-toastify";
 import { FinancePopup } from "../../widgets/modal/finance-popup";
 import ClassInfo from "../../data/entities/classesInfo";
 
-const Header = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền còn lại', 'Ghi chú']
+const Header = glb_sv.HEADER_TUITION
 
 export function Tuition() {
   const [list, setList] = useState([])
@@ -57,7 +57,7 @@ export function Tuition() {
   const [openSubList, setOpenSubList] = useState([])
   const currentMonth = moment().format('MMYYYY')
   const [selectedMonth, setSelectedMonth] = useState(moment().format('MMYYYY'))
-  const [tuitionTable, setTuitionTable] = useState([])
+  const [selectedStudent, setSelectedStudent] = useState({})
   const [filterTuition, setFilterTuition] = useState(false)
   const [isTuitionDate, setIsTuitionDate] = useState(true)
 
@@ -135,6 +135,11 @@ export function Tuition() {
   const changeMonth = (month) => {
     setSelectedMonth(month)
     getTuitionTable(moment().month(month).format('MMYYYY'))
+  }
+
+  const handleSelectStudent = (param) => {
+    setSelectedStudent(param)
+    setOpenPayment(true)
   }
 
   return (
@@ -301,7 +306,7 @@ export function Tuition() {
                                 </div>
                               </AccordionHeader>
                               <AccordionBody>
-                                  <TuitionTable filterTuition={filterTuition} classInfo={classInfo} selectedMonth={selectedMonth} />
+                                  <TuitionTable handleSelectStudent={handleSelectStudent} filterTuition={filterTuition} classInfo={classInfo} selectedMonth={selectedMonth} />
                                 {/* {!isPayAll || !filterTuition ?
                                 } */}
                               </AccordionBody>
@@ -331,14 +336,14 @@ export function Tuition() {
                 </CardFooter> */}
       </Card>
       {/* <PaymentPopup selectedMonth={selectedMonth} classList={classList} open={openPayment} handleCallback={handleMakePayment} loading={loading} tuitionTable={tuitionTable}/> */}
-      <FinancePopup open={openPayment} handleCallback={handleMakePayment} dataClass={classList}/>
+      <FinancePopup open={openPayment} handleCallback={handleMakePayment} dataClass={classList} dataStudent={selectedStudent}/>
     </div>
   );
 }
 
 export default Tuition;
 
-export const TuitionTable = ({ filterTuition, classInfo, selectedMonth }) => {
+export const TuitionTable = ({ filterTuition, classInfo, selectedMonth, handleSelectStudent }) => {
   const [studentTuitionList, setStudentTuitionList] = useState([])
   const classStudentListRef = useRef([])
   const tuitionDefault = glb_sv.getTuitionFee[classInfo.id.split('_')[0]][0].value
@@ -378,7 +383,7 @@ export const TuitionTable = ({ filterTuition, classInfo, selectedMonth }) => {
   //   } else {
   //     setClassStudentList(classStudentListRef.current)
   //   }
-  }, [])
+  }, [selectedMonth])
 
   const filterNopay = (tuition) => {
     if (typeof tuition !== 'number') return true
@@ -415,7 +420,7 @@ export const TuitionTable = ({ filterTuition, classInfo, selectedMonth }) => {
             }`;
           if ((tuitionDefault - amount === 0) && !filterTuition) return (<></>)
           return (
-            <tr key={index}>
+            <tr key={index} onDoubleClick={() => handleSelectStudent({id_student: id, id_class: classInfo.id, full_name, month: selectedMonth})}>
               <td className={className}>
                 <Typography className="text-xs font-normal text-blue-gray-500">
                   {id}
