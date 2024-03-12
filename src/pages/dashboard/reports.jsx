@@ -51,6 +51,7 @@ import InputMask from 'react-input-mask';
 import DefaultSkeleton from '../../widgets/skeleton/index'
 import { glb_sv } from "../../service";
 import exportExcelScore from "../../utils/exportExcel/exportScore";
+import exportExcel from "../../utils/exportExcel";
 
 const TABLE_HEAD = [
     "Export",
@@ -454,6 +455,7 @@ export default function ReportScore() {
         </>
     );
 }
+import ExcelJS from 'exceljs'
 
 const StudentRow = ({ hideColumn = false, classes, index, item, handleEdit = () => { }, handleRemove = () => { }, isConfirm = false }) => {
     const [controller] = useController();
@@ -576,11 +578,29 @@ const StudentRow = ({ hideColumn = false, classes, index, item, handleEdit = () 
         )
     }
 
+    // function handleImport() {
+    //     const wb = new Excel.Workbook();
+    //     const reader = new FileReader()
+      
+    //     reader.readAsArrayBuffer(this.file)
+    //     reader.onload = () => {
+    //       const buffer = reader.result;
+    //       wb.xlsx.load(buffer).then(workbook => {
+    //         console.log(workbook, 'workbook instance')
+    //         workbook.eachSheet((sheet, id) => {
+    //           sheet.eachRow((row, rowIndex) => {
+    //             console.log(row.values, rowIndex)
+    //           })
+    //         })
+    //       })
+    //     }
+    //   }
+
     return (
         <tr key={index} className="even:bg-blue-gray-50/50">
             <td className={classes + ' cursor-pointer'}>
                 <DocumentTextIcon
-                    onClick={() => exportExcelScore(item)}
+                    onClick={() => exportExcel({reportName: 'score', data: item})}
                     className="w-5 h-5"
                 />
             </td>
