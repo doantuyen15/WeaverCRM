@@ -53,7 +53,8 @@ const typeList = {
     'add_classes': 'Create Class',
     'staff_checkin': 'Staff check in',
     'make_tuition': 'Make tuition',
-    'make_finance': 'Finance'
+    'make_finance': 'Finance',
+    'make_refunds': 'Refunds'
 }
 const status = [
     'Duyệt',

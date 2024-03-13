@@ -67,6 +67,7 @@ export function useFirebase(service: string, params: any) {
         case 'update_student_score': return updateStudentScore(params)
         case 'update_course_info': return updateCourseInfo(params)
         case 'make_tuition': return makeTuition(params)
+        case 'make_refunds': return makeRefunds(params)
         case 'make_finance': return makeFinance(params)
         case 'staff_checkin': return staffCheckin(params)
         case 'update_approval': return updateApproval(params)
@@ -313,13 +314,33 @@ const makeTuition = (list: any) => {
     })
 }
 
-const getTuitionTable = (params: any) => {
+const makeRefunds = (list: any) => {
     return new useRequest((resolve: any, reject: any) => {
-        getDocs(collection(db, `finance/${params}/tuition`))
+        addDoc(collection(db, 'approval'), {
+            make_refunds: {
+                'data': {...list},
+                'requesting_username': userInfo.displayName,
+                'created_at': moment().toString()
+            }
+        })
+            .then(resolve)
+            .catch(reject)
+    })
+}
+
+const getTuitionTable = (params: any) => {
+    console.log('getTuitionTable', params);
+    return new useRequest((resolve: any, reject: any) => {
+        const q = query(
+            collectionGroup(db, 'tuition'),
+            where("tuition_date", "in", params),
+            where("class_id", "!=", '')
+        );
+        getDocs(q)
             .then(
                 (snap) => {
                     try {
-                        resolve(snap.docs.map(item => item.data()))
+                        resolve(snap.docs.map(item => item.data()));
                     } catch (error) {
                         reject(error)
                     }
@@ -327,6 +348,17 @@ const getTuitionTable = (params: any) => {
             )
             .catch(reject)
     });
+    // getDocs(collection(db, `finance/${params}/tuition`))
+    //     .then(
+    //         (snap) => {
+    //             try {
+    //                 resolve(snap.docs.map(item => item.data()))
+    //             } catch (error) {
+    //                 reject(error)
+    //             }
+    //         }
+    //     )
+    //     .catch(reject)
 }
 
 const updateLessonDiary = (classdata: any) => {
@@ -581,7 +613,7 @@ const updateApproval = ({approval, ok}: any) => {
                 batch.commit()
                     .then(resolve)
                     .catch(reject)
-            } else if (approval.type === 'make_tuition') {
+            } else if (approval.type === 'make_tuition' || approval.type === 'make_refunds') {
                 const { amount, class_id, customer_id, code, tuition_date, create_date, explain } =  approval?.data
                 const financeRef = doc(db, `finance/${tuition_date}/tuition`, code)
                 const classRef = doc(db, 'classes', class_id)
@@ -591,6 +623,9 @@ const updateApproval = ({approval, ok}: any) => {
                     currentTuition = snap.data()?.tuition?.[tuition_date]?.[customer_id]?.amount || 0
                 }
 
+                if (approval.type === 'make_refunds' && currentTuition < amount) {
+                    reject('Số tiền refunds vượt quá số tiền đã đóng!')
+                }
                 // let id = 0
                 // await getDocs(collection(db, 'classes')).then(snap => id = snap.docs.length);
 
@@ -640,7 +675,7 @@ const updateApproval = ({approval, ok}: any) => {
                                 code,
                                 create_date,
                                 explain,
-                                amount: currentTuition + amount
+                                amount: approval.type === 'make_tuition' ? (currentTuition + amount) : (currentTuition - amount)
                             }
                         }
                     }

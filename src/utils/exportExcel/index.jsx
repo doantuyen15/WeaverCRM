@@ -36,7 +36,7 @@ const exportScore = async (data) => {
                     ...sheetClone.model,
                     name: item.term || 'TEST',
                 };
-                sheetClone.model.merges.forEach(merge => newSheet.mergeCellsWithoutStyle(merge));
+                sheetClone.model.merges.forEach(merge => newWorkSheet.mergeCellsWithoutStyle(merge));
 
                 // newWorkSheet.properties = sheetClone.properties
                 // newWorkSheet.name = item.term || 'TEST';

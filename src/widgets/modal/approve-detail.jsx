@@ -293,7 +293,7 @@ export function ModalApproveDetail({ setOpen, open, data, typeApprove }) {
                         </CardBody>
                     </Card>
                 </Dialog>
-            ) : typeApprove === 'make_finance' || typeApprove === 'make_tuition' ? (
+            ) : ['make_finance', 'make_tuition', 'make_refunds'].includes(typeApprove) ? (
                 <ModalFinanceDetail open={open} handleOpen={setOpen} data={data}/>
             ) : <></>}
             {/* : typeApprove === 'make_tuition' ? (

@@ -26,6 +26,7 @@ import formatDate from "../../utils/formatNumber/formatDate";
 import StaffInfo from "../../data/entities/staffInfo";
 import { glb_sv } from "../../service";
 import Finance from "../../data/entities/finance";
+import FormatPhone from "../../utils/formatNumber/formatPhone";
 
 const academic = glb_sv.academic
 
@@ -159,20 +160,22 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                         else totalTuition -= Number(item.amount)
                     })
                 }
+                console.log('getTuitionForCustomer', isPayment, totalTuition);
+
 
                 if (program === 'IELTS') {
-                    if (Number(totalTuition) >= tuitionFee) {
+                    if ((Number(totalTuition) === 0 && isPayment) || (Number(totalTuition) >= tuitionFee && !isPayment) ) {
                         setTuitionData([])
-                    } else if (Number(totalTuition) > 0) {
-                        setTuitionData([
-                            tuitionFee / 2,
-                        ])
-                    } else {
+                    } else if ((Number(totalTuition) >= tuitionFee && isPayment) || (Number(totalTuition) === 0 && !isPayment)) {
                         setTuitionData([
                             tuitionFee,
                             tuitionFee / 2
                         ])
-                    }
+                    } else {
+                        setTuitionData([
+                            tuitionFee / 2,
+                        ])
+                    } 
                 } else {
                     const totalMonth = moment(end_date, 'DD/MM/YYYY').diff(moment(start_date, 'DD/MM/YYYY'), 'months')
                     const option = []
@@ -314,7 +317,7 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                             </div>
                                         </div>
 
-                                        {isPayment && (
+                                        {newBill.type_id !== 1 && (
                                             <div className="grid grid-cols-3 self-center">
                                                 <div className="max-w-max relative self-center">
                                                     <Typography variant="small" color="black">
@@ -368,7 +371,7 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                             </div>
                                         </div>
 
-                                        {!isPayment ? (
+                                        {newBill.type_id === 1 ? (
                                             <>
                                                 <div className="grid grid-cols-3 self-center">
                                                     <div className="max-w-max relative self-center">
@@ -463,7 +466,7 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                                         <Option onClick={() => {
                                                                             updateFinance('tuition_date', month)
                                                                             updateFinance('amount', 0)
-                                                                            getTuitionForCustomer(month, newBill.customer_id)
+                                                                            getTuitionForCustomer(month, newBill.customer_id, 'refunds')
                                                                         }}
                                                                             key={month} value={month} className="flex items-center gap-2">
                                                                             {moment(month, 'MMYYYY').format('MMMM YYYY')}
@@ -520,40 +523,6 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                         <div className="grid grid-cols-3 self-center">
                                             <div className="max-w-max relative self-center">
                                                 <Typography variant="small" color="black">
-                                                    Phòng ban
-                                                </Typography>
-                                                <span className="absolute -top-1 -right-2 text-red-500">*</span>
-                                            </div>
-                                            <div className="col-span-2 pb-3">
-                                                <Select
-                                                    variant="standard"
-                                                    value={newBill.department}
-                                                    // error={!newBill.department?.toString()}
-                                                    selected={(element) =>
-                                                        element &&
-                                                        React.cloneElement(element, {
-                                                            disabled: true,
-                                                            className:
-                                                                "flex items-center opacity-100 px-4 gap-2 pointer-events-none",
-                                                        })
-                                                    }
-                                                >
-                                                    {department.map((item, id) => (
-                                                        <Option onClick={() => {
-                                                            updateFinance('department', item)
-                                                            updateFinance('department_id', id)
-                                                        }}
-                                                            key={item} value={item} className="flex items-center gap-2">
-                                                            {item}
-                                                        </Option>
-                                                    ))}
-                                                </Select>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-3 self-center">
-                                            <div className="max-w-max relative self-center">
-                                                <Typography variant="small" color="black">
                                                     Nhân viên
                                                 </Typography>
                                                 <span className="absolute -top-1 -right-2 text-red-500">*</span>
@@ -569,13 +538,15 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                         </Typography>
                                                     }
                                                 >
-                                                    {staffList.filter(item => item.department_id !== newBill.department_id).map((item, id) => (
+                                                    {staffList.map((item, id) => (
                                                         <Option
                                                             // onClick={(e) => e.stopPropagation()}
                                                             onClick={(e) => {
                                                                 // e.stopPropagation()
-                                                                updateFinance('staff_id', id)
+                                                                updateFinance('staff_id', item.id)
                                                                 updateFinance('staff_name', item.full_name)
+                                                                newBill.staff_phone = item.phone
+                                                                updateFinance('staff_phone', item.phone)
                                                             }}
                                                             key={item.id} value={item.full_name} className="flex items-center gap-1"
                                                         >
@@ -586,7 +557,23 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                             </div>
                                         </div>
 
-
+                                        <div className="grid grid-cols-3 self-center">
+                                            <div className="max-w-max relative self-center">
+                                                <Typography variant="small" color="black">
+                                                    Số điện thoại
+                                                </Typography>
+                                                {/* <span className="absolute -top-1 -right-2 text-red-500">*</span> */}
+                                            </div>
+                                            <div className="col-span-2 pb-3">
+                                                <Input
+                                                    readOnly
+                                                    variant="standard"
+                                                    value={FormatPhone(newBill.staff_phone)}
+                                                    className="px-4"
+                                                    onChange={(e) => updateFinance('staff_phone', e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
 
                                         <div className="grid grid-cols-3 self-center">
                                             <div className="max-w-max relative self-center">

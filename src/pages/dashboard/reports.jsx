@@ -72,7 +72,7 @@ const STUDENT_HEAD = [
     "Note"
 ];
 
-const HEADER_TUITION = ['Export', 'Mã HS', 'Tên', 'Ngày lập phiếu', 'Số tiền', 'Ghi chú']
+const HEADER_TUITION = ['Mã HS', 'Tên', 'Ngày lập phiếu', 'Học phí tháng', 'Số tiền', 'Ghi chú']
 
 const ListStatus = [
     {
@@ -158,6 +158,15 @@ export default function ReportScore() {
     const [selectedMonth, setSelectedMonth] = useState(currentMonth)
     const courseTuition = useRef({})
     const [init, setInit] = useState(false)
+    const [selectTime, setSelectTime] = useState('')
+    const currentYear = moment().format('YYYY')
+    const monthOfQuarter = {
+        I: ['01' + currentYear, '02' + currentYear, '03' + currentYear],
+        II: ['04' + currentYear, '05' + currentYear, '06' + currentYear],
+        III: ['07' + currentYear, '08' + currentYear, '09' + currentYear],
+        IV: ['10' + currentYear, '11' + currentYear, '12' + currentYear],
+    }
+    const monthOfYear = [...monthOfQuarter.I, ...monthOfQuarter.II, ...monthOfQuarter.III, ...monthOfQuarter.IV]
 
     useEffect(() => {
         getStudentList()
@@ -174,9 +183,9 @@ export default function ReportScore() {
             .catch(err => console.log(err))
     }
 
-    const getTuitionTable = (month = '') => {
+    const getTuitionTable = (month) => {
         setLoading(true)
-        useFirebase('get_tuition_table', month || currentMonth)
+        useFirebase('get_tuition_table', month || [currentMonth])
             .then(data => {
                 setLoading(false)
                 tuitionTableRef.current = data
@@ -313,7 +322,7 @@ export default function ReportScore() {
                         <Tab onClick={() => {
                             // getCourseTuition()
                             if (!init) {
-                                getTuitionTable(selectedMonth)
+                                getTuitionTable([currentMonth])
                                 setInit(true)
                             }
                         }} value="tuition" className="w-48 h-10">
@@ -336,7 +345,7 @@ export default function ReportScore() {
                                 <Button
                                     className="h-8"
                                     size="sm"
-                                    onClick={() => getTuitionTable(selectedMonth)}
+                                    onClick={() => getTuitionTable([selectedMonth])}
                                 >
                                     <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
                                 </Button>
@@ -395,17 +404,54 @@ export default function ReportScore() {
                             </div>
                         </TabPanel>
                         <TabPanel key={'tuition'} value={'tuition'}>
-                            <div className="grid grid-cols-3">
-                                <div className="flex col-start-2 mb-2">
+                            <div className="grid grid-cols-4">
+                                <div className="flex col-start-2 col-span-2 mb-2">
+                                    <Menu>
+                                        <MenuHandler>
+                                            <Button
+                                                size="md"
+                                                ripple={false}
+                                                // onClick={() => setSelectQuarter(prev => !prev)}
+                                                // color={email ? "gray" : "blue-gray"}
+                                                // disabled={!email}
+                                                className="rounded-r-none min-w-max"
+                                            >
+                                                {selectTime ? selectTime : 'Other'}
+                                            </Button>
+                                        </MenuHandler>
+                                        <MenuList onClick={() => setSelectedMonth('')}>
+                                            <MenuItem onClick={() => {
+                                                getTuitionTable(monthOfQuarter.I)
+                                                setSelectTime('Quarter I')
+                                            }}>Quarter I</MenuItem>
+                                            <MenuItem onClick={() => {
+                                                getTuitionTable(monthOfQuarter.II)
+                                                setSelectTime('Quarter II')
+                                            }}>Quarter II</MenuItem>
+                                            <MenuItem onClick={() => {
+                                                getTuitionTable(monthOfQuarter.III)
+                                                setSelectTime('Quarter III')
+                                            }}>Quarter III</MenuItem>
+                                            <MenuItem onClick={() => {
+                                                getTuitionTable(monthOfQuarter.IV)
+                                                setSelectTime('Quarter IV')
+                                            }}>Quarter IV</MenuItem>
+                                            <MenuItem onClick={() => {
+                                                getTuitionTable(monthOfYear)
+                                                setSelectTime('Year')
+                                            }}>Year</MenuItem>
+                                        </MenuList>
+                                    </Menu>
                                     <Input
                                         type="month"
                                         value={moment(selectedMonth, 'MMYYYY').format('YYYY-MM')}
                                         onChange={(e) => {
                                             if (!e.target.value) setSelectedMonth(moment().format('MMYYYY'))
                                             else setSelectedMonth(moment(e.target.value, 'YYYY-MM').format('MMYYYY'))
-                                            getTuitionTable(moment(e.target.value, 'YYYY-MM').format('MMYYYY'))
+                                            getTuitionTable([moment(e.target.value, 'YYYY-MM').format('MMYYYY')])
+                                            setSelectTime('Other')
                                         }}
-                                        className="rounded-r-none !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                        className="rounded-none !border-t-blue-gray-200 focus:!border-t-gray-900"
                                         labelProps={{
                                             className: "before:content-none after:content-none",
                                         }}
@@ -414,7 +460,7 @@ export default function ReportScore() {
                                         }}
                                     />
                                     <Button
-                                        size="sm"
+                                        size="md"
                                         ripple={false}
                                         // color={email ? "gray" : "blue-gray"}
                                         // disabled={!email}
@@ -423,11 +469,11 @@ export default function ReportScore() {
                                         Export
                                     </Button>
                                 </div>
-                                <div className="col-start-3 justify-self-end self-center">
+                                <div className="col-start-4 justify-self-end self-center">
                                     <Button
                                         className="h-8"
                                         size="sm"
-                                        onClick={() => getTuitionTable(selectedMonth)}
+                                        onClick={() => getTuitionTable([selectedMonth])}
                                     >
                                         <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
                                     </Button>
@@ -764,7 +810,8 @@ const TuitionTable = ({ tuitionTable, setTuitionTable, courseTuition }) => {
 
     const handleSortTuition = (indexCol) => {
         let sorted
-        sorted = orderBy(tuitionTable, 'customer', [isAsc ? 'asc' : 'desc'])
+        const searchCol = indexCol == 1 ? 'customer' : indexCol == 2 ? 'create_date' : indexCol == 3 ? 'tuition_date' : ''
+        sorted = orderBy(tuitionTable, searchCol, [isAsc ? 'asc' : 'desc'])
         setTuitionTable([...sorted])
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
@@ -786,7 +833,7 @@ const TuitionTable = ({ tuitionTable, setTuitionTable, courseTuition }) => {
                                 className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
                             >
                                 {head}{" "}
-                                {(index === 2) && (
+                                {(index === 1 || index === 2 || index === 3) && (
                                     keySort !== index ? (
                                         <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
                                     ) : keySort === index && isAsc ? (
@@ -811,12 +858,12 @@ const TuitionTable = ({ tuitionTable, setTuitionTable, courseTuition }) => {
                             : "py-2 px-4 border-b border-blue-gray-50";
                         return (
                             <tr key={index} className="even:bg-blue-gray-50/50">
-                                <td className={classes + ' cursor-pointer'}>
+                                {/* <td className={classes + ' cursor-pointer'}>
                                     <DocumentTextIcon
                                         onClick={() => exportExcelScore(item)}
                                         className="w-5 h-5"
                                     />
-                                </td>
+                                </td> */}
                                 <td className={classes}>
                                     <Typography className="text-xs font-normal text-blue-gray-500">
                                         {item.customer_id}
@@ -830,6 +877,11 @@ const TuitionTable = ({ tuitionTable, setTuitionTable, courseTuition }) => {
                                 <td className={classes}>
                                     <Typography className="text-xs font-normal text-blue-gray-600">
                                         {item.create_date ? formatDate(item.create_date) : ''}
+                                    </Typography>
+                                </td>
+                                <td className={classes}>
+                                    <Typography className="text-xs font-normal text-blue-gray-600">
+                                        {item.tuition_date ? moment(item.tuition_date, 'MMYYYY').format('MMMM - YYYY') : ''}
                                     </Typography>
                                 </td>
                                 <td className={classes}>

@@ -188,6 +188,7 @@ export default function Finance() {
       setLoading(true)
       let service = 'make_finance'
       if (data.type_id === 1 && !data.isPayment) service = 'make_tuition'
+      else if (data.type_id === 1 && data.isPayment) service = 'make_refunds'
       useFirebase(service, data)
       .then(() => {
         setOpenModal(false)
@@ -214,9 +215,25 @@ export default function Finance() {
   }
 
   return (
-    <>
+    <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card className="h-full w-full">
-        <CardHeader floated={false} shadow={false} className="rounded-none pb-2">
+        <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
+          <div className="flex justify-between">
+            <Typography variant="h6" color="white">
+              DANH SÁCH THU CHI THÁNG - {moment().format('MM')}
+            </Typography>
+          </div>
+
+        </CardHeader>
+        <div className="mb-4 flex flex-col items-center justify-center py-4">
+          {/* <Typography variant="h5" color="blue-gray">
+              {moment(selectedMonth, 'MMYYYY').locale('vi').format(`MMMM - [Q]Q - YYYY`).toLocaleUpperCase()}
+            </Typography> */}
+          <Typography color="gray" className="mt-1 font-bold">
+            TỔNG THU: {formatNum(totalReceive)} &emsp; | &emsp; TỔNG CHI: {formatNum(totalPay)}
+          </Typography>
+        </div>
+        {/* <CardHeader floated={false} shadow={false} className="rounded-none pb-2">
           <div className="mb-4 flex flex-col items-center justify-center py-4">
             <Typography variant="h5" color="blue-gray">
               {moment(selectedMonth, 'MMYYYY').locale('vi').format(`MMMM - [Q]Q - YYYY`).toLocaleUpperCase()}
@@ -225,7 +242,7 @@ export default function Finance() {
               Tổng thu: {formatNum(totalReceive)} &emsp; | &emsp; Tổng chi: {formatNum(totalPay)}
             </Typography>
           </div>
-        </CardHeader>
+        </CardHeader> */}
         <CardBody className="p-0 px-0 overflow-auto max-h-[65vh]">
           <div className="flex right-5 top-30 absolute items-center justify-end gap-4">
             <Button
@@ -236,7 +253,12 @@ export default function Finance() {
               <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
             </Button>
           </div>
-          <Tabs value={mod}>
+          <FinanceTable
+            // handleRemove={handleRemove}
+            openModalDetail={handleOpenModalDetail}
+            financeData={financeTable}
+          />
+          {/* <Tabs value={mod}>
             <TabsHeader className="max-w-max mx-auto">
               <Tab value="month" onClick={() => changeMode('month')} className="w-48 h-10">
                 Tháng
@@ -256,11 +278,8 @@ export default function Finance() {
                   financeData={financeTable}
                 />
               </TabPanel>
-              {/* <TabPanel key={'treemap'} value={'treemap'}>
-               
-              </TabPanel> */}
             </TabsBody>
-          </Tabs>
+          </Tabs> */}
         </CardBody>
         <CardFooter className="flex justify-end items-center border-t border-blue-gray-50 p-4">
           <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
@@ -286,7 +305,7 @@ export default function Finance() {
       </Card>
       <FinancePopup open={openModal} handleCallback={handleFinanceCallback} isPayment={isPayment}/>
       <ModalFinanceDetail open={openModalDetail} handleOpen={setOpenModalDetail} data={objectDetail}/>
-    </>
+    </div>
   );
 }
 
