@@ -1,3 +1,4 @@
+import moment from 'moment'
 import { Subject } from 'rxjs'
 
 class globalService {
@@ -159,6 +160,18 @@ class globalService {
             }
         ]
         this.HEADER_TUITION = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền còn lại', 'Ghi chú']
+
+        this.calenderWeek = () => {
+            let dayArr = []
+            for (let i = 0; i <= 6; i++) {
+                const currentDay = {
+                    weekDay: moment().day(i).format('dddd'),
+                    date: moment().day(i).format('DD/MM/YYYY')
+                }
+                dayArr.push(currentDay)
+            }
+            return dayArr
+        }
     }
 }
 
