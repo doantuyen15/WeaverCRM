@@ -249,10 +249,10 @@ export function Tuition() {
                 <AccordionBody>
                   <List>
                     {classList.map((classInfo, index) => {
-                      const tuitiondate = classInfo.start_date.slice(0,2)
+                      const tuitiondate = formatDate(classInfo.start_date).slice(0,2)
                       let isShow = isTuitionDate ? 
                         moment(tuitiondate + selectedMonth, 'DDMMYYYY').diff(moment(), 'day') <= 1 :
-                        moment(selectedMonth, 'MMYYYY').isBetween(moment(classInfo.start_date, 'DD/MM/YYYY').startOf('month').subtract(1, "day"), moment(classInfo.end_date, 'DD/MM/YYYY'))
+                        moment(selectedMonth, 'MMYYYY').isBetween(moment(classInfo.start_date).startOf('month').subtract(1, "day"), moment(classInfo.end_date, 'DD/MM/YYYY'))
                       // const isPayAll = (Object.values(tuitionTable[classInfo.id] || {})?.length === classInfo.student_list?.length)
                       return (
                         classInfo.id.includes(item) && isShow ? (

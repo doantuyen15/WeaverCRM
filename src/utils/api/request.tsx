@@ -90,7 +90,7 @@ const queryClassList = (params: any) => {
             .then(
                 (snap) => {
                     try {
-                        resolve(snap.docs.map(item => item.data()));
+                        resolve(snap.docs.map(item => new ClassInfo(item.data())));
                     } catch (error) {
                         reject(error)
                     }

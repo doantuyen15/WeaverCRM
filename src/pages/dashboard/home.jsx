@@ -25,19 +25,23 @@ import {
   projectsTableData,
   ordersOverviewData,
 } from "../../data";
-import { CalendarDaysIcon, CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
+import { CalendarDaysIcon, CheckCircleIcon, ClockIcon, PresentationChartBarIcon } from "@heroicons/react/24/solid";
 import Amethyst from "../../assets/amethyst.png";
 import useStorage from "../../utils/localStorageHook";
 import { useNavigate } from "react-router-dom";
 import { glb_sv } from "../../service";
 import moment from "moment";
 import { useFirebase } from "../../utils/api/request";
+import { ClassInfo } from "./classes";
+import { ModalClassInfo } from "../../widgets/modal/class-info";
 
 const calendar = glb_sv.calenderWeek()
 
 export function Home() {
   const navigate = useNavigate();
   const [classList, setClassList] = useState([])
+  const [openModalClass, setOpenModalClass] = useState(false)
+  const [selectedClass, setSelectedClass] = useState({})
 
   useEffect(() => {
     queryClassList()
@@ -48,9 +52,21 @@ export function Home() {
     useFirebase('query_class_list', {end_date: current})
     .then(data => {
       console.log('query_class_list', data);
-      setClassList(data.filter(item => item.start_date > current))
+      setClassList(data.filter(item => item.start_date < current))
     })
     .catch(err => console.log(err))
+  }
+
+  const getClassDay = (schedule, index) => {
+    if (schedule === 0 && (index === 0 || index === 2)) return true
+    if (schedule === 1 && (index === 1 || index === 3)) return true
+    if (schedule === 2 && (index === 5 || index === 6)) return true
+    if (schedule === 3 && (index === 4)) return true
+  }
+
+  const handleOpenClassInfo = (item) => {
+    setSelectedClass(item)
+    setOpenModalClass(true)
   }
 
   return (
@@ -100,7 +116,33 @@ export function Home() {
           >
             <div>
               <Typography variant="h6" color="blue-gray" className="mb-1">
-                Bảng thông tin
+                Danh sách lớp
+              </Typography>
+              <Typography
+                variant="small"
+                className="flex items-center gap-1 font-normal text-blue-gray-600"
+              >
+                <PresentationChartBarIcon strokeWidth={3} className="h-4 w-4 text-blue-gray-200" />
+                <strong>{classList.length} Lớp</strong>
+              </Typography>
+            </div>
+          </CardHeader>
+          <CardBody className="overflow-x-scroll px-2 pt-0 pb-2 cursor-pointer">
+            {classList.map(item =>
+              <ClassInfo openModal={() => handleOpenClassInfo(item)} item={item} />
+            )}
+          </CardBody>
+        </Card>
+        <Card className="overflow-hidden border border-blue-gray-100 shadow-sm">
+          <CardHeader
+            floated={false}
+            shadow={false}
+            color="transparent"
+            className="m-0 flex items-center justify-between p-6"
+          >
+            <div>
+              <Typography variant="h6" color="blue-gray" className="mb-1">
+                Thời khóa biểu
               </Typography>
               <Typography
                 variant="small"
@@ -129,12 +171,12 @@ export function Home() {
             </Menu> */}
           </CardHeader>
           <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-            <table className="w-full pt-6 min-w-max table-auto text-left border-separate border-spacing-0">
+            <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
               <thead>
                 <tr>
                   <th
                     rowSpan={2}
-                    className={`z-10 sticky top-0 border-blue-gray-100 p-4 transition-colors
+                    className={`z-10 sticky top-0 border-r border-blue-gray-100 p-4 transition-colors
                       `}
                   >
                   </th>
@@ -142,21 +184,21 @@ export function Home() {
                     <th
                       rowSpan={2}
                       key={day.date}
-                      className={`z-10 sticky top-0 border-blue-gray-100 p-4 transition-colors
+                      className={`z-10 sticky top-0 border-blue-gray-100 p-2 transition-colors
                         ${index === calendar.length - 1 ? 'border-l' : 'border-x'} 
                       `}
                     >
                       <Typography
                         variant="small"
                         color="blue-gray"
-                        className="text-center gap-2 font-normal leading-none opacity-70"
+                        className={`text-center pb-1 ${day.date === moment().format('DD/MM/YYYY') ? 'font-bold' : 'font-normal'} leading-none opacity-70`}
                       >
                         {day.weekDay}
                       </Typography>
                       <Typography
                         variant="small"
                         color="blue-gray"
-                        className="text-center gap-2 font-normal leading-none opacity-70"
+                        className={`text-center pb-1 ${day.date === moment().format('DD/MM/YYYY') ? 'font-bold' : 'font-normal'} leading-none opacity-70`}
                       >
                         {day.date}
                       </Typography>
@@ -165,21 +207,39 @@ export function Home() {
                 </tr>
               </thead>
               <tbody>
-                {classList.map(item => (
-                  <tr key={index} className="even:bg-blue-gray-50/50">
-                    <td className={classes}>
-                      <div className="flex flex-col">
+                {classList.map((item, key) => {
+                  return (
+                    <tr key={key} className="hover:bg-blue-gray-50/50">
+                      <td className={"py-2 px-4 border-t border-r border-blue-gray-100 hover:bg-blue-gray-50/50"}>
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {index}
+                          {item.id}
                         </Typography>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      {calendar.map((day, index) => {
+                        const isClassDay = getClassDay(item.class_schedule_id, index)
+                        const isLast = index === calendar.length - 1;
+                        const classes = isLast
+                          ? "py-2 px-4 border-t border-l border-blue-gray-100"
+                          : "py-2 px-4 border-t border-x border-blue-gray-100";
+                        return (
+                          <td className={classes}>
+                            <Typography
+                              variant="small"
+                              color="blue-gray"
+                              className="font-bold text-center"
+                            >
+                              {isClassDay ? 'X' : ''}
+                            </Typography>
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </CardBody>
@@ -192,7 +252,7 @@ export function Home() {
             className="m-0 p-6"
           >
             <Typography variant="h6" color="blue-gray" className="mb-2">
-              Task
+              Bảng thông tin
             </Typography>
             {/* <Typography
               variant="small"
@@ -242,6 +302,7 @@ export function Home() {
           </CardBody>
         </Card>
       </div>
+      {openModalClass ? <ModalClassInfo getClassList={queryClassList} classList={classList} handleOpen={setOpenModalClass} open={openModalClass} data={selectedClass} /> : null}
     </div>
   );
 }

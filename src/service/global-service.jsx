@@ -163,7 +163,7 @@ class globalService {
 
         this.calenderWeek = () => {
             let dayArr = []
-            for (let i = 0; i <= 6; i++) {
+            for (let i = 1; i <= 7; i++) {
                 const currentDay = {
                     weekDay: moment().day(i).format('dddd'),
                     date: moment().day(i).format('DD/MM/YYYY')
