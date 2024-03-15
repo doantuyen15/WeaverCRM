@@ -90,16 +90,17 @@ export function Programs() {
     }
 
     const handleAddClasses = (ok, classList = []) => {
-        console.log('handleMakePayment', ok, classList);
+        console.log('add_classes', ok, classList);
         if (ok) {
             setLoading(true)
             useFirebase('add_classes', classList)
                 .then(() => {
                     setLoading(false)
                     toast.success('Tạo lớp thành công, yêu cầu đang chờ duyệt!')
+                    setOpenModal(false)
                 })
-        } 
-        setOpenModal(false)
+                // .catch((err) => toast.error(err))
+        }
     }
 
     const handleUpdateClass = (type, item) => {

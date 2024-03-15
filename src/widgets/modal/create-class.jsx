@@ -130,8 +130,8 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
     }
 
     const generateCalendar = (classInfo) => {
-        const startDate = moment(classInfo.start_date, 'DD/MM/YYYY');
-        const endDate = moment(classInfo.end_date, 'DD/MM/YYYY');
+        const startDate = moment(classInfo.start_date);
+        const endDate = moment(classInfo.end_date);
         // Lấy mảng các ngày trong tháng
         const days = [];
         for (let i = 0; i <= endDate.diff(startDate, 'days'); i++) {
@@ -179,13 +179,9 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
     }
 
     const updateClassList = (index, key, value) => {
-        // if (moment(classList[index].end_date, 'DD/MM/YYYY') <= moment(classList[index].start_date, 'DD/MM/YYYY')) {
-        //     toast.error('Kiểm tra lại ngày bắt đầu và ngày kết thúc!')
-        //     return
-        // }
         classList[index].updateInfo(key, value)
         if ((key === 'end_date' || key === 'start_date' || key === 'class_schedule_id') && !!classList[index].start_date && !!classList[index].end_date) {
-            if (moment(classList[index].start_date, 'DD/MM/YYYY').isValid() || moment(classList[index].end_date, 'DD/MM/YYYY').isValid()) {
+            if (moment(classList[index].start_date).isValid() || moment(classList[index].end_date).isValid()) {
                 const timetable = generateCalendar(classList[index])
                 classList[index].updateInfo('timetable', timetable)
             } else {
@@ -289,7 +285,14 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             }
                                         >
                                             {info.program && (classType[info.program]).map(item => (
-                                                <Option onClick={() => updateClassList(index, 'level', item)} key={item} value={item} className="flex items-center gap-2">
+                                                <Option onClick={() => {
+                                                    updateClassList(index, 'level', item)
+                                                    if (info.start_date != '')
+                                                        updateClassList(index, 'end_date',
+                                                            moment(info.start_date)
+                                                                .add(courseList?.[info.program]?.[info.level]?.week, 'week').valueOf()
+                                                        )
+                                                }} key={item} value={item} className="flex items-center gap-2">
                                                     {item}
                                                 </Option>
                                             ))}
@@ -403,13 +406,12 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             variant="outlined"
                                             label="Start Date"
                                             disabled={!info.program || !info.level}
-                                            value={formatDate(info.start_date, 'YYYY-MM-DD')}
+                                            value={!info.start_date ? '' : formatDate(info.start_date, 'YYYY-MM-DD')}
                                             onChange={(e) => {
-                                                console.log(courseList, info.program, info.level, 'week');
                                                 updateClassList(index, 'start_date', formatDate(e.target.value, 'moment'))
                                                 updateClassList(index, 'end_date',
-                                                    moment(info.start_date, 'DD/MM/YYYY')
-                                                        .add(courseList?.[info.program]?.[info.level]?.week, 'week')
+                                                    moment(e.target.value, 'YYYY-MM-DD')
+                                                        .add(courseList?.[info.program]?.[info.level]?.week, 'week').valueOf()
                                                 )
                                             }}
                                         />
@@ -419,7 +421,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             min={formatDate(info.start_date, 'YYYY-MM-DD')}
                                             variant="outlined"
                                             label="End Date"
-                                            value={formatDate(info.end_date, 'YYYY-MM-DD')}
+                                            value={!info.start_date ? '' : formatDate(info.end_date, 'YYYY-MM-DD')}
                                             onChange={(e) => updateClassList(index, 'end_date', formatDate(e.target.value, 'moment'))}
                                         />
                                         <Select

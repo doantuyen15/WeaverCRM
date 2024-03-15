@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Typography,
   Card,
@@ -31,16 +31,27 @@ import useStorage from "../../utils/localStorageHook";
 import { useNavigate } from "react-router-dom";
 import { glb_sv } from "../../service";
 import moment from "moment";
+import { useFirebase } from "../../utils/api/request";
 
 const calendar = glb_sv.calenderWeek()
 
 export function Home() {
   const navigate = useNavigate();
-  console.log('calendar', calendar.sort());
-  // useEffect(() => {
+  const [classList, setClassList] = useState([])
 
-  // }, [])
-  
+  useEffect(() => {
+    queryClassList()
+  }, [])
+
+  const queryClassList = () => {
+    useFirebase('query_class_list', {end_date: moment().valueOf()})
+    .then(data => {
+      console.log('query_class_list', data);
+      setClassList(data)
+    })
+    .catch(err => console.log(err))
+  }
+
   return (
     <div className="mt-12">
       {/* <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
@@ -117,15 +128,21 @@ export function Home() {
             </Menu> */}
           </CardHeader>
           <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-            <table className="w-full pt-12 min-w-max table-auto text-left border-separate border-spacing-0">
+            <table className="w-full pt-6 min-w-max table-auto text-left border-separate border-spacing-0">
               <thead>
                 <tr>
+                  <th
+                    rowSpan={2}
+                    className={`z-10 sticky top-0 border-blue-gray-100 p-4 transition-colors
+                      `}
+                  >
+                  </th>
                   {calendar.map((day, index) => (
                     <th
                       rowSpan={2}
                       key={day.date}
                       className={`z-10 sticky top-0 border-blue-gray-100 p-4 transition-colors
-                        ${index === 0 ? "border-r" : index === calendar.length - 1 ? 'border-l' : 'border-x'} 
+                        ${index === calendar.length - 1 ? 'border-l' : 'border-x'} 
                       `}
                     >
                       <Typography

@@ -47,6 +47,7 @@ export function useFirebase(service: string, params: any) {
         case 'get_all_course': return getAllCourse(params)
         case 'query_finance_table': return queryFinanceTable(params)
         case 'query_tuition': return queryTuition(params)
+        case 'query_class_list': return queryClassList(params)
         case 'add_student': return addStudent(params)
         case 'update_student': return updateStudent(params)
         case 'delete_student': return deleteStudent(params)
@@ -76,6 +77,29 @@ export function useFirebase(service: string, params: any) {
     }
 }
 
+const queryClassList = (params: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        let queryDate
+        if (!params.start_date) queryDate = where("end_date", ">=", params.end_date)
+        else queryDate = where("start_date", "<=", params.start_date)    
+        const q = query(
+            collection(db, 'classes'),
+            queryDate
+        );
+        getDocs(q)
+            .then(
+                (snap) => {
+                    try {
+                        resolve(snap.docs.map(item => item.data()));
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            )
+            .catch(reject)
+    });
+}
+
 const queryTuition = (params: any) => {
     return new useRequest((resolve: any, reject: any) => {
         let queryMonth
@@ -100,7 +124,6 @@ const queryTuition = (params: any) => {
             .catch(reject)
     });
 }
-
 
 const queryFinanceTable = (params: string[]) => {
     return new useRequest((resolve: any, reject: any) => {
