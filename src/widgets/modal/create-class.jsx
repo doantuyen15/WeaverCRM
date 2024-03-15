@@ -70,6 +70,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
     const [tuition, setTuition] = useState(useStorage('get', 'tuition') || [])
     const [studentList, setStudentList] = useState([])
     const [staffList, setStaffList] = useState([])
+    const [courseList, setCourseList] = useState([])
     // const [courseList, setCourseList] = useState([])
     // const [levelList, setLevelList] = useState([])
     const [, updateState] = React.useState();
@@ -79,37 +80,27 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
         if (open) {
             getStudentList()
             getStaffList()
+            getAllCourse()
             handleAdd()
             // getAllCourse()
         } else {
             setClassList([])
         }
-        // const studentListRef = useStorage('get', 'studentInfo')
-        // if (!studentListRef) getStudentList()
-        // else {
-        //     setStudentList(studentListRef)
-        //     // tableRef.current = studentList
-        // }
-        // const staffListRef = useStorage('get', 'staffList')
-        // if (!staffListRef) getStaffList()
-        // else {
-        //     setStaffList(staffListRef)
-        //     // tableRef.current = studentList
-        // }
     }, [open])
 
-    // const getAllCourse = () => {
-    //     useFirebase('get_all_course', {getId: true})
-    //         .then(data => {
-    //             console.log('getAllCourse', data.map(item => levelList[] item.data())).sort();
-                
-    //             // Object.keys(courseList.find(item => item.id === info.program).data()).sort()
-    //             setCourseList(data)
-    //             useStorage('set', 'programs', data)
-    //         })
-    //         .catch(err => console.log(err))
-    //         // .finally(() => setLoading(false))
-    // }
+    const getAllCourse = () => {
+        useFirebase('get_all_course', {getId: true})
+            .then(data => {
+                const object = {}
+                data.forEach(item => {
+                    object[item.id] = item.data()
+                })
+                setCourseList(object)
+                // useStorage('set', 'programs', data)
+            })
+            .catch(err => console.log(err))
+            // .finally(() => setLoading(false))
+    }
 
     const getStudentList = () => {
         setLoading(true)
@@ -266,7 +257,8 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                         </Typography>
                                         <Select
                                             // disabled={!info.id_student}
-                                            label="Select Program"
+                                            label="Select program"
+                                            error={!info.program}
                                             value={info.program}
                                             selected={(element) =>
                                                 element &&
@@ -278,7 +270,10 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             }
                                         >
                                             {Object.keys(classType).map(item => (
-                                                <Option onClick={() => updateClassList(index, 'program', item)} key={item} value={item} className="flex items-center gap-2">
+                                                <Option onClick={() => {
+                                                    updateClassList(index, 'program', item)
+                                                    updateClassList(index, 'level', '')
+                                                }} key={item} value={item} className="flex items-center gap-2">
                                                     {item}
                                                 </Option>
                                             ))}
@@ -407,8 +402,16 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             type="date"
                                             variant="outlined"
                                             label="Start Date"
+                                            disabled={!info.program || !info.level}
                                             value={formatDate(info.start_date, 'YYYY-MM-DD')}
-                                            onChange={(e) => updateClassList(index, 'start_date', formatDate(e.target.value, 'moment'))}
+                                            onChange={(e) => {
+                                                console.log(courseList, info.program, info.level, 'week');
+                                                updateClassList(index, 'start_date', formatDate(e.target.value, 'moment'))
+                                                updateClassList(index, 'end_date',
+                                                    moment(info.start_date, 'DD/MM/YYYY')
+                                                        .add(courseList?.[info.program]?.[info.level]?.week, 'week')
+                                                )
+                                            }}
                                         />
                                         <Input
                                             type="date"
