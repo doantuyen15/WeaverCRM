@@ -44,10 +44,11 @@ export function Home() {
   }, [])
 
   const queryClassList = () => {
-    useFirebase('query_class_list', {end_date: moment().valueOf()})
+    const current = moment().valueOf()
+    useFirebase('query_class_list', {end_date: current})
     .then(data => {
       console.log('query_class_list', data);
-      setClassList(data)
+      setClassList(data.filter(item => item.start_date > current))
     })
     .catch(err => console.log(err))
   }
@@ -164,7 +165,21 @@ export function Home() {
                 </tr>
               </thead>
               <tbody>
-
+                {classList.map(item => (
+                  <tr key={index} className="even:bg-blue-gray-50/50">
+                    <td className={classes}>
+                      <div className="flex flex-col">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          {index}
+                        </Typography>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </CardBody>
