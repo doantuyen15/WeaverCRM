@@ -28,6 +28,7 @@ export default class ClassInfo {
         this.class_code = data?.class_code || '',
         this.textbooks = data?.textbooks ||'',
         this.tuition = data?.tuition || {}
+        this.end_date_stamp = data?.end_date_stamp || ''
         // this.attendance = data?.attendance || [],
         // this.lesson_diary = data?.lesson_diary || [{
         //         lesson_id: 1,

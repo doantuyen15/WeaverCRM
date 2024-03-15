@@ -408,7 +408,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             variant="outlined"
                                             label="Start Date"
                                             value={formatDate(info.start_date, 'YYYY-MM-DD')}
-                                            onChange={(e) => updateClassList(index, 'start_date', formatDate(e.target.value))}
+                                            onChange={(e) => updateClassList(index, 'start_date', formatDate(e.target.value, 'moment'))}
                                         />
                                         <Input
                                             type="date"
@@ -417,7 +417,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             variant="outlined"
                                             label="End Date"
                                             value={formatDate(info.end_date, 'YYYY-MM-DD')}
-                                            onChange={(e) => updateClassList(index, 'end_date', formatDate(e.target.value))}
+                                            onChange={(e) => updateClassList(index, 'end_date', formatDate(e.target.value, 'moment'))}
                                         />
                                         <Select
                                             label="Class Schedule"

@@ -1,14 +1,23 @@
 import moment from "moment";
-const formatDate = (dateInput, type = 'DD/MM/YYYY') => {
+const formatDate = (dateInput = '', type = 'DD/MM/YYYY') => {
+    let outputDate = dateInput || moment()
     // if (moment(dateInput).isValid()) {
         // return moment(dateInput).format(type);
     // }
     // else if (moment(dateInput, 'DDMMYYYYHHmmSS').isValid()) return moment(dateInput, 'DDMMYYYYHHmmSS').format(type);
-    if (moment(dateInput, "DD/MM/YYYY").isValid()) return moment(dateInput, 'DD/MM/YYYY').format(type);
-    else if (moment(dateInput, 'YYYY-MM-DD').isValid()) return moment(dateInput, 'YYYY-MM-DD').format(type);
-    else if (moment(dateInput, 'DDMMYYYY').isValid()) return moment(dateInput, 'DDMMYYYY').format(type);
-    else if (moment(dateInput, 'YYYYMMDD').isValid()) return moment(dateInput, 'YYYYMMDD').format(type);
-    else return dateInput
+    if (typeof dateInput === 'number') outputDate = moment(dateInput);
+    else if (moment(dateInput, "DD/MM/YYYY").isValid()) outputDate = moment(dateInput, 'DD/MM/YYYY');
+    else if (moment(dateInput, 'YYYY-MM-DD').isValid()) outputDate = moment(dateInput, 'YYYY-MM-DD');
+    else if (moment(dateInput, 'DDMMYYYY').isValid()) outputDate = moment(dateInput, 'DDMMYYYY');
+    else if (moment(dateInput, 'YYYYMMDD').isValid()) outputDate = moment(dateInput, 'YYYYMMDD');
+
+    if (type === 'moment') {
+        outputDate = outputDate.valueOf()
+        console.log('outputDate', outputDate, type);
+    } else {
+        outputDate = outputDate.format(type)
+    }
+    return outputDate
     // // console.log('dateInput', dateInput, String(dateInput?.lenght));
     // if (!dateInput) return
     // const date = String(dateInput)?.slice(10)
