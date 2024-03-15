@@ -10,7 +10,7 @@
 		"releaseType": "draft"
 	},
 	"license": "GPL-3.0",
-	"version": "1.0.17",
+	"version": "1.0.18",
 	"private": true,
 	"devDependencies": {
 		"@types/node": "^18.11.10",
@@ -81,14 +81,14 @@
 		"electron:build-win32": "electron-builder build --win --ia32 --publish never",
 		"electron:deploy-win": "electron-builder build --win --publish always",
 		"electron:deploy-mac": "electron-builder build --mac --publish always",
-		"electron:deploy": "electron-builder build -mwl --publish always",
+		"electron:deploy-win32": "electron-builder build --win --ia32 --publish always",
 		"electron:dev": "electron .",
 		"build": "npm run react:build && npm run electron:build",
 		"build-win32": "npm run react:build && npm run electron:build-win32",
 		"deploy": "npm run react:build && npm run electron:deploy",
 		"deploy-mac": "npm run react:build && npm run electron:deploy-mac",
 		"deploy-win": "npm run react:build && npm run electron:deploy-win",
-		"deploy-win-32": "npm run react:build && npm run electron:deploy-win",
+		"deploy-win32": "npm run react:build && npm run electron:deploy-win32",
 		"format": "prettier --write .",
 		"update": "taze latest -w"
 	},
