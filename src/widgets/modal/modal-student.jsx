@@ -309,7 +309,7 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
                         <div className="flex flex-col w-full gap-6">
                             <div className="grid grid-cols-6 gap-6 pb-6">
                                 <Typography variant="small" className="flex h-full items-center text-blue-gray-500">
-                                    Correct: {
+                                    Số câu đúng: {
                                         Number(testScore._writing || 0) + 
                                         Number(testScore._listening || 0) + 
                                         Number(testScore._speaking || 0) + 
@@ -366,7 +366,7 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
                             </div>
                             <div className="grid grid-cols-6 gap-6">
                                 <Typography variant="small" className="flex h-full items-center text-blue-gray-500">
-                                    Total Score: {testScore.total || 0}
+                                    Điểm: {testScore.total || 0}
                                 </Typography>
                                 <Input
                                     type="number"
