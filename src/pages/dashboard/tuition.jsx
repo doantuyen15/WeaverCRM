@@ -250,7 +250,8 @@ export function Tuition() {
                   <List>
                     {classList.map((classInfo, index) => {
                       const tuitiondate = formatDate(classInfo.start_date).slice(0,2)
-                      let isShow = isTuitionDate ? 
+                      console.log('classInfo.programs', classInfo.program);
+                      let isShow = isTuitionDate || classInfo.program === 'IELTS' ? 
                         moment(tuitiondate + selectedMonth, 'DDMMYYYY').diff(moment(), 'day') <= 1 :
                         moment(selectedMonth, 'MMYYYY').isBetween(moment(classInfo.start_date).startOf('month').subtract(1, "day"), moment(classInfo.end_date, 'DD/MM/YYYY'))
                       // const isPayAll = (Object.values(tuitionTable[classInfo.id] || {})?.length === classInfo.student_list?.length)
@@ -320,7 +321,6 @@ export function Tuition() {
               </Accordion>
             </ListItem>
           ))}
-
         </CardBody>
         {/* <CardFooter className="pt-0 gap-2 flex justify-end">
                     <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>

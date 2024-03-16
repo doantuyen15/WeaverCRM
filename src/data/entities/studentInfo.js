@@ -13,7 +13,9 @@ export default class StudentInfo {
             this.address = data?.address || '',
             this.email = data?.email || '',
             this.referrer = data?.referrer || '',
+            this.referrer_id = data?.referrer || '',
             this.advisor = data?.advisor || '',
+            this.advisor_id = data?.advisor || '',
             this.register_date = data?.register_date || moment().format('DD/MM/YYYY'),
             this.score_table = data?.score_table || []
             this.id_class_temp = data?.id_class_temp || '',
@@ -26,34 +28,19 @@ export default class StudentInfo {
         if (this[key] !== undefined) {
             this[key] = value
             if (key === 'last_name' || key === 'first_name') this.full_name = this.first_name + ' ' + this.last_name
+            if (key === 'full_name') {
+                this.first_name = ''
+                const name = this.full_name?.split(' ')
+                name?.forEach((item, index) => {
+                    index === name.length - 1 ? 
+                    this.last_name = item :
+                    this.first_name = this.first_name + ' ' + item
+                })
+            }
         }
     }
     updateScore({classId, type, key, score}) {
         if (!classId || !score || !key) return
-        // if (classId === 'test') {
-        //     this.score_table[classId][key] = score
-        //     this.score_table[classId]['class_id'] = 'test'
-        //     this.score_table[classId]['total'] = formatNum((
-        //         Number(this.score_table[classId].listening) +
-        //         Number(this.score_table[classId].reading) +
-        //         Number(this.score_table[classId].speaking) +
-        //         Number(this.score_table[classId].writing)
-        //     ) / 4, 1, 'overall')
-        //     this.score_table[classId]['update_time'] = moment().format('DDMMYYYYHHmmss')
-        // }
-        // else {
-        // this.score_table = [
-        //     ...this.score_table[classId],
-        //     {
-        //         class_id: classId,
-        //         listening: '',
-        //         speaking: '',
-        //         reading: '',
-        //         writing: '',
-        //         total: '',
-        //         update_time: '',
-        //     }
-        // ]
         let scoreUpdate = this.score_table.find(item => item?.class_id === classId && item?.term === type)
         if (!scoreUpdate) {
             scoreUpdate = {
@@ -69,24 +56,18 @@ export default class StudentInfo {
             }
             this.score_table.push(scoreUpdate)
         }
-        scoreUpdate[key] = score;
-        scoreUpdate['total'] = formatNum((
-            Number(scoreUpdate.listening) +
-            Number(scoreUpdate.reading) +
-            Number(scoreUpdate.speaking) +
-            Number(scoreUpdate.writing)
-        ) / 4, 1, 'overall')
-        this.score_table['update_time'] = moment().format('DDMMYYYYHHmmss')
-        this.has_score = true
-        // this.score_table[classId][type][key] = score
-        // this.score_table[classId][type]['class_id'] = classId
-        // this.score_table[classId][type]['total'] = formatNum((
-        //     Number(this.score_table[classId][type].listening) +
-        //     Number(this.score_table[classId][type].reading) +
-        //     Number(this.score_table[classId][type].speaking) +
-        //     Number(this.score_table[classId][type].writing)
-        // ) / 4, 1, 'overall')
-        // this.score_table[classId][type]['update_time'] = moment().format('DDMMYYYYHHmmss')
-        // }
+        if (['_writing', '_listening', '_speaking', '_reading', '_grammar'].includes(key)) {
+            scoreUpdate[key] = score;
+        } else {
+            scoreUpdate[key] = score;
+            scoreUpdate['total'] = formatNum((
+                Number(scoreUpdate.listening) +
+                Number(scoreUpdate.reading) +
+                Number(scoreUpdate.speaking) +
+                Number(scoreUpdate.writing)
+            ) / 4, 1, 'overall')
+            this.score_table['update_time'] = moment().format('DDMMYYYYHHmmss')
+            this.has_score = true
+        }
     }
 }

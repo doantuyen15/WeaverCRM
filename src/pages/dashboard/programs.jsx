@@ -100,6 +100,8 @@ export function Programs() {
                     setOpenModal(false)
                 })
                 // .catch((err) => toast.error(err))
+        } else {
+            setOpenModal(false)
         }
     }
 

@@ -48,6 +48,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import InputMask from 'react-input-mask';
 import DefaultSkeleton from './../../widgets/skeleton/index'
 import { glb_sv } from "../../service";
+import { CreateStudent } from "../../widgets/modal/modal-student";
 
 const TABLE_HEAD = [
     "Tình trạng đăng ký",
@@ -122,7 +123,7 @@ export default function StudentTable() {
     const [editMode, setEditMode] = useState(false)
     const [editKey, setEditKey] = useState([])
     const [openScore, setOpenScore] = useState(-1)
-    const [openPayment, setOpenPayment] = useState(false)
+    const [openModal, setOpenModal] = useState(false)
     const [controller] = useController();
     const { userInfo } = controller;
     const currentEditKey = useRef({})    
@@ -144,35 +145,18 @@ export default function StudentTable() {
             .finally(() => setLoading(false))
     }
 
-    const handleAddStudent = () => {
-        setOnAdd(true)
-        const list = [...objectNew]
-        const newStudent = new StudentInfo()
-        list.push(newStudent)
-        // list.push({
-        //     status_res: '1',
-        //     dob: '',
-        //     first_name: '',
-        //     last_name: '',
-        //     phone: '',
-        //     parent_phone: '',
-        //     address: '',
-        //     email: '',
-        //     referrer: '',
-        //     advisor: '',
-        //     register_date: moment(Date.now()).format('DD/MM/YYYY'),
-        //     listening: '',
-        //     speaking: '',
-        //     reading: '',
-        //     writing: '',
-        //     grammar: '',
-        //     vocabulary: '',
-        //     test_input_score: '',
-        //     id_class_temp: '',
-        //     note: '',
-        //     has_score: false
-        // })
-        setObjectNew(list)
+    const handleStudentCallback = (ok, studentInfo, isUpdate) => {
+        console.log('handleAddStudent', studentInfo);
+        if (!ok) {
+            setOpenModal(false)
+        } else {
+            //
+        }
+        // setOnAdd(true)
+        // const list = [...objectNew]
+        // const newStudent = new StudentInfo()
+        // list.push(newStudent)
+        // setObjectNew(list)
     }
 
     const handleCancelAdd = (removeIndex) => {
@@ -316,45 +300,6 @@ export default function StudentTable() {
         })
     }
 
-    // const handleMakePayment = (ok, listPayment = []) => {
-    //     console.log('handleMakePayment', ok, listPayment);
-    //     setLoading(true)
-
-    //     if (ok) {
-    //         listPayment.forEach(item => {
-    //             setTimeout(() => {
-    //                 const requestInfo = {
-    //                     body: [
-    //                         item.id_student,
-    //                         item.id_class,
-    //                         item.id_class_type,
-    //                         item.date,
-    //                         item.tuition,
-    //                         item.note
-    //                     ],
-    //                     headers: {
-    //                         "authorization": `${userInfo.token}`,
-    //                     },
-    //                     method: 'post',
-    //                     service: 'createTuition',
-    //                     callback: (data) => {
-    //                         setLoading(false)
-    //                         // setStudentList(data)
-    //                         // tableRef.current = data
-    //                     },
-    //                     handleError: (error) => {
-    //                         // console.log('error', error)
-    //                         setLoading(false)
-    //                     },
-    //                     showToast: true
-    //                 }
-    //                 useFetch(requestInfo)
-    //             }, 300);
-    //         })
-    //     }
-    //     setOpenPayment(false)
-    // }
-
     return (
         <>
             <Card className="h-full w-full">
@@ -369,15 +314,15 @@ export default function StudentTable() {
                             </Typography>
                         </div>
                         <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                            <Button disabled={
+                            {/* <Button disabled={
                                 (objectNew?.length > 0 && objectNew.findIndex(item => !item.last_name || !item.first_name) > -1) || 
                                 (objectEdit?.length > 0 && objectEdit.findIndex(item => !item.last_name || !item.first_name) > -1 ) ||
                                 (objectNew?.length < 1 && objectEdit?.length < 1)
                             } 
                                 className="flex items-center gap-3" size="sm" onClick={handleConfirm}>
                                 <ArrowUpTrayIcon strokeWidth={2} className="h-4 w-4" /> Confirm & Request
-                            </Button>
-                            <Button className="flex items-center gap-3" size="sm" onClick={handleAddStudent}>
+                            </Button> */}
+                            <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenModal(true)}>
                                 <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add student
                             </Button>
                             {/* <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>
@@ -1300,7 +1245,8 @@ export default function StudentTable() {
                         </Button>
                     </div> */}
                 </CardFooter>
-                <ModalConfirmUpdate
+
+                {/* <ModalConfirmUpdate
                     open={openModalConfirm}
                     handleOpen={setOpenModalConfirm}
                     objectNew={objectNew}
@@ -1308,9 +1254,11 @@ export default function StudentTable() {
                     handleConfirmCallback={handleConfirmCallback}
                     loading={loading}
                     StudentRow={StudentRow}
-                />
+                /> */}
                 {/* <ModalEditStudent open={openModalEdit} handleOpen={handleOpenEditStudent} objectEdit={objectEdit} /> */}
             </Card>
+
+            <CreateStudent open={openModal} handleOpen={setOpenModal} handleCallback={handleStudentCallback} />
             {/* <PaymentPopup studentList={studentList} open={openPayment} handleCallback={handleMakePayment} /> */}
         </>
     );

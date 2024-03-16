@@ -157,6 +157,11 @@ class globalService {
                 type: 3,
                 status: 'Đang chờ lớp',
                 color: 'orange'
+            },
+            {
+                type: 4,
+                status: 'Học thử',
+                color: 'blue'
             }
         ]
         this.HEADER_TUITION = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền còn lại', 'Ghi chú']
