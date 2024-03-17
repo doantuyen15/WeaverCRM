@@ -644,10 +644,23 @@ const StudentRow = ({ hideColumn = false, classes, index, item, handleEdit = () 
     return (
         <tr key={index} className="even:bg-blue-gray-50/50">
             <td className={classes + ' cursor-pointer'}>
-                <DocumentTextIcon
-                    onClick={() => exportExcel({reportName: 'score', data: item})}
-                    className="w-5 h-5"
-                />
+                <Menu placement="start-end">
+                    <MenuHandler>
+                        <IconButton size="sm" variant="text" color="blue-gray">
+                            <DocumentTextIcon
+                                // onClick={() => exportExcel({ reportName: 'score', data: item })}
+                                className="w-5 h-5"
+                            />
+                        </IconButton>
+                    </MenuHandler>
+                    <MenuList>
+                        {item.score_table.map((data, index) => (
+                            <MenuItem onClick={() => exportExcel({ reportName: data.term ? 'score' : 'score_test', data: data, info: item })}>
+                                {data.class_id + ' - ' + (data.term || 'đầu vào')}
+                            </MenuItem>
+                        ))}
+                    </MenuList>
+                </Menu>
             </td>
             <td className={classes}>
                 <div className="flex flex-col">
