@@ -68,7 +68,7 @@ const classType = {
 
 const classSchedule = glb_sv.classSchedule
 
-export function CreateStudent({ studentData, open, handleCallback, justShow = false }) {
+export function ModalStudent({ studentData, open, handleCallback, justShow = false }) {
     const [controller] = useController();
     const { userInfo } = controller;
     const [selectedClass, setSelectedClass] = useState({})
@@ -88,7 +88,7 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
     
     useEffect(() => {
         if (open) {
-            if (!studentData) {
+            if (!studentData.id) {
                 setStudentInfo(new StudentInfo({
                     status_res: 0,
                     advisor: userInfo.display_name,
@@ -97,6 +97,7 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
             } else {
                 setIsUpdate(true)
                 setStudentInfo(new StudentInfo(studentData))
+                setTestScore(studentData?.score_table?.find(item => item.class_id === 'test') || {})
             }
             // getStudentList()
             // getStaffList()
@@ -159,10 +160,10 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
             handler={() => {
                 handleCallback(false)
             }}
-            className={`bg-transparent shadow-none w-min-w ${justShow ? 'pointer-events-none' : ''}`}
+            className={`bg-transparent shadow-none w-min-w`}
         >
             <Card className="mx-auto w-full">
-                <CardBody>
+                <CardBody className={justShow ? 'pointer-events-none' : ''}>
                     <div className="flex flex-col py-4 border-b border-blue-gray-50 items-center">
                         <div className="flex w-full grid grid-cols-3 gap-6 pb-6">
                             <Typography className="col-span-2" variant="h6" color="black">
@@ -340,7 +341,7 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
                                     type="number"
                                     variant="static"
                                     label="Speaking"
-                                    value={studentInfo._speaking}
+                                    value={testScore._speaking}
                                     onChange={(e) => {
                                         updateStudentInfo('_speaking', e.target.value, 'score')
                                     }}
@@ -349,7 +350,7 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
                                     type="number"
                                     variant="static"
                                     label="Reading"
-                                    value={studentInfo._reading}
+                                    value={testScore._reading}
                                     onChange={(e) => {
                                         updateStudentInfo('_reading', e.target.value, 'score')
                                     }}
@@ -358,7 +359,7 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
                                     type="number"
                                     variant="static"
                                     label="Grammar/Volcabulary"
-                                    value={studentInfo._grammar}
+                                    value={testScore._grammar}
                                     onChange={(e) => {
                                         updateStudentInfo('_grammar', e.target.value, 'score')
                                     }}
@@ -374,7 +375,7 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
                                     label="Writing"
                                     max={10}
                                     min={0}
-                                    value={studentInfo.writing}
+                                    value={testScore.writing}
                                     onChange={(e) => {
                                         updateStudentInfo('writing', e.target.value, 'score')
                                     }}
@@ -385,7 +386,7 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
                                     label="Listening"
                                     max={10}
                                     min={0}
-                                    value={studentInfo.listening}
+                                    value={testScore.listening}
                                     onChange={(e) => {
                                         updateStudentInfo('listening', e.target.value, 'score')
                                     }}
@@ -396,7 +397,7 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
                                     label="Speaking"
                                     max={10}
                                     min={0}
-                                    value={studentInfo.speaking}
+                                    value={testScore.speaking}
                                     onChange={(e) => {
                                         updateStudentInfo('speaking', e.target.value, 'score')
                                     }}
@@ -407,7 +408,7 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
                                     label="Reading"
                                     max={10}
                                     min={0}
-                                    value={studentInfo.reading}
+                                    value={testScore.reading}
                                     onChange={(e) => {
                                         updateStudentInfo('reading', e.target.value, 'score')
                                     }}
@@ -418,7 +419,7 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
                                     label="Grammar/Volcabulary"
                                     max={10}
                                     min={0}
-                                    value={studentInfo.grammar}
+                                    value={testScore.grammar}
                                     onChange={(e) => {
                                         updateStudentInfo('grammar', e.target.value, 'score')
                                     }}
@@ -431,15 +432,18 @@ export function CreateStudent({ studentData, open, handleCallback, justShow = fa
                     <Button variant="text" color="blue-gray" onClick={() => handleCallback(false)}>
                         Close
                     </Button>
-                    <Button
-                        disabled={!studentInfo.full_name || !studentInfo.register_date}
-                        loading={loading}
-                        variant="gradient"
-                        onClick={() => handleCallback(true, studentInfo, isUpdate)}
-                    >
-                        {isUpdate ? 'Update' : 'Confirm'}
-                    </Button>
+                    {!justShow ? (
+                        <Button
+                            disabled={!studentInfo.full_name || !studentInfo.register_date}
+                            loading={loading}
+                            variant="gradient"
+                            onClick={() => handleCallback(true, studentInfo, isUpdate)}
+                        >
+                            {isUpdate ? 'Update' : 'Confirm'}
+                        </Button>
+                    ) : null}
                 </CardFooter>
+                
             </Card>
         </Dialog>
     );

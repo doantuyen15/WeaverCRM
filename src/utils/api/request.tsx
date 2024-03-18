@@ -421,17 +421,11 @@ const updateStudentScore = (studentList: any[]) => {
     })
 }
 
-const updateStudent = (list: any[]) => {
+const updateStudent = (student: any) => {
     return new useRequest((resolve: any, reject: any) => {
-        let studentList = []
-        try {
-            studentList = list.map(item => { return {...item}})
-        } catch (error) {
-            reject(error)
-        }
         addDoc(collection(db, 'approval'), {
             update_student: {
-                'data': studentList,
+                'data': {...student},
                 'requesting_username': userInfo.displayName,
                 'created_at': moment().toString()
             }
@@ -596,23 +590,28 @@ const updateApproval = ({approval, ok}: any) => {
                 let id: any = 0
                 await getDocs(collection(db, 'student')).then(snap => {
                     const lastID = (snap.docs || [])?.at(-1)?.id || '';
-                    id = Number(lastID?.slice(2))
+                    id = Number(lastID?.slice(2)) + 1
                 });
-                approval?.data?.forEach((student: any) => {
-                    id += 1
-                    const docId = 'WE' + ('00000' + id).slice(-5)
-                    const studentRef = doc(db, 'student', docId)
-                    batch.set(studentRef, student)
-                })
+                // approval?.data?.forEach((student: any) => {
+                //     id += 1
+                //     const docId = 'WE' + ('00000' + id).slice(-5)
+                //     const studentRef = doc(db, 'student', docId)
+                //     batch.set(studentRef, student)
+                // })
+                const docId = 'WE' + ('00000' + id).slice(-5)
+                const studentRef = doc(db, 'student', docId)
+                batch.set(studentRef, approval?.data)
                 batch.delete(approvalRef)
                 batch.commit()
                     .then(resolve)
                     .catch(reject)
             } else if (approval.type === 'update_student') {
-                approval?.data?.forEach((student: any) => {
-                    const studentRef = doc(db, 'student', student.id)
-                    batch.update(studentRef, student)
-                })
+                // approval?.data?.forEach((student: any) => {
+                //     const studentRef = doc(db, 'student', student.id)
+                //     batch.update(studentRef, student)
+                // })
+                const studentRef = doc(db, 'student', approval?.data?.id)
+                batch.update(studentRef, approval?.data)
                 batch.delete(approvalRef)
                 batch.commit()
                     .then(resolve)
@@ -954,37 +953,16 @@ const getAccountInfo = () => {
     });
 }
 
-const addStudent = (list: any[]) => {
+const addStudent = (student: any) => {
     return new useRequest((resolve: any, reject: any) => {
-        let studentList = []
-        try {
-            studentList = list.map(item => { return {...item}})
-        } catch (error) {
-            reject(error)
-        }
         addDoc(collection(db, 'approval'), {
             add_student: {
-                'data': studentList,
+                'data': {...student},
                 'requesting_username': userInfo.displayName,
                 'created_at': moment().toString()
             }
         })
             .then(resolve)
-            .catch(reject)
-    });
-}
-
-const addToApproval = () => {
-    return new useRequest((resolve: any, reject: any) => {
-        getDocs(collection(db, "add_student"))
-            .then(
-                (snap) => {
-                    resolve(snap.docs.map(doc => doc.data()))
-                    // snap.forEach((doc) => {
-                    //     console.log(doc.id, "=>", doc.data());
-                    // });
-                }
-            )
             .catch(reject)
     });
 }

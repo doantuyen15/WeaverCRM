@@ -48,7 +48,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import InputMask from 'react-input-mask';
 import DefaultSkeleton from './../../widgets/skeleton/index'
 import { glb_sv } from "../../service";
-import { CreateStudent } from "../../widgets/modal/modal-student";
+import { ModalStudent } from "../../widgets/modal/modal-student";
 
 const TABLE_HEAD = [
     "Tình trạng đăng ký",
@@ -86,7 +86,7 @@ const Header = [
     'referrer',
     'advisor',
     'note'//14
-        // 'writing',
+    // 'writing',
     // 'reading',
     // 'speaking',
     // 'listening',
@@ -126,8 +126,9 @@ export default function StudentTable() {
     const [openModal, setOpenModal] = useState(false)
     const [controller] = useController();
     const { userInfo } = controller;
-    const currentEditKey = useRef({})    
-
+    const currentEditKey = useRef({})
+    const [selectedStudent, setSelectedStudent] = useState({})
+    
     useEffect(() => {
         getStudentList()
     }, [])
@@ -150,7 +151,35 @@ export default function StudentTable() {
         if (!ok) {
             setOpenModal(false)
         } else {
-            //
+            if (isUpdate) {
+                useFirebase('update_student', studentInfo)
+                .then(() => {
+                    toast.success("Sửa thông tin học viên thành công! Yêu cầu đang chờ duyệt")
+                })
+                .catch((err) => {
+                    console.log(err);
+                    toast.error(`Sửa thông tin học viên không thành công! Lỗi: ${err}`)
+                })
+                .finally(() => {
+                    setObjectEdit([])
+                    setLoading(false)
+                    setOpenModalConfirm(false)
+                })
+            } else {
+                useFirebase('add_student', studentInfo)
+                .then(() => {
+                    toast.success("Thêm học viên thành công! Yêu cầu đang chờ duyệt")
+                })
+                .catch((err) => {
+                    console.log(err);
+                    toast.error(`Thêm học viên không thành công! Lỗi: ${err}`)
+                })
+                .finally(() => {
+                    setObjectNew([])
+                    setLoading(false)
+                    setOpenModalConfirm(false)
+                })
+            }
         }
         // setOnAdd(true)
         // const list = [...objectNew]
@@ -184,7 +213,7 @@ export default function StudentTable() {
         try {
             const editIndex = currentEditKey.current[index]
             if (['listening', 'speaking', 'reading', 'writing', 'grammar'].includes(key)) {
-                objectEdit[editIndex].updateScore({key: key, score: value, classId: 'test', type: ''})
+                objectEdit[editIndex].updateScore({ key: key, score: value, classId: 'test', type: '' })
                 setObjectEdit(objectEdit)
             } else {
                 objectEdit[editIndex].updateInfo(key, value)
@@ -200,7 +229,7 @@ export default function StudentTable() {
         try {
             // objectNew[index][key] = value
             if (['listening', 'speaking', 'reading', 'writing', 'grammar'].includes(key)) {
-                objectNew[index].updateScore({key: key, score: value, classId: 'test', type: ''})
+                objectNew[index].updateScore({ key: key, score: value, classId: 'test', type: '' })
             } else {
                 objectNew[index].updateInfo(key, value)
             }
@@ -225,15 +254,17 @@ export default function StudentTable() {
     }
 
     const handleEdit = (item, index) => {
-        objectEdit.push(item)
-        currentEditKey.current = {
-            ...currentEditKey.current,
-            [index]: objectEdit?.length - 1
-        }
-        setObjectEdit(objectEdit)
-        editKey.push(index)
-        setEditKey([...editKey])
-        setEditMode(true)
+        setSelectedStudent(item)
+        setOpenModal(true)
+        // objectEdit.push(item)
+        // currentEditKey.current = {
+        //     ...currentEditKey.current,
+        //     [index]: objectEdit?.length - 1
+        // }
+        // setObjectEdit(objectEdit)
+        // editKey.push(index)
+        // setEditKey([...editKey])
+        // setEditMode(true)
     }
 
     const handleCancelEdit = (removeIndex) => {
@@ -286,18 +317,18 @@ export default function StudentTable() {
     const handleRemove = (item) => {
         setLoading(true)
         useFirebase('delete_student', item)
-        .then(() => {
-            toast.success("Xoá học viên thành công!")
-            getStudentList()
-        })
-        .catch((err) => {
-            console.log(err);
-            toast.error(`Xoá học viên không thành công! Lỗi: ${err}`)
-        })
-        .finally(() => {
-            setLoading(false)
-            setOpenModalConfirm(false)
-        })
+            .then(() => {
+                toast.success("Xoá học viên thành công!")
+                getStudentList()
+            })
+            .catch((err) => {
+                console.log(err);
+                toast.error(`Xoá học viên không thành công! Lỗi: ${err}`)
+            })
+            .finally(() => {
+                setLoading(false)
+                setOpenModalConfirm(false)
+            })
     }
 
     return (
@@ -953,8 +984,8 @@ export default function StudentTable() {
                                                     />
                                                 </td>
                                                 <td className={classes}>
-                                                    <Button className="flex items-center gap-3" size="sm" 
-                                                    onClick={() => updateObjectNew(index, Header[6], !item?.has_score)}
+                                                    <Button className="flex items-center gap-3" size="sm"
+                                                        onClick={() => updateObjectNew(index, Header[6], !item?.has_score)}
                                                     >
                                                         Nhập Điểm
                                                     </Button>
@@ -1258,7 +1289,7 @@ export default function StudentTable() {
                 {/* <ModalEditStudent open={openModalEdit} handleOpen={handleOpenEditStudent} objectEdit={objectEdit} /> */}
             </Card>
 
-            <CreateStudent open={openModal} handleOpen={setOpenModal} handleCallback={handleStudentCallback} />
+            <ModalStudent studentData={selectedStudent} open={openModal} handleOpen={setOpenModal} handleCallback={handleStudentCallback} />
             {/* <PaymentPopup studentList={studentList} open={openPayment} handleCallback={handleMakePayment} /> */}
         </>
     );
@@ -1271,7 +1302,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
     const [scoreTable, setScoreTable] = useState([])
     const [loading, setLoading] = useState(false)
 
-    const TableScore = ({scoreTable = []}) => {
+    const TableScore = ({ scoreTable = [] }) => {
         return (
             <table className="text-left">
                 <thead>
@@ -1387,7 +1418,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
 
     return (
         <tr key={index} className="even:bg-blue-gray-50/50">
-            <td className={classes} style={{ display: !hideColumn ? 'table-cell' : 'none'}}>
+            <td className={classes} style={{ display: !hideColumn ? 'table-cell' : 'none' }}>
                 <div className="w-max">
                     <Menu placement="bottom-start" open={false}>
                         <MenuHandler>
@@ -1492,12 +1523,12 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                             {loading ? (
                                 <DefaultSkeleton />
                             ) : (
-                                <TableScore scoreTable={item.score_table}/>
+                                <TableScore scoreTable={item.score_table} />
                             )}
                         </PopoverContent>
                     </Popover>
                 </td>
-            ) : <td/>}
+            ) : <td />}
             <td className={classes}>
                 <div className="flex flex-col">
                     <Typography
