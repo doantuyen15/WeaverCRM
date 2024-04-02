@@ -58,6 +58,7 @@ export function useFirebase(service: string, params: any) {
         case 'update_class_info': return updateClassInfo(params)
         case 'delete_class_info': return deleteClassInfo(params)
         case 'add_student_classes': return addStudentClasses(params)
+        case 'add_new_program': return addNewProgram(params)
         case 'create_user': return createUser(params)
         case 'delete_user': return deleteUser(params)
         case 'update_user': return updateUser(params)
@@ -148,7 +149,7 @@ const makeFinance = (finance: any) => {
             make_finance: {
                 'data': {...finance},
                 'requesting_username': userInfo.displayName,
-                'created_at': moment().toString()
+                'created_at': moment().valueOf()
             }
         })
             .then(resolve)
@@ -257,7 +258,7 @@ const staffCheckin = (params: any) => {
             staff_checkin: {
                 'data': {...params},
                 'requesting_username': userInfo.displayName,
-                'created_at': moment().toString()
+                'created_at': moment().valueOf()
             }
         })
             .then(resolve)
@@ -329,7 +330,7 @@ const makeTuition = (list: any) => {
             make_tuition: {
                 'data': {...list},
                 'requesting_username': userInfo.displayName,
-                'created_at': moment().toString()
+                'created_at': moment().valueOf()
             }
         })
             .then(resolve)
@@ -343,7 +344,7 @@ const makeRefunds = (list: any) => {
             make_refunds: {
                 'data': {...list},
                 'requesting_username': userInfo.displayName,
-                'created_at': moment().toString()
+                'created_at': moment().valueOf()
             }
         })
             .then(resolve)
@@ -427,7 +428,7 @@ const updateStudent = (student: any) => {
             update_student: {
                 'data': {...student},
                 'requesting_username': userInfo.displayName,
-                'created_at': moment().toString()
+                'created_at': moment().valueOf()
             }
         })
             .then(resolve)
@@ -437,8 +438,6 @@ const updateStudent = (student: any) => {
 
 const updateStudentAttendance = (data: any) => {
     return new useRequest((resolve: any, reject: any) => {
-        console.log('data', data);
-        
         updateDoc(doc(db, `classes/${data.id}`), {
             'attendance': {
                 [data.month]: data.data
@@ -452,6 +451,22 @@ const updateStudentAttendance = (data: any) => {
                 // An error occurred
                 // ...
             })
+    })
+}
+
+const addNewProgram = (newProgram: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        const programRef = doc(db, `courses/${newProgram.id}`);
+        setDoc(programRef, newProgram.level)
+            .then(resolve)
+            .catch(reject)
+        // const batch = writeBatch(db);
+        // newProgram.level?.forEach((level: any) => {
+        //     batch.set(programRef, level)
+        // })
+        // batch.commit()
+        //     .then(resolve)
+        //     .catch(reject)
     })
 }
 
@@ -523,7 +538,7 @@ const addClasses = (list: any[]) => {
             add_classes: {
                 'data': classList,
                 'requesting_username': userInfo.displayName,
-                'created_at': moment().toString()
+                'created_at': moment().valueOf()
             }
         })
             .then(resolve)
@@ -959,7 +974,7 @@ const addStudent = (student: any) => {
             add_student: {
                 'data': {...student},
                 'requesting_username': userInfo.displayName,
-                'created_at': moment().toString()
+                'created_at': moment().valueOf()
             }
         })
             .then(resolve)

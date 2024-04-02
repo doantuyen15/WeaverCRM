@@ -82,19 +82,22 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
     const [courseList, setCourseList] = useState([])
     const [staffList, setStaffList] = useState([])
     const [testScore, setTestScore] = useState({})
-
+    const [regDateRef, setRegDateRef] = useState(moment().format('YYYY-MM-DD'))
+    const [dobRef, setDobRef] = useState('')
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
-    
+
     useEffect(() => {
         if (open) {
-            if (!studentData.id) {
+            if (!studentData.full_name) {
                 setStudentInfo(new StudentInfo({
                     status_res: 0,
                     advisor: userInfo.display_name,
                     advisor_id: userInfo.uid
                 }))
             } else {
+                setRegDateRef(formatDate(studentData?.register_date, 'YYYY-MM-DD'))
+                setDobRef(formatDate(studentData?.dob, 'YYYY-MM-DD'))
                 setIsUpdate(true)
                 setStudentInfo(new StudentInfo(studentData))
                 setTestScore(studentData?.score_table?.find(item => item.class_id === 'test') || {})
@@ -112,10 +115,10 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
     useEffect(() => {
         getStaffList()
     }, [])
-    
+
 
     const getAllCourse = () => {
-        useFirebase('get_all_course', {getId: true})
+        useFirebase('get_all_course', { getId: true })
             .then(data => {
                 const object = {}
                 data.forEach(item => {
@@ -125,14 +128,14 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                 // useStorage('set', 'programs', data)
             })
             .catch(err => console.log(err))
-            // .finally(() => setLoading(false))
+        // .finally(() => setLoading(false))
     }
 
     const updateStudentInfo = (key, value, type = 'info') => {
         if (type === 'info') {
             studentInfo?.updateInfo(key, value)
         } else {
-            studentInfo?.updateScore({key: key, score: value, classId: 'test', type: ''})
+            studentInfo?.updateScore({ key: key, score: value, classId: 'test', type: '' })
             setTestScore(studentInfo?.score_table?.find(item => item.class_id === 'test') || {})
         }
         forceUpdate()
@@ -213,8 +216,11 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                     type="date"
                                     variant="outlined"
                                     label="Ngày đăng ký"
-                                    value={!studentInfo.register_date ? '' : formatDate(studentInfo.register_date, 'YYYY-MM-DD')}
-                                    onChange={(e) => updateStudentInfo('register_date', formatDate(e.target.value, 'moment'))}
+                                    value={regDateRef}
+                                    onChange={(e) => {
+                                        setRegDateRef(e.target.value)
+                                        updateStudentInfo('register_date', formatDate(e.target.value, 'moment'))
+                                    }}
                                 />
                                 <Input
                                     type="text"
@@ -222,19 +228,23 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                     label="Họ và tên"
                                     placeholder="Họ và tên"
                                     value={studentInfo.full_name}
-                                    onChange={(e) => {
-                                        updateStudentInfo('full_name', e.target.value)
-                                    }}
+                                    onChange={(e) => updateStudentInfo('full_name', e.target.value)}
                                 />
                                 <Input
                                     type="date"
                                     variant="outlined"
                                     label="Ngày sinh"
-                                    value={!studentInfo.dob ? '' : formatDate(studentInfo.dob, 'YYYY-MM-DD')}
-                                    onChange={(e) => updateStudentInfo('register_date', formatDate(e.target.value, 'moment'))}
+                                    value={dobRef}
+                                    onChange={(e) => {
+                                        setDobRef(e.target.value)
+                                        updateStudentInfo('dob', formatDate(e.target.value, 'moment'))
+                                    }}
+                                    max={moment().format('YYYY-MM-DD')}
+                                    error={studentInfo.dob > moment().valueOf()}
                                 />
                                 <Input
                                     type="tel"
+                                    // pattern="[0-9]{4}.[0-9]{3}.[0-9]{3}"
                                     maxLength={12}
                                     variant="outlined"
                                     label="Số điện thoại"
@@ -262,6 +272,15 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                     value={studentInfo.address}
                                     onChange={(e) => {
                                         updateStudentInfo('address', e.target.value)
+                                    }}
+                                />
+                                <Input
+                                    variant="outlined"
+                                    label="Địa chỉ email"
+                                    placeholder='Địa chỉ email'
+                                    value={studentInfo.email}
+                                    onChange={(e) => {
+                                        updateStudentInfo('email', e.target.value)
                                     }}
                                 />
                             </div>
@@ -311,10 +330,10 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                             <div className="grid grid-cols-6 gap-6 pb-6">
                                 <Typography variant="small" className="flex h-full items-center text-blue-gray-500">
                                     Số câu đúng: {
-                                        Number(testScore._writing || 0) + 
-                                        Number(testScore._listening || 0) + 
-                                        Number(testScore._speaking || 0) + 
-                                        Number(testScore._reading || 0) + 
+                                        Number(testScore._writing || 0) +
+                                        Number(testScore._listening || 0) +
+                                        Number(testScore._speaking || 0) +
+                                        Number(testScore._reading || 0) +
                                         Number(testScore._grammar || 0)
                                     }
                                 </Typography>
@@ -443,7 +462,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                         </Button>
                     ) : null}
                 </CardFooter>
-                
+
             </Card>
         </Dialog>
     );

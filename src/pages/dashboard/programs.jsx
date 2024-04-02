@@ -166,6 +166,7 @@ export function Programs() {
                         <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenModal(true)}>
                             <PlusIcon strokeWidth={2} className="h-4 w-4" /> Create new class
                         </Button>
+                        {userInfo.ro}
                         <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenCourseEdit(true)}>
                             <WrenchIcon strokeWidth={2} className="h-4 w-4" /> Course modification
                         </Button>

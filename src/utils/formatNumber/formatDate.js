@@ -14,7 +14,6 @@ const formatDate = (dateInput = '', type = 'DD/MM/YYYY') => {
 
     if (type === 'moment') {
         outputDate = outputDate.valueOf()
-        console.log('outputDate', outputDate, type);
     } else {
         outputDate = outputDate.format(type)
     }

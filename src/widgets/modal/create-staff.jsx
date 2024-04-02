@@ -23,6 +23,7 @@ import ClassInfo from "../../data/entities/classesInfo";
 import formatDate from "../../utils/formatNumber/formatDate";
 import StaffInfo from "../../data/entities/staffInfo";
 import { glb_sv } from "../../service";
+import FormatPhone from "../../utils/formatNumber/formatPhone";
 
 const academic = glb_sv.academic
 
@@ -87,8 +88,10 @@ export function CreateStaff({ open, handleCallback, staffInfo }) {
                                     <Input
                                         variant="outlined"
                                         label="Phone"
-                                        value={newStaff.phone}
-                                        onChange={(e) => updateStaffList('phone', e.target.value)}
+                                        value={FormatPhone(newStaff.phone)}
+                                        onChange={(e) => {
+                                            updateStaffList('phone', e.target.value?.replaceAll(/\./g, ''))
+                                        }}
                                     />
                                     <Input
                                         variant="outlined"
@@ -182,9 +185,8 @@ export function CreateStaff({ open, handleCallback, staffInfo }) {
                                                     key={item} value={item} className="flex items-center gap-1"
                                                 >
                                                     <div className="flex w-full items-center" onClick={(e) => {
-                                                        // e.stopPropagation()
                                                         updateStaffList('roles', item)
-                                                        updateStaffList('roles_id', id)
+                                                        updateStaffList('roles_id', id + 1)
                                                     }}>
                                                         {/* <Checkbox className="w-4 h-4" checked={newStaff.roles?.includes(item)} /> */}
                                                         {item}
@@ -271,7 +273,7 @@ export function CreateStaff({ open, handleCallback, staffInfo }) {
                                             type="date"
                                             variant="outlined"
                                             label="Ngày kết thúc"
-                                            value={formatDate(newStaff.end_date, 'YYYY-MM-DD')}
+                                            value={newStaff.end_date ? formatDate(newStaff.end_date, 'YYYY-MM-DD') : ''}
                                             onChange={(e) => updateStaffList('end_date', formatDate(e.target.value))}
                                         />
                                         <div className="col-span-2">

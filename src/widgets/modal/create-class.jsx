@@ -337,7 +337,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                                     Clear
                                                 </Option>
                                             }
-                                            {(staffList || [])?.filter(staff => staff.roles_id === 3)?.map(item => (
+                                            {(staffList || [])?.filter(staff => [1, 3, 4].includes(staff.roles_id))?.map(item => (
                                                 <Option
                                                     onClick={() => {
                                                         updateClassList(index, 'teacher', item.full_name)
