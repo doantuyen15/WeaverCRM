@@ -95,6 +95,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                 data.forEach(item => {
                     object[item.id] = item.data()
                 })
+                console.log('get_all_course', object);
                 setCourseList(object)
                 // useStorage('set', 'programs', data)
             })
@@ -256,16 +257,16 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             label="Select program"
                                             error={!info.program}
                                             value={info.program}
-                                            selected={(element) =>
-                                                element &&
-                                                React.cloneElement(element, {
-                                                    disabled: true,
-                                                    className:
-                                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                                })
-                                            }
+                                            // selected={(element) =>
+                                            //     element &&
+                                            //     React.cloneElement(element, {
+                                            //         disabled: true,
+                                            //         className:
+                                            //             "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                            //     })
+                                            // }
                                         >
-                                            {Object.keys(classType).map(item => (
+                                            {Object.keys(courseList).map(item => (
                                                 <Option onClick={() => {
                                                     updateClassList(index, 'program', item)
                                                     updateClassList(index, 'level', '')
@@ -284,16 +285,16 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                                 </Typography>
                                             }
                                         >
-                                            {info.program && (classType[info.program]).map(item => (
+                                            {info.program && Object.values(courseList[info.program])?.map(item => (
                                                 <Option onClick={() => {
-                                                    updateClassList(index, 'level', item)
+                                                    updateClassList(index, 'level', item.level_id)
                                                     if (info.start_date != '')
                                                         updateClassList(index, 'end_date',
                                                             moment(info.start_date)
                                                                 .add(courseList?.[info.program]?.[info.level]?.week, 'week').valueOf()
                                                         )
-                                                }} key={item} value={item} className="flex items-center gap-2">
-                                                    {item}
+                                                }} key={item.level_id} value={item.level_id} className="flex items-center gap-2">
+                                                    {item.level_id}
                                                 </Option>
                                             ))}
                                         </Select>

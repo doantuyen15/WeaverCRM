@@ -68,7 +68,7 @@ export function Configurator() {
 
   return (
     <aside
-      className={`fixed top-0 right-0 z-50 h-screen w-96 bg-white px-2.5 shadow-lg transition-transform duration-300 ${openConfigurator ? "translate-x-0" : "translate-x-96"
+      className={`fixed flex flex-col top-0 right-0 z-50 h-screen w-96 bg-white px-2.5 shadow-lg transition-transform duration-300 ${openConfigurator ? "translate-x-0" : "translate-x-96"
         }`}
       ref={ref}
     >
@@ -89,71 +89,81 @@ export function Configurator() {
           <XMarkIcon strokeWidth={2.5} className="h-5 w-5" />
         </IconButton>
       </div>
-      <div className="py-4 px-6">
-        <div className="mb-12">
-          <Typography variant="h6" color="blue-gray">
-            Sidenav Colors
-          </Typography>
-          <div className="mt-3 flex items-center gap-2">
-            {Object.keys(sidenavColors).map((color) => (
-              <span
-                key={color}
-                className={`h-6 w-6 cursor-pointer rounded-full border bg-gradient-to-br transition-transform hover:scale-105 ${sidenavColors[color]
-                  } ${sidenavColor === color ? "border-black" : "border-transparent"
-                  }`}
-                onClick={() => setSidenavColor(dispatch, color)}
+      <div className="py-4 px-6 h-full flex flex-col justify-between">
+        <div>
+          <div className="mb-12">
+            <Typography variant="h6" color="blue-gray">
+              Sidenav Colors
+            </Typography>
+            <div className="mt-3 flex items-center gap-2">
+              {Object.keys(sidenavColors).map((color) => (
+                <span
+                  key={color}
+                  className={`h-6 w-6 cursor-pointer rounded-full border bg-gradient-to-br transition-transform hover:scale-105 ${sidenavColors[color]
+                    } ${sidenavColor === color ? "border-black" : "border-transparent"
+                    }`}
+                  onClick={() => setSidenavColor(dispatch, color)}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="mb-6">
+            <Typography variant="h6" color="blue-gray">
+              Sidenav Types
+            </Typography>
+            <Typography variant="small" color="gray">
+              Choose between 2 different sidenav types.
+            </Typography>
+            <div className="mt-3 flex items-center gap-2">
+              <Button
+                variant={sidenavType === "dark" ? "gradient" : "outlined"}
+                onClick={() => setSidenavType(dispatch, "dark")}
+              >
+                Dark
+              </Button>
+              <Button
+                variant={sidenavType === "white" ? "gradient" : "outlined"}
+                onClick={() => setSidenavType(dispatch, "white")}
+              >
+                White
+              </Button>
+            </div>
+            <div className="flex items-center justify-between mt-3">
+              <Typography variant="h3" color="gray">
+                Hide Sidenav
+              </Typography>
+              <Switch
+                id="hide-sidenav"
+                checked={collapsedSidenav}
+                onChange={() => setCollapsedSidenav(dispatch, !collapsedSidenav)}
               />
-            ))}
+            </div>
+          </div>
+          <div className="mb-6">
+            <hr />
+            <div className="flex items-center justify-between mt-3">
+              <Typography variant="small" color="blue-gray">
+                Navbar Fixed
+              </Typography>
+              <Switch
+                id="navbar-fixed"
+                value={fixedNavbar}
+                onChange={() => setFixedNavbar(dispatch, !fixedNavbar)}
+              />
+            </div>
           </div>
         </div>
-        <div className="mb-12">
-          <Typography variant="h6" color="blue-gray">
-            Sidenav Types
-          </Typography>
-          <Typography variant="small" color="gray">
-            Choose between 2 different sidenav types.
-          </Typography>
-          <div className="mt-3 flex items-center gap-2">
-            <Button
-              variant={sidenavType === "dark" ? "gradient" : "outlined"}
-              onClick={() => setSidenavType(dispatch, "dark")}
-            >
-              Dark
-            </Button>
-            <Button
-              variant={sidenavType === "white" ? "gradient" : "outlined"}
-              onClick={() => setSidenavType(dispatch, "white")}
-            >
-              White
-            </Button>
-          </div>
-          <div className="flex items-center justify-between mt-3">
-            <Typography variant="h3" color="gray">
-              Hide Sidenav
-            </Typography>
-            <Switch
-              id="hide-sidenav"
-              checked={collapsedSidenav}
-              onChange={() => setCollapsedSidenav(dispatch, !collapsedSidenav)}
-            />
-          </div>
-        </div>
-        <div className="mb-12">
-          <hr />
-          <div className="flex items-center justify-between mt-3">
-            <Typography variant="small" color="blue-gray">
-              Navbar Fixed
-            </Typography>
-            <Switch
-              id="navbar-fixed"
-              value={fixedNavbar}
-              onChange={() => setFixedNavbar(dispatch, !fixedNavbar)}
-            />
-          </div>
-        </div>
-        <div className="mb-12">
-          <hr />
+        <div>
           <div className="flex items-center justify-between py-5">
+            <Typography variant="h6" color="blue-gray">
+              User Guide
+            </Typography>
+            <Typography as='a' href="https://drive.google.com/drive/folders/16XFoUuAPFB5cdXIi0N3onMQUHM03YTkF?usp=sharing" target="_blank" variant="small" color="blue">
+              Click here
+            </Typography>
+          </div>
+          <hr />
+          <div className="flex items-center justify-between pt-5">
             <Typography variant="h6" color="blue-gray">
               App Version
             </Typography>

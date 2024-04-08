@@ -81,7 +81,8 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                     type: !isPayment ? BillType['receive'][1] : BillType['pay'][0],
                     tuition_date: currentMonth,
                     account_type: AccountType[0],
-                    account_type_id: 0
+                    account_type_id: 0,
+                    create_date: moment().valueOf()
                 })
                 newBillRef.current = createBill
                 setNewBill(createBill)
@@ -90,12 +91,13 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                     isPayment: isPayment,
                     type_id: !isPayment ? 1 : 0,
                     type: !isPayment ? BillType['receive'][1] : BillType['pay'][0],
-                    tuition_date: currentMonth,
+                    tuition_date: '',
                     account_type: AccountType[0],
                     account_type_id: 0,
                     customer_id: dataStudent.id_student,
                     customer: dataStudent.full_name,
                     class_id: dataStudent.id_class,
+                    create_date: moment().valueOf()
                 })
                 getCourseTuition()
                 newBillRef.current = createBill
@@ -277,7 +279,7 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                     max={moment().format('YYYY-MM-DD')}
                                                     className="pl-4 pr-2"
                                                     value={formatDate(newBill.create_date, 'YYYY-MM-DD')}
-                                                    onChange={(e) => updateFinance('create_date', formatDate(e.target.value || moment(), 'DDMMYYYY'))}
+                                                    onChange={(e) => updateFinance('create_date', moment().valueOf())}
                                                 />
                                             </div>
                                         </div>

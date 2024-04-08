@@ -45,6 +45,7 @@ export function useFirebase(service: string, params: any) {
         case 'get_tuition_table': return getTuitionTable(params)
         case 'get_staff_attendance': return getStaffAttendance()
         case 'get_all_course': return getAllCourse(params)
+        case 'get_finance_table': return getFinanceTable(params)
         case 'query_finance_table': return queryFinanceTable(params)
         case 'query_tuition': return queryTuition(params)
         case 'query_class_list': return queryClassList(params)
@@ -128,18 +129,19 @@ const queryTuition = (params: any) => {
 
 const queryFinanceTable = (params: string[]) => {
     return new useRequest((resolve: any, reject: any) => {
-        const q = query(collectionGroup(db, 'tuition'), where('month', 'in', params));
-        getDocs(q)
-            .then(
-                (snap) => {
-                    try {
-                        resolve(snap.docs.map(item => item.data()));
-                    } catch (error) {
-                        reject(error)
-                    }
-                }
-            )
-            .catch(reject)
+        console.log('params', params);
+        // const q = query(collectionGroup(db, 'tuition'), where('month', 'in', params));
+        // getDocs(q)
+        //     .then(
+        //         (snap) => {
+        //             try {
+        //                 resolve(snap.docs.map(item => item.data()));
+        //             } catch (error) {
+        //                 reject(error)
+        //             }
+        //         }
+        //     )
+        //     .catch(reject)
     });
 }
 
@@ -295,6 +297,22 @@ const getStaffAttendance = () => {
                 (snap) => {
                     try {
                         resolve(snap.data() || [])
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            )
+            .catch(reject)
+    });
+}
+
+const getFinanceTable = (params: string) => {
+    return new useRequest((resolve: any, reject: any) => {
+        getDocs(collection(db, `finance/${params}/tuition`))
+            .then(
+                (snap) => {
+                    try {
+                        resolve(snap.docs.map(doc => doc.data()) || [])
                     } catch (error) {
                         reject(error)
                     }

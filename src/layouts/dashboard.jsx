@@ -43,12 +43,13 @@ export function Dashboard() {
         >
           <Cog6ToothIcon className="h-5 w-5" />
         </IconButton>
+        {console.log('routes', routes, typeof userInfo.roles)}
         <Routes>
           {routes.map(
             ({ layout, pages }) =>
               layout === "dashboard" &&
               pages.map(({ path, element, subpath, roles }) => (
-                roles.includes(userInfo.roles || '8') &&
+                (roles?.includes(userInfo.roles) || roles === "All") &&
                 (subpath?.length > 0 ?
                   subpath.map(({ path, element }) => (
                     <Route exact path={path} element={element} />

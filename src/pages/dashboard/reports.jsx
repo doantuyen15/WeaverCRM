@@ -464,6 +464,10 @@ export default function ReportScore() {
                                         ripple={false}
                                         // color={email ? "gray" : "blue-gray"}
                                         // disabled={!email}
+                                        onClick={() => {
+                                            console.log('click export', tuitionTable);
+                                            exportExcel({reportName: 'finance', data: tuitionTable})
+                                        }}
                                         className="rounded-l-none"
                                     >
                                         Export

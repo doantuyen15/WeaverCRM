@@ -9,6 +9,9 @@ import formatDate from '../formatNumber/formatDate';
 
 import ScoreTemplate from "./reports/report_score.docx";
 import ScoreTemplateTest from "./reports/report_score_test.docx";
+import FinanceTemplateDoc from "./reports/report_finance.docx";
+import FinanceTemplateExcel from "./reports/mau-so-quy-tm.xlsx";
+import formatNum from '../formatNumber/formatNum';
 
 const exportExcel = ({ reportName = '', data = {}, info = {} }) => {
     switch (reportName) {
@@ -17,6 +20,9 @@ const exportExcel = ({ reportName = '', data = {}, info = {} }) => {
             break;
         case 'score_test':
             exportScoreTest(data, info)
+            break;
+        case 'finance':
+            exportFinance(data)
             break;
         default:
             break;
@@ -99,6 +105,59 @@ const exportScoreTest = (data, info) => {
             doc.render();
             saveDocFile(doc)
         })
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+const exportFinance = async (data) => {
+    const headerCount = 6
+    try {
+        const workbook = new ExcelJS.Workbook();
+        const resp = await fetch('./assets/reports/mau-so-quy-tm.xlsx')
+        const buffer = await resp.arrayBuffer()
+        const excel = await workbook.xlsx.load(buffer)
+        const worksheet = excel.getWorksheet(1)
+        let total = 0
+        data.forEach((item, index) => {
+            item.isPayment ? total -= Number(item.amount) : total += Number(item.amount)
+            worksheet.insertRow(index + 6, [
+                formatDate(item.create_date),
+                item.code,
+                item.explain || ' ',
+                item.isPayment ? ' ' : formatNum(item.amount),
+                !item.isPayment ? ' ' : formatNum(item.amount),
+                item.note
+            ])
+            const row = worksheet.getRow(index + 6)
+            for(var indexCell = 1; indexCell <= 6; indexCell++) {
+                const cell = row.getCell(indexCell)
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' },
+                };
+                if (indexCell == 4 || indexCell == 5) {
+                    cell.alignment = { horizontal: 'right' }
+                }
+            }
+        })
+        const lastCell = worksheet.getRow(data?.length + 6).getCell(4)
+        lastCell.value = formatNum(total)
+        lastCell.alignment = { horizontal: 'right' }
+        
+        workbook.xlsx.writeBuffer().then(function (data) {
+            const blob = new Blob([data], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            });
+            const url = window.URL.createObjectURL(blob);
+            const anchor = document.createElement("a");
+            anchor.href = url;
+            anchor.download = "download.xlsx";
+            anchor.click();
+            window.URL.revokeObjectURL(url);
+        });
     } catch (error) {
         console.error('Error:', error);
     }

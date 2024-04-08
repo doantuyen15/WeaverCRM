@@ -58,7 +58,7 @@ export const routes = [
 				name: "dashboard",
 				path: "/home",
 				element: <Home />,
-				roles: ["1", "8"]
+				roles: "All"
 			},
 			{
 				icon: <DocumentCheckIcon {...menu} />,
@@ -107,7 +107,7 @@ export const routes = [
 				name: "Student list",
 				path: "/student",
 				element: <StudentTable />,
-				roles: ["1", "4"]
+				roles: ["1", "4", "6"]
 			},
 			{
 				icon: <DocumentMagnifyingGlassIcon {...menu} />,
@@ -128,7 +128,7 @@ export const routes = [
 				name: "class",
 				path: "/class",
 				element: <Class />,
-				roles: ["1", "4"]
+				roles: ["1", "4", "6"]
 			},
 			{
 				icon: <SwatchIcon {...menu} />,

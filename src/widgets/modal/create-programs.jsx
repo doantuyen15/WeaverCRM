@@ -130,6 +130,7 @@ export function CreatePrograms({ loading, open, handleCallback }) {
                         <div className="flex gap-4 items-center border-b border-blue-gray-50 pb-3">
                             <div className="grow menu-fixed">
                                 <Input
+                                    autoFocus
                                     error={!newProgram.id}
                                     variant="outlined"
                                     label="Program"
@@ -141,6 +142,7 @@ export function CreatePrograms({ loading, open, handleCallback }) {
                                 {newProgram.level?.map((programInfo, index) => (
                                     <div className="flex items-center gap-4">
                                         <Input
+                                            autoFocus
                                             error={!programInfo.level_id}
                                             variant="outlined"
                                             label="Level"

@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
   MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
 import { ChevronUpDownIcon, ChevronDownIcon, ChevronUpIcon, PencilIcon, UserPlusIcon, ArrowUpTrayIcon, BackwardIcon, ArrowUturnLeftIcon, ArrowUturnDownIcon, ArrowPathIcon, PlusIcon, DocumentTextIcon, TableCellsIcon, RectangleGroupIcon, BanknotesIcon, PlusCircleIcon, MinusCircleIcon } from "@heroicons/react/24/solid";
@@ -121,14 +123,14 @@ export default function Finance() {
   const [financeTable, setFinanceTable] = useState([])
   const financeTableRef = useRef([])
   const currentMonth = moment().format('MMYYYY')
-  const [selectedMonth, setSelectedMonth] = useState(moment().format('MMYYYY'))
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth)
   const [openModal, setOpenModal] = useState(false)
   const [isPayment, setIsPayment] = useState(false)
   const [totalPay, setTotalPay] = useState(0)
   const [totalReceive, setTotalReceive] = useState(0)
   const [openModalDetail, setOpenModalDetail] = useState(false)
   const [objectDetail, setObjectDetail] = useState({})
-  const selectDate = useRef([currentMonth])
+  const selectDate = useRef(currentMonth)
 
   useEffect(() => {
     getFinanceTable()
@@ -137,9 +139,10 @@ export default function Finance() {
   const getFinanceTable = () => {
     setLoading(true)
     console.log('selectDate.current', selectDate.current);
-    useFirebase('query_finance_table', [].concat(selectDate.current))
+    useFirebase('get_finance_table', selectDate.current)
       .then(data => {
         setTotalReceive(0)
+        setTotalPay(0)
         setLoading(false)
         // if (data) {
         //   const convert =
@@ -185,6 +188,7 @@ export default function Finance() {
     if (!ok) {
       setOpenModal(false)
     } else {
+      console.log('handleFinanceCallback', data);
       setLoading(true)
       let service = 'make_finance'
       if (data.type_id === 1 && !data.isPayment) service = 'make_tuition'
@@ -214,6 +218,17 @@ export default function Finance() {
     setObjectDetail(item)
   }
 
+  const getFinanceHistory = () => {
+    if (currentMonth === selectedMonth) {
+      setSelectedMonth(moment().subtract(1, 'M').format('MM/YYYY'))
+      selectDate.current = moment().subtract(1, 'M').format('MMYYYY')
+    } else {
+      setSelectedMonth(currentMonth)
+      selectDate.current = currentMonth
+    }
+    getFinanceTable()
+  }
+
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card className="h-full w-full">
@@ -225,13 +240,34 @@ export default function Finance() {
           </div>
 
         </CardHeader>
-        <div className="mb-4 flex flex-col items-center justify-center py-4">
-          {/* <Typography variant="h5" color="blue-gray">
-              {moment(selectedMonth, 'MMYYYY').locale('vi').format(`MMMM - [Q]Q - YYYY`).toLocaleUpperCase()}
-            </Typography> */}
-          <Typography color="gray" className="mt-1 font-bold">
+        <div className="mb-4 flex w-full items-center justify-between p-4">
+          <div onClick={getFinanceHistory}>
+            <Typography variant="h6" color="blue-gray" className="flex items-center mr-3 cursor-pointer">
+              {currentMonth === selectedMonth ? (
+                <>
+                  <ChevronLeftIcon className="h-4 w-4" strokeWidth="2" />
+                  {moment().subtract(1, 'M').format('MM/YYYY')}
+                </>
+              ) : (
+                <>
+                  {currentMonth}
+                  <ChevronRightIcon className="h-4 w-4" strokeWidth="2" />
+                </>
+              )}
+            </Typography>
+          </div>
+          <Typography variant="h6" color="blue-gray" className="mt-1 font-bold">
             TỔNG THU: {formatNum(totalReceive)} &emsp; | &emsp; TỔNG CHI: {formatNum(totalPay)}
           </Typography>
+          <div className="gap-4">
+            <Button
+              className="flex items-center gap-3"
+              size="sm"
+              onClick={() => getFinanceTable()}
+            >
+              <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
+            </Button>
+          </div>
         </div>
         {/* <CardHeader floated={false} shadow={false} className="rounded-none pb-2">
           <div className="mb-4 flex flex-col items-center justify-center py-4">
@@ -244,15 +280,6 @@ export default function Finance() {
           </div>
         </CardHeader> */}
         <CardBody className="p-0 px-0 overflow-auto max-h-[65vh]">
-          <div className="flex right-5 top-30 absolute items-center justify-end gap-4">
-            <Button
-              className="flex items-center gap-3"
-              size="sm"
-              onClick={() => getFinanceTable()}
-            >
-              <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
-            </Button>
-          </div>
           <FinanceTable
             // handleRemove={handleRemove}
             openModalDetail={handleOpenModalDetail}
@@ -332,7 +359,7 @@ export const ModalFinanceDetail = ({open, handleOpen, data}) => {
             Ngày lập phiếu
           </Typography>
           <Typography variant="small" color="black" className="font-bold">
-            {formatDate(data.create_date, 'YYYY-MM-DD')}
+            {formatDate(data.create_date, 'DD/MM/YYYY')}
           </Typography>
         </div>
         <div className="p-4 border-b border-blue-gray-100 flex justify-between">

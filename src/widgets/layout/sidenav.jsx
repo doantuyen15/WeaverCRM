@@ -107,7 +107,7 @@ export function Sidenav({ brandName, routes }) {
               </div>
             )}
             {pages.map(({ icon, name, path, subpath, roles }, key) => (
-              roles?.includes(userInfo.roles || '8') && (
+              (roles?.includes(userInfo.roles) || roles === 'All') && (
                 <li key={name} style={{ display: userInfo.uid && layout === 'auth' ? 'none' : 'block'}}>
                   {subpath?.length >= 1 ? (
                     <Accordion open={open?.includes(name)}>
