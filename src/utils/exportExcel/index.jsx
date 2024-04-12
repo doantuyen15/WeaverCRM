@@ -22,7 +22,7 @@ const exportExcel = ({ reportName = '', data = {}, info = {} }) => {
             exportScoreTest(data, info)
             break;
         case 'tuition':
-            exportFinance(data, info)
+            exportTuition(data, info)
             break;
         case 'finance':
             exportFinance(data, info)
@@ -165,26 +165,29 @@ const exportFinance = async (data, info) => {
     }
 }
 
-const exportTuition = async (data) => {
-    const headerCount = 6
+const exportTuition = async (data, info) => {
     try {
         const workbook = new ExcelJS.Workbook();
-        const resp = await fetch('./assets/reports/mau-so-quy-tm.xlsx')
+        const resp = await fetch('./assets/reports/report_tuition.xlsx')
         const buffer = await resp.arrayBuffer()
         const excel = await workbook.xlsx.load(buffer)
         const worksheet = excel.getWorksheet(1)
         let total = 0
         data.forEach((item, index) => {
             item.isPayment ? total -= Number(item.amount) : total += Number(item.amount)
-            worksheet.insertRow(index + 6, [
+            worksheet.insertRow(index + 5, [
+                item.customer_id,
+                item.customer,
                 formatDate(item.create_date),
-                item.code,
-                item.explain || ' ',
-                item.isPayment ? ' ' : formatNum(item.amount),
-                !item.isPayment ? ' ' : formatNum(item.amount),
-                item.note
+                moment(item.tuition_date, 'MMYYYY').format('MMMM - YYYY'),
+                !item.isPayment ? formatNum(item.amount, 0, 'price') : ('-' + formatNum(item.amount, 0, 'price')),
+                item.explain
             ])
-            const row = worksheet.getRow(index + 6)
+            const rowTitle = worksheet.getRow(2)
+            const timeTitle = rowTitle.getCell(1).value
+            rowTitle.getCell(1).value = timeTitle.replace('{time}', info.time)
+
+            const row = worksheet.getRow(index + 5)
             for(var indexCell = 1; indexCell <= 6; indexCell++) {
                 const cell = row.getCell(indexCell)
                 cell.border = {
@@ -193,12 +196,12 @@ const exportTuition = async (data) => {
                     bottom: { style: 'thin' },
                     right: { style: 'thin' },
                 };
-                if (indexCell == 4 || indexCell == 5) {
+                if (indexCell == 5) {
                     cell.alignment = { horizontal: 'right' }
                 }
             }
         })
-        const lastCell = worksheet.getRow(data?.length + 6).getCell(4)
+        const lastCell = worksheet.getRow(data?.length + 5).getCell(5)
         lastCell.value = formatNum(total)
         lastCell.alignment = { horizontal: 'right' }
         
@@ -209,7 +212,7 @@ const exportTuition = async (data) => {
             const url = window.URL.createObjectURL(blob);
             const anchor = document.createElement("a");
             anchor.href = url;
-            anchor.download = "download.xlsx";
+            anchor.download = `Tuition reports - ${info.time}`;
             anchor.click();
             window.URL.revokeObjectURL(url);
         });

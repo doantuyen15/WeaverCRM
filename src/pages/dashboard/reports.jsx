@@ -501,11 +501,13 @@ export default function ReportScore() {
                                     <Button
                                         size="md"
                                         ripple={false}
-                                        // color={email ? "gray" : "blue-gray"}
-                                        // disabled={!email}
                                         onClick={() => {
                                             console.log('click export', tuitionTable);
-                                            exportExcel({reportName: 'tuition', data: tuitionTable})
+                                            exportExcel({
+                                                reportName: 'tuition', 
+                                                data: tuitionTable, 
+                                                info: {time: selectTime === 'Other' || !selectTime ? selectedMonth : (selectTime + ' - ' + moment().format('YYYY'))
+                                            }})
                                         }}
                                         className="rounded-l-none"
                                     >
@@ -591,7 +593,11 @@ export default function ReportScore() {
                                         // disabled={!email}
                                         onClick={() => {
                                             console.log('click export', tuitionTable, selectTime, selectedMonth);
-                                            exportExcel({reportName: 'finance', data: financeTable, info: {time: selectTime === 'Other' || !selectTime ? selectedMonth : (selectTime + ' - ' + moment().format('YYYY'))}})
+                                            exportExcel({
+                                                reportName: 'finance', 
+                                                data: financeTable, 
+                                                info: {time: selectTime === 'Other' || !selectTime ? selectedMonth : (selectTime + ' - ' + moment().format('YYYY'))
+                                            }})
                                         }}
                                         className="rounded-l-none"
                                     >
