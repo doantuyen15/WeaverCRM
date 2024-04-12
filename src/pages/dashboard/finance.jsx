@@ -438,9 +438,7 @@ export const ModalFinanceDetail = ({open, handleOpen, data}) => {
   )
 }
 
-const FinanceTable = ({ financeData = [], openModalDetail }) => {
-  const [controller] = useController();
-  const { userInfo } = controller;
+export const FinanceTable = ({ financeData = [], openModalDetail }) => {
   const [keySort, setKeySort] = useState('')
   const [isAsc, setIsAsc] = useState(true)
 

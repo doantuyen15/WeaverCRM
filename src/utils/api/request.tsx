@@ -130,18 +130,18 @@ const queryTuition = (params: any) => {
 const queryFinanceTable = (params: string[]) => {
     return new useRequest((resolve: any, reject: any) => {
         console.log('params', params);
-        // const q = query(collectionGroup(db, 'tuition'), where('month', 'in', params));
-        // getDocs(q)
-        //     .then(
-        //         (snap) => {
-        //             try {
-        //                 resolve(snap.docs.map(item => item.data()));
-        //             } catch (error) {
-        //                 reject(error)
-        //             }
-        //         }
-        //     )
-        //     .catch(reject)
+        const q = query(collectionGroup(db, 'tuition'), where('tuition_date', 'in', params));
+        getDocs(q)
+            .then(
+                (snap) => {
+                    try {
+                        resolve(snap.docs.map(item => item.data()));
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            )
+            .catch(reject)
     });
 }
 
