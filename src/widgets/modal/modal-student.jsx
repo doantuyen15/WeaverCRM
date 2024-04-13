@@ -109,6 +109,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
             // getAllCourse()
         } else {
             setStudentInfo({})
+            setDobRef('')
         }
     }, [open])
 
@@ -340,6 +341,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                 <Input
                                     size="md"
                                     type="number"
+                                    step='0.5'
                                     variant="static"
                                     label="Writing"
                                     value={testScore._writing}
@@ -349,6 +351,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                 />
                                 <Input
                                     type="number"
+                                    step='0.5'
                                     variant="static"
                                     label="Listening"
                                     value={testScore._listening}
@@ -358,6 +361,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                 />
                                 <Input
                                     type="number"
+                                    step='0.5'
                                     variant="static"
                                     label="Speaking"
                                     value={testScore._speaking}
@@ -367,6 +371,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                 />
                                 <Input
                                     type="number"
+                                    step='0.5'
                                     variant="static"
                                     label="Reading"
                                     value={testScore._reading}
@@ -376,6 +381,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                 />
                                 <Input
                                     type="number"
+                                    step='0.5'
                                     variant="static"
                                     label="Grammar/Volcabulary"
                                     value={testScore._grammar}
@@ -390,6 +396,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                 </Typography>
                                 <Input
                                     type="number"
+                                    step='0.5'
                                     variant="static"
                                     label="Writing"
                                     max={10}
@@ -401,6 +408,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                 />
                                 <Input
                                     type="number"
+                                    step='0.5'
                                     variant="static"
                                     label="Listening"
                                     max={10}
@@ -412,6 +420,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                 />
                                 <Input
                                     type="number"
+                                    step='0.5'
                                     variant="static"
                                     label="Speaking"
                                     max={10}
@@ -423,6 +432,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                 />
                                 <Input
                                     type="number"
+                                    step='0.5'
                                     variant="static"
                                     label="Reading"
                                     max={10}
@@ -434,6 +444,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
                                 />
                                 <Input
                                     type="number"
+                                    step='0.5'
                                     variant="static"
                                     label="Grammar/Volcabulary"
                                     max={10}

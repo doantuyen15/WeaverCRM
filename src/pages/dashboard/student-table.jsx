@@ -331,6 +331,39 @@ export default function StudentTable() {
             })
     }
 
+    const handleOpenModalStudent = () => {
+        const data = new StudentInfo({})
+        Object.assign(data, {
+            "status_res": 1,
+            "referrer": "",
+            "advisor_id": "",
+            "parent_phone": "",
+            "email": "nttd27062004@gmail.com",
+            "note": "lên Gold A",
+            "register_date": moment('03/08/2023', 'DD/MM/YYYY').valueOf(),
+            "address": "Nhà bè",
+            // "dob": moment('03/08/2023', 'DD/MM/YYYY').valueOf(),
+            "class_id": [],
+            "advisor": "",
+            "id": "",
+            "phone": "0933702155",
+            "has_score": false,
+            "referrer_id": ""
+        }) 
+        data.updateInfo('full_name', 'Tăng Quán Gia	Hân')
+        const temp = ['listening',
+            'speaking',
+            'reading',
+            'writing',
+            'grammar'];
+        [4.5, 5.0, 5.0, 4.5].forEach((score, index) => {
+            data.updateScore({ key: temp[index], score: score, classId: 'test', type: '' })
+        })
+        handleStudentCallback(true, {...data}, false)
+        // setSelectedStudent({})
+        // setOpenModal(true)
+    }
+
     return (
         <>
             <Card className="h-full w-full">
@@ -353,7 +386,7 @@ export default function StudentTable() {
                                 className="flex items-center gap-3" size="sm" onClick={handleConfirm}>
                                 <ArrowUpTrayIcon strokeWidth={2} className="h-4 w-4" /> Confirm & Request
                             </Button> */}
-                            <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenModal(true)}>
+                            <Button className="flex items-center gap-3" size="sm" onClick={handleOpenModalStudent}>
                                 <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add student
                             </Button>
                             {/* <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenPayment(true)}>

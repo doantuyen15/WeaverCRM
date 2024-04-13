@@ -51,7 +51,7 @@ export default class StudentInfo {
                 writing: '',
                 total: '',
                 grammar: '',
-                update_time: moment().format('DDMMYYYYHHmmss'),
+                update_time: classId === 'test' ? this.register_date : moment().format('DDMMYYYYHHmmss'),
                 term: type
             }
             this.score_table.push(scoreUpdate)
