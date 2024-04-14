@@ -87,6 +87,7 @@ export function Approval() {
         setLoading(true)
         useFirebase('get_approval_list')
             .then(data => {
+                console.log('data', data);
                 setLoading(false)
                 setList(groupData(data))
                 tableRef.current = data

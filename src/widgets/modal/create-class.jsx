@@ -14,7 +14,7 @@ import {
 } from "@material-tailwind/react";
 import { useController } from "../../context";
 import formatNum from "../../utils/formatNumber/formatNum";
-import { PlusIcon } from "@heroicons/react/24/solid";
+import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { MinusCircleIcon } from "@heroicons/react/24/outline";
 import useStorage from "../../utils/localStorageHook";
 import { useFetch, useFirebase } from "../../utils/api/request";
@@ -71,8 +71,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
     const [studentList, setStudentList] = useState([])
     const [staffList, setStaffList] = useState([])
     const [courseList, setCourseList] = useState([])
-    // const [courseList, setCourseList] = useState([])
-    // const [levelList, setLevelList] = useState([])
+    const tableRef = useRef([])
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
     
@@ -108,7 +107,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
         useFirebase('get_student')
             .then(data => {
                 setLoading(false)
-                // tableRef.current = data
+                tableRef.current = data
                 setStudentList(data)
                 useStorage('set', 'studentInfo', data)
             })
@@ -121,7 +120,6 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
         useFirebase('get_staff_list')
             .then(data => {
                 setLoading(false)
-                // tableRef.current = data
                 setStaffList(data)
                 console.log('getStaffList', data);
                 // useStorage('set', 'staffList', data)
@@ -208,9 +206,19 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
         } catch (error) {
             console.log(error);
         }
-
     }
 
+    const handleSearch = (searchValue) => {
+        try {
+            var search = tableRef.current?.filter(item => 
+                item.full_name.toLowerCase().includes(searchValue.toLowerCase()) ||
+                item.id?.includes(searchValue)
+            );
+            setStudentList(search)
+        } catch (error) {
+            console.log('error', error);
+        }
+    }
     // const updateClassList = ({ key, index, value, mode = 'add' }) => {
     //     if (mode === 'delete') {
     //         setClassList(classList.filter((item, i) => i !== index))
@@ -275,6 +283,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                                 </Option>
                                             ))}
                                         </Select>
+                                        {(info.program && courseList[info.program] ) ? 
                                         <Select
                                             // disabled={!info.program}
                                             label="Class level"
@@ -285,9 +294,9 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                                 </Typography>
                                             }
                                         >
-                                            {info.program && Object.values(courseList[info.program])?.map(item => (
+                                            {Object.values(courseList[info.program])?.map(item => (
                                                 <Option onClick={() => {
-                                                    updateClassList(index, 'level', item.level_id)
+                                                    updateClassList(index, 'level', item.level_id?.replace(' ', ''))
                                                     if (info.start_date != '')
                                                         updateClassList(index, 'end_date',
                                                             moment(info.start_date)
@@ -297,7 +306,33 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                                     {item.level_id}
                                                 </Option>
                                             ))}
-                                        </Select>
+                                        </Select> : null}
+                                        {info.program === 'EXTRA' && <Select
+                                            key="Select Student"
+                                            label="Select Student"
+                                            selected={() => info.student_id &&
+                                                <Typography variant="small" className="flex truncate items-center opacity-100 px-0 gap-2 pointer-events-none">
+                                                    {info.student_id + ' - ' + info.student}
+                                                </Typography>
+                                            }
+                                        >
+                                            <div>
+                                                <Input
+                                                    autoFocus
+                                                    label="Search"
+                                                    icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                                                    onChange={(e) => handleSearch(e.target.value)}
+                                                />
+                                            </div>
+                                            {(studentList || []).map(item => (
+                                                <Option onClick={() => {
+                                                    updateClassList(index, 'student', item.full_name)
+                                                    updateClassList(index, 'student_id', item.id)
+                                                }} key={item.id} value={item.full_name} className="flex items-center gap-2">
+                                                    {item.id + ' - ' + item.full_name}
+                                                </Option>
+                                            ))}
+                                        </Select>}
                                         <Select
                                             label="CS"
                                             value={info.cs_staff ? info.cs_staff : undefined}
@@ -338,7 +373,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                                     Clear
                                                 </Option>
                                             }
-                                            {(staffList || [])?.filter(staff => [1, 3, 4].includes(staff.roles_id))?.map(item => (
+                                            {(staffList || [])?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id))?.map(item => (
                                                 <Option
                                                     onClick={() => {
                                                         updateClassList(index, 'teacher', item.full_name)
@@ -362,7 +397,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                                     Clear
                                                 </Option>
                                             }
-                                            {(staffList || [])?.filter(staff => staff.roles_id === 3)?.map(item => (
+                                            {(staffList || [])?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id))?.map(item => (
                                                 <Option
                                                     onClick={() => {
                                                         updateClassList(index, 'sub_teacher', item.full_name)
@@ -425,49 +460,32 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             value={!info.start_date ? '' : formatDate(info.end_date, 'YYYY-MM-DD')}
                                             onChange={(e) => updateClassList(index, 'end_date', formatDate(e.target.value, 'moment'))}
                                         />
-                                        <Select
-                                            label="Class Schedule"
-                                            value={info.class_schedule}
-                                            selected={(element) =>
-                                                element &&
-                                                React.cloneElement(element, {
-                                                    disabled: true,
-                                                    className:
-                                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                                })
-                                            }
-                                        >
-                                            {classSchedule.map((item, i) => (
-                                                <Option onClick={() => {
-                                                    console.log('item, index', item, i);
-                                                    updateClassList(index, 'class_schedule', item)
-                                                    updateClassList(index, 'class_schedule_id', i)
-                                                }} key={index} value={item} className="flex items-center gap-2">
-                                                    {item}
-                                                </Option>
-                                            ))}
-                                        </Select>
+                                        {info.program && info.program !== 'EXTRA' && (
+                                            <Select
+                                                label="Class Schedule"
+                                                value={info.class_schedule}
+                                                selected={(element) =>
+                                                    element &&
+                                                    React.cloneElement(element, {
+                                                        disabled: true,
+                                                        className:
+                                                            "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                                    })
+                                                }
+                                            >
+                                                {classSchedule.map((item, i) => (
+                                                    <Option onClick={() => {
+                                                        console.log('item, index', item, i);
+                                                        updateClassList(index, 'class_schedule', item)
+                                                        updateClassList(index, 'class_schedule_id', i)
+                                                    }} key={index} value={item} className="flex items-center gap-2">
+                                                        {item}
+                                                    </Option>
+                                                ))}
+                                            </Select>
+                                        )}
                                     </div>
-                                    {/* <Select
-                                        label="Select Student"
-                                        selected={(element) =>
-                                            element &&
-                                            React.cloneElement(element, {
-                                                disabled: true,
-                                                className:
-                                                    "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
-                                            })
-                                        }
-                                    >
-                                        {(studentList || []).map(item => (
-                                            <Option onClick={() => updateClassList({ key: 'student', value: item, index: index })} key={item.id_student} value={item.id + ' - ' + item.class_name} className="flex items-center gap-2">
-                                                {item.id + ' - ' + item.full_name}
-                                            </Option>
-                                        ))}
-                                    </Select> */}
-
                                 </div>
-
                             </div>
                             // <MinusCircleIcon
                             //     style={{ visibility: index == 0 ? 'hidden' : 'visible' }}

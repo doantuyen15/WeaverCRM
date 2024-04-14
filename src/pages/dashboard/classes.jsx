@@ -51,15 +51,31 @@ export function Class() {
     const [classList, setClassList] = useState([])
     const [openList, setOpenList] = useState([])
     const [dataClassIndex, setDataClassIndex] = useState(false)
+    const [courseList, setCourseList] = useState([])
 
     useEffect(() => {
         getClassList()
+        getAllCourse()
         // if (!glb_sv.classList) getClassList()
         // else {
         //     tableRef.current = glb_sv.classList
         //     setClassList(glb_sv.classList)
         // }
     }, [])
+
+    const getAllCourse = () => {
+        useFirebase('get_all_course', {getId: true})
+            .then(data => {
+                console.log('getAllCourse', data);
+                // data.forEach(item => {
+                //     courseTuition.current[item.id] = item.data()
+                // })
+                console.log('data', data.map(item => item.id));
+                setCourseList(data.map(item => item.id))
+            })
+            .catch(err => console.log(err))
+            // .finally(() => setLoading(false))
+    }
 
     const getClassList = () => {
         setLoading(true)
@@ -157,7 +173,7 @@ export function Class() {
                         </Button>
                     </div>
                     <List>
-                        {glb_sv.programs.map((item, index) => (
+                        {courseList?.map((item, index) => (
                             <ListItem ripple={false} className="hover:bg-transparent focus:bg-transparent active:bg-transparent">
                                 <Accordion
                                     open={openList.includes(index)}

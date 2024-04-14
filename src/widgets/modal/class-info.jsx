@@ -359,10 +359,20 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
     const forceUpdate = React.useCallback(() => updateState({}), []);
     const [classData, setClassData] = useState(data)
     const [editMode, setEditMode] = useState(false)
+    const [staffList, setStaffList] = useState([])
 
     useEffect(() => {
       if (!open) setEditMode(false)
     }, [open])
+
+    const getStaffList = () => {
+        useFirebase('get_staff_list')
+            .then(data => {
+                console.log('get_staff_list', data);
+                setStaffList(data?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id)))
+            })
+            .catch(err => console.log(err))
+    }
     
     const updateDiary = (index, key, value) => {
         classData.updateDiary(index, key, value)
@@ -532,42 +542,25 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                                                 )}
                                             </td>
                                             <td className={classes + ' w-[10rem]'} style={style}>
+                                                {console.log('staffList', staffList)}
                                                 {editMode ? (
+                                                    staffList.length > 0 &&
                                                     <Select
                                                         variant="standard"
                                                         value={diary.teacher ? diary.teacher : undefined}
                                                     >
-                                                        {classData.teacher ?
+                                                        {staffList.map(item => (
                                                             <Option
-                                                                onClick={() => { 
-                                                                    updateDiary(index, 'teacher', classData.teacher)
-                                                                    updateDiary(index, 'teacher_id', classData.teacher_id)
+                                                                value={item.full_name}
+                                                                onClick={() => {
+                                                                    updateDiary(index, 'teacher', item.full_name)
+                                                                    updateDiary(index, 'teacher_id', item.id)
                                                                     forceUpdate()
-                                                                }} 
+                                                                }}
                                                                 className="flex items-center gap-2">
-                                                                {classData.teacher}
+                                                                {item.full_name}
                                                             </Option>
-                                                            : <></>}
-                                                        {classData.sub_teacher ?
-                                                            <Option
-                                                                onClick={() => { 
-                                                                    updateDiary(index, 'teacher', classData.sub_teacher) 
-                                                                    updateDiary(index, 'teacher_id', classData.sub_teacher_id)
-                                                                    forceUpdate()
-                                                                }} className="flex items-center gap-2">
-                                                                {classData.sub_teacher}
-                                                            </Option>
-                                                            : <></>}
-                                                        {classData.ta_teacher ?
-                                                            <Option
-                                                                onClick={() => { 
-                                                                    updateDiary(index, 'teacher', classData.ta_teacher) 
-                                                                    updateDiary(index, 'teacher_id', classData.ta_teacher_id)
-                                                                    forceUpdate()
-                                                                }} className="flex items-center gap-2">
-                                                                {classData.ta_teacher}
-                                                            </Option>
-                                                            : <></>}
+                                                        ))}
                                                     </Select>
                                                 ) : (
                                                     <Typography
@@ -655,7 +648,7 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                                                 </Typography>
                                             </td>
                                             <td className={editMode ? 'cursor-pointer ' : ' ' + classes} style={style} onClick={() => {
-                                                if (userInfo.roles === '1' && editMode) {
+                                                if (['1', '7'].includes(userInfo.roles) && editMode) {
                                                     updateDiary(index, 'checked', !diary.checked)
                                                     forceUpdate()
                                                 }
@@ -674,7 +667,7 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                                                     variant="small"
                                                     color="blue-gray"
                                                     className="font-normal"
-                                                    contentEditable={userInfo.roles === '1' && editMode}
+                                                    contentEditable={['1', '7'].includes(userInfo.roles) && editMode}
                                                     onBlur={() => forceUpdate()}
                                                     onInput={(e) => {
                                                         updateDiary(index, 'admin_note', e.currentTarget.innerText)
@@ -721,7 +714,10 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                                 </>
                             ) : (
                                 <Button variant="gradient" color="deep-orange" size="sm"
-                                    onClick={() => setEditMode(prev => !prev)}
+                                    onClick={() => {
+                                        getStaffList()
+                                        setEditMode(prev => !prev)
+                                    }}
                                 >
                                     Edit
                                 </Button>

@@ -333,37 +333,15 @@ export default function StudentTable() {
     }
 
     const handleOpenModalStudent = async () => {
-        const studentList = await importExcel()
-        console.log('studentList', studentList);
-        studentList.forEach(info => {
-            setTimeout(() => {
-                handleStudentCallback(true, info, false)
-            }, 100);
-        })
-        // const data = new StudentInfo({})
-        // data.updateInfo('full_name', 'Huỳnh Minh Hiếu')
-        // Object.assign(data, {
-        //     "status_res": 1,
-        //     "phone": "0906619617",
-        //     "dob": moment('17/10/2000', 'DD/MM/YYYY').valueOf(),
-        //     "parent_phone": "0358576908",
-        //     "address": "Quận 10",
-        //     "email": "minhhieu17609@gmail.com",
-        //     "referrer": "Bạn Việt",
-        //     "note": "Toiec 660 (10/2022) - ko học",
-        //     // "register_date": moment('03/08/2023', 'DD/MM/YYYY').valueOf(),
-        // }) 
-        // const temp = ['listening',
-        //     'speaking',
-        //     'reading',
-        //     'writing',
-        //     'grammar'];
-        // [4.0,	3.5,	5.5,	3.5,	3.5].forEach((score, index) => {
-        //     data.updateScore({ key: temp[index], score: score, classId: 'test', type: '' })
+        // const studentList = await importExcel()
+        // console.log('studentList', studentList);
+        // studentList.forEach(info => {
+        //     setTimeout(() => {
+        //         handleStudentCallback(true, info, false)
+        //     }, 100);
         // })
-        // handleStudentCallback(true, {...data}, false)
-        // setSelectedStudent({})
-        // setOpenModal(true)
+        setSelectedStudent({})
+        setOpenModal(true)
     }
 
     return (

@@ -2,6 +2,7 @@ import { getDoc, getDocs } from "firebase/firestore"
 import moment from "moment"
 import StudentInfo from "./studentInfo"
 import formatDate from "../../utils/formatNumber/formatDate"
+import { deburr } from 'lodash'
 
 export default class ClassInfo {
     constructor(data) {
@@ -64,6 +65,8 @@ export default class ClassInfo {
             },
             attendance: {}
         }]
+        this.student = data?.student || ''
+        this.student_id = data?.student_id || ''
     }
 
     getStudentList() {
@@ -114,7 +117,9 @@ export default class ClassInfo {
     updateInfo(key, value) {
         if (this[key] !== undefined) {
             this[key] = value
-            if (key === 'program' || key === 'level' || key === 'start_date') 
+            if (this.program === 'EXTRA') {
+                this.id = this.program?.toUpperCase() + '_' + this.level?.toUpperCase() + '_' + this.student?.normalize('NFD').replace(/[\u0300-\u036f\s]/g, '')?.toUpperCase() + '_' + formatDate(this.start_date, 'DDMMYY')
+            } else if (key === 'program' || key === 'level' || key === 'start_date') 
                 this.id = this.program?.toUpperCase() + '_' + this.level?.toUpperCase() + '_' + formatDate(this.start_date, 'DDMMYY')
         }
     }

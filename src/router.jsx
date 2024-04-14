@@ -55,14 +55,14 @@ export const routes = [
 		pages: [
 			{
 				icon: <HomeIcon {...menu} />,
-				name: "dashboard",
+				name: "Home",
 				path: "/home",
 				element: <Home />,
 				roles: "All"
 			},
 			{
 				icon: <DocumentCheckIcon {...menu} />,
-				name: "approval",
+				name: "Duyệt",
 				path: "/approval",
 				element: <Approval />,
 				roles: ["1"]
@@ -104,7 +104,7 @@ export const routes = [
 			// },
 			{
 				icon: <UserGroupIcon {...menu} />,
-				name: "Student list",
+				name: "Danh sách học viên",
 				path: "/student",
 				element: <StudentTable />,
 				roles: ["1", "4", "6"]
@@ -118,28 +118,28 @@ export const routes = [
 			},
 			{
 				icon: <BanknotesIcon {...menu} />,
-				name: "tuition",
+				name: "Học phí",
 				path: "/tuition",
 				element: <Tuition />,
 				roles: ["1"]
 			},
 			{
 				icon: <TableCellsIcon {...menu} />,
-				name: "class",
+				name: "Danh sách Lớp",
 				path: "/class",
 				element: <Class />,
 				roles: ["1", "4", "6"]
 			},
 			{
 				icon: <SwatchIcon {...menu} />,
-				name: "programs",
+				name: "Khoá học",
 				path: "/programs",
 				element: <Programs />,
 				roles: ["1", "4"]
 			},
 			{
 				icon: <AttachMoneyIcon {...menu} />,
-				name: "Finance",
+				name: "Tài chính",
 				path: "/finance",
 				element: <Finance />,
 				roles: ["1"]

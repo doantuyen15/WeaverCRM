@@ -46,7 +46,8 @@ class globalService {
             'Giáo Vụ',
             'Giáo viên',
             'Trợ giảng',
-            'Nhân viên'
+            'Nhân viên',
+            'Điều hành'
         ]
         this.department = [
             "All",

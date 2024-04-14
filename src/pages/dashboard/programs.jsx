@@ -57,6 +57,7 @@ export function Programs() {
     const [objectEdit, setObjectEdit] = useState({})
     const [openList, setOpenList] = useState([])
 
+
     useEffect(() => {
         getClassList()
         // if (!glb_sv.classList) getClassList()
@@ -187,7 +188,7 @@ export function Programs() {
                                     <AccordionHeader
                                         // onClick={() => handleOpenTable(item, index)}
                                     >
-                                        <div co className="flex justify-between items-center w-full">
+                                        <div className="flex justify-between items-center w-full">
                                             <Typography variant="h6" color="blue-gray">
                                                 {item.id}
                                             </Typography>
