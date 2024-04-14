@@ -49,6 +49,7 @@ import InputMask from 'react-input-mask';
 import DefaultSkeleton from './../../widgets/skeleton/index'
 import { glb_sv } from "../../service";
 import { ModalStudent } from "../../widgets/modal/modal-student";
+import importExcel from "../../utils/importExcel";
 
 const TABLE_HEAD = [
     "Tình trạng đăng ký",
@@ -331,35 +332,36 @@ export default function StudentTable() {
             })
     }
 
-    const handleOpenModalStudent = () => {
-        const data = new StudentInfo({})
-        Object.assign(data, {
-            "status_res": 1,
-            "referrer": "",
-            "advisor_id": "",
-            "parent_phone": "",
-            "email": "nttd27062004@gmail.com",
-            "note": "lên Gold A",
-            "register_date": moment('03/08/2023', 'DD/MM/YYYY').valueOf(),
-            "address": "Nhà bè",
-            // "dob": moment('03/08/2023', 'DD/MM/YYYY').valueOf(),
-            "class_id": [],
-            "advisor": "",
-            "id": "",
-            "phone": "0933702155",
-            "has_score": false,
-            "referrer_id": ""
-        }) 
-        data.updateInfo('full_name', 'Tăng Quán Gia	Hân')
-        const temp = ['listening',
-            'speaking',
-            'reading',
-            'writing',
-            'grammar'];
-        [4.5, 5.0, 5.0, 4.5].forEach((score, index) => {
-            data.updateScore({ key: temp[index], score: score, classId: 'test', type: '' })
+    const handleOpenModalStudent = async () => {
+        const studentList = await importExcel()
+        console.log('studentList', studentList);
+        studentList.forEach(info => {
+            setTimeout(() => {
+                handleStudentCallback(true, info, false)
+            }, 100);
         })
-        handleStudentCallback(true, {...data}, false)
+        // const data = new StudentInfo({})
+        // data.updateInfo('full_name', 'Huỳnh Minh Hiếu')
+        // Object.assign(data, {
+        //     "status_res": 1,
+        //     "phone": "0906619617",
+        //     "dob": moment('17/10/2000', 'DD/MM/YYYY').valueOf(),
+        //     "parent_phone": "0358576908",
+        //     "address": "Quận 10",
+        //     "email": "minhhieu17609@gmail.com",
+        //     "referrer": "Bạn Việt",
+        //     "note": "Toiec 660 (10/2022) - ko học",
+        //     // "register_date": moment('03/08/2023', 'DD/MM/YYYY').valueOf(),
+        // }) 
+        // const temp = ['listening',
+        //     'speaking',
+        //     'reading',
+        //     'writing',
+        //     'grammar'];
+        // [4.0,	3.5,	5.5,	3.5,	3.5].forEach((score, index) => {
+        //     data.updateScore({ key: temp[index], score: score, classId: 'test', type: '' })
+        // })
+        // handleStudentCallback(true, {...data}, false)
         // setSelectedStudent({})
         // setOpenModal(true)
     }

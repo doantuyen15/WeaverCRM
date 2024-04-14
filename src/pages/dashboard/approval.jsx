@@ -88,13 +88,8 @@ export function Approval() {
         useFirebase('get_approval_list')
             .then(data => {
                 setLoading(false)
-                const groupedData = data.reduce((acc, item) => {
-                    acc[Object.keys(item)[0]] = acc[Object.keys(item)[0]] || [];
-                    acc[Object.keys(item)[0]].push({...Object.values(item)[0], type: Object.keys(item)[0]});
-                    return acc;
-                }, {});
-                setList(groupedData)
-                console.log('get_approval_list', groupedData)
+                setList(groupData(data))
+                tableRef.current = data
             })
             .catch(err => console.log(err))
     }
@@ -108,6 +103,14 @@ export function Approval() {
         setList([...sorted])
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
+    }
+
+    const groupData = (data) => {
+        return data.reduce((acc, item) => {
+            acc[Object.keys(item)[0]] = acc[Object.keys(item)[0]] || [];
+            acc[Object.keys(item)[0]].push({...Object.values(item)[0], type: Object.keys(item)[0]});
+            return acc;
+        }, {});
     }
 
     const handleApprove = (ok, item) => {
@@ -193,7 +196,7 @@ export function Approval() {
                                     {header.map(
                                         (head, index) => (
                                             <th
-                                                onClick={() => handleSort(index)}
+                                                // onClick={() => handleSort(index)}
                                                 key={head}
                                                 className="z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors hover:bg-blue-gray-200"
                                             >

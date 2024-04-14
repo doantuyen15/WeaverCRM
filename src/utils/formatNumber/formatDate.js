@@ -11,6 +11,7 @@ const formatDate = (dateInput = '', type = 'DD/MM/YYYY') => {
     else if (moment(dateInput, 'YYYY-MM-DD').isValid()) outputDate = moment(dateInput, 'YYYY-MM-DD');
     else if (moment(dateInput, 'DDMMYYYY').isValid()) outputDate = moment(dateInput, 'DDMMYYYY');
     else if (moment(dateInput, 'YYYYMMDD').isValid()) outputDate = moment(dateInput, 'YYYYMMDD');
+    else return dateInput
 
     if (type === 'moment') {
         outputDate = outputDate.valueOf()
