@@ -31,19 +31,6 @@ export default class ClassInfo {
         this.tuition = data?.tuition || {}
         this.end_date_stamp = data?.end_date_stamp || ''
         // this.attendance = data?.attendance || [],
-        // this.lesson_diary = data?.lesson_diary || [{
-        //         lesson_id: 1,
-        //         day: '',
-        //         teacher: '',
-        //         unit: '',
-        //         unit_lesson: '',
-        //         content: '',
-        //         homeword: '',
-        //         performance: '',
-        //         checked: false,
-        //         class_code: '',
-        //         textbooks: '',
-        //     }]
         this.lesson_diary_note = '* Teachers are required to complete Lesson Diary within 24hrs after each lesson has finished.'
         this.timetable = data?.timetable || [{
             session: 1,
@@ -63,9 +50,9 @@ export default class ClassInfo {
             //     checked: false,
             //     admin_note: ''
             // },
-            lesson_diary: [{ name: 'Sheet1', celldata: [{ r: 0, c: 0, v: null }] }],
             attendance: {}
         }]
+        this.lesson_diary = data?.lesson_diary || [{ name: 'Sheet1', column: 10, celldata: [{ r: 0, c: 0, v: null }] }]
         this.student = data?.student || ''
         this.student_id = data?.student_id || ''
     }
@@ -134,7 +121,7 @@ export default class ClassInfo {
     // }
 
     updateDairy(data) {
-        this.timetable.lesson_diary = data
+        this.lesson_diary = data
     }
 
     addDiary() {
@@ -144,18 +131,18 @@ export default class ClassInfo {
             status: 0, //0 active, 1 nghỉ, 2 lý do khác
             reason: '',
             day: formatDate(moment()),
-            lesson_diary: {
-                lesson_id: this.timetable.length + 1,
-                day: formatDate(moment()),
-                teacher: '',
-                unit: '',
-                unit_lesson: '',
-                content: '',
-                homework: '',
-                performance: '',
-                checked: false,
-                admin_note: ''
-            },
+            // lesson_diary: {
+            //     lesson_id: this.timetable.length + 1,
+            //     day: formatDate(moment()),
+            //     teacher: '',
+            //     unit: '',
+            //     unit_lesson: '',
+            //     content: '',
+            //     homework: '',
+            //     performance: '',
+            //     checked: false,
+            //     admin_note: ''
+            // },
             attendance: {}
         })
     }

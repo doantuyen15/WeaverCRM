@@ -31,6 +31,7 @@ import { AddStudentToClass } from "./add-student-class";
 import formatDate from "../../utils/formatNumber/formatDate";
 import { loadExcelTemplate } from "../../utils/luckySheet";
 import { Workbook } from "@fortune-sheet/react";
+import lessonDairyTest from '../../data/sample/lesson_dairy'
 
 const HEADER_STUDENT = [
     // "Tình trạng đăng ký",
@@ -362,25 +363,32 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
     const [classData, setClassData] = useState(data)
     const [editMode, setEditMode] = useState(false)
     const [staffList, setStaffList] = useState([])
-    const [dataSheet, setDataSheet] = useState([{ name: 'Sheet1', celldata: [{ r: 0, c: 0, v: null }] }])
+    // const [dataSheet, setDataSheet] = useState(data.lesson_diary || [{ name: 'Sheet1', celldata: [{ r: 0, c: 0, v: null }] }])
+    const [dataSheet, setDataSheet] = useState(lessonDairyTest)
 
     useEffect(() => {
         if (!open) setEditMode(false)
+        console.log('data', lessonDairyTest); 
+
     }, [open])
     
     const settings = {
-        data: data.lesson_diary, // sheet data
-        onChange: (data) => { 
-            console.log('data', data); 
-            data.updateDairy(data)
-        }, // onChange event
+        // data: lessonDairyTest, // sheet data
+        // onOp: (dataSheet) => { 
+        //     console.log('data', dataSheet);
+        //     // data.updateDairy(dataSheet)
+        // },
+        onChange: (dataChange) => {
+            setDataSheet(lessonDairyTest)
+            console.log('onChange', dataSheet);
+        },
         lang: 'en' // set language
         // More other settings...
     }
 
     // const loadDataSheet = () => {
     //     loadExcelTemplate().then((res) => {
-    //         // console.log('loadExcelTemplate', res);
+    //         console.log('loadExcelTemplate', res);
     //         setDataSheet(res)
     //     })
     // }
@@ -494,8 +502,8 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                     </div>
                 </CardHeader>
                 <CardBody className="flex flex-col p-0 px-0 overflow-auto max-h-[70vh]">
-                <div className="h-[40vh] w-full">
-                    <Workbook {...settings} />
+                <div className="h-[70vh] w-full">
+                    {dataSheet && <Workbook {...settings} data={lessonDairyTest} />}
                 </div>
                     {/* <LuckySheet /> */}
                     {/* <table className="w-full min-w-max border-separate border-spacing-0 text-left">
@@ -719,19 +727,22 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                         <div className="flex item-center justify-end gap-2">
                             {editMode ? (
                                 <>
-                                    <Button variant="text" size="sm"
+                                    <Button variant="gradient" size="sm"
                                         onClick={() => setEditMode(false)}
                                     >
                                         Cancel
                                     </Button>
-                                    <Button variant="gradient" size="sm"
+                                    {/* <Button variant="gradient" size="sm"
                                         onClick={() => addRowDiary()}
                                     >
                                         Add Row
-                                    </Button>
+                                    </Button> */}
                                     <Button variant="gradient" color="deep-orange" size="sm"
                                         loading={loading}
-                                        onClick={() => handleCallback(true, classData)}
+                                        onClick={() => {
+                                            console.log('dataSheet', dataSheet);
+                                            // handleCallback(true, classData)
+                                        }}
                                     >
                                         Save
                                     </Button>
