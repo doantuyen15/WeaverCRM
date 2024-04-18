@@ -43,7 +43,6 @@ export function Dashboard() {
         >
           <Cog6ToothIcon className="h-5 w-5" />
         </IconButton>
-        {console.log('routes', routes, typeof userInfo.roles)}
         <Routes>
           {routes.map(
             ({ layout, pages }) =>

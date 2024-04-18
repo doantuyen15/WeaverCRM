@@ -240,6 +240,13 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
     //     paymentListRef.current = [...classList]
     // }
 
+    const validate = () => {
+        classList?.forEach(item => {
+            if (item.program === 'EXTRA' && (!item.program || !item.level || !item.start_date || !item.end_date)) return true
+            else if (!item.program || !item.level || !item.start_date || !item.end_date || !item.class_schedule) return true
+        })
+    }
+
     return (
         <>
             <Dialog
@@ -310,6 +317,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                         {info.program === 'EXTRA' && <Select
                                             key="Select Student"
                                             label="Select Student"
+                                            value={info?.student || undefined}
                                             selected={() => info.student_id &&
                                                 <Typography variant="small" className="flex truncate items-center opacity-100 px-0 gap-2 pointer-events-none">
                                                     {info.student_id + ' - ' + info.student}
@@ -509,7 +517,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                     Close
                                 </Button>
                                 <Button
-                                    disabled={classList?.findIndex(item => !item.program || !item.level || !item.start_date || !item.end_date || !item.class_schedule) > -1}
+                                    disabled={validate()}
                                     loading={loading}
                                     variant="gradient"
                                     onClick={() => isUpdate ? handleUpdateClass('update', classList[0]) : handleCallback(true, classList)}

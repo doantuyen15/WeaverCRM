@@ -29,6 +29,8 @@ import { useFirebase } from "../../utils/api/request";
 import { toast } from "react-toastify";
 import { AddStudentToClass } from "./add-student-class";
 import formatDate from "../../utils/formatNumber/formatDate";
+import { loadExcelTemplate } from "../../utils/luckySheet";
+import { Workbook } from "@fortune-sheet/react";
 
 const HEADER_STUDENT = [
     // "Tình trạng đăng ký",
@@ -360,10 +362,28 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
     const [classData, setClassData] = useState(data)
     const [editMode, setEditMode] = useState(false)
     const [staffList, setStaffList] = useState([])
+    const [dataSheet, setDataSheet] = useState([{ name: 'Sheet1', celldata: [{ r: 0, c: 0, v: null }] }])
 
     useEffect(() => {
-      if (!open) setEditMode(false)
+        if (!open) setEditMode(false)
     }, [open])
+    
+    const settings = {
+        data: data.lesson_diary, // sheet data
+        onChange: (data) => { 
+            console.log('data', data); 
+            data.updateDairy(data)
+        }, // onChange event
+        lang: 'en' // set language
+        // More other settings...
+    }
+
+    // const loadDataSheet = () => {
+    //     loadExcelTemplate().then((res) => {
+    //         // console.log('loadExcelTemplate', res);
+    //         setDataSheet(res)
+    //     })
+    // }
 
     const getStaffList = () => {
         useFirebase('get_staff_list')
@@ -474,7 +494,11 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                     </div>
                 </CardHeader>
                 <CardBody className="flex flex-col p-0 px-0 overflow-auto max-h-[70vh]">
-                    <table className="w-full min-w-max border-separate border-spacing-0 text-left">
+                <div className="h-[40vh] w-full">
+                    <Workbook {...settings} />
+                </div>
+                    {/* <LuckySheet /> */}
+                    {/* <table className="w-full min-w-max border-separate border-spacing-0 text-left">
                         <thead className="">
                             <tr>
                                 {HEADER_DIARY.map((head, index) => (
@@ -681,7 +705,7 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                                 }
                             )}
                         </tbody>
-                    </table>
+                    </table> */}
                 </CardBody>
                 <CardFooter className="pt-4 flex justify-between items-center">
                     <Typography
@@ -764,6 +788,7 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                     </div> */}
                 </CardFooter>
             </Card>
+
         </Dialog>
     )
 }

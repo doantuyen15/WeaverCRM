@@ -50,19 +50,20 @@ export default class ClassInfo {
             status: 0, //0 active, 1 nghỉ, 2 lý do khác
             reason: '',
             day: '',
-            lesson_diary: {
-                lesson_id: 1,
-                day: '',
-                teacher: '',
-                teacher_id: '',
-                unit: '',
-                unit_lesson: '',
-                content: '',
-                homework: '',
-                performance: '',
-                checked: false,
-                admin_note: ''
-            },
+            // lesson_diary: {
+            //     lesson_id: 1,
+            //     day: '',
+            //     teacher: '',
+            //     teacher_id: '',
+            //     unit: '',
+            //     unit_lesson: '',
+            //     content: '',
+            //     homework: '',
+            //     performance: '',
+            //     checked: false,
+            //     admin_note: ''
+            // },
+            lesson_diary: [{ name: 'Sheet1', celldata: [{ r: 0, c: 0, v: null }] }],
             attendance: {}
         }]
         this.student = data?.student || ''
@@ -124,12 +125,16 @@ export default class ClassInfo {
         }
     }
 
-    updateDiary(index, key, value) {
-        if (key === 'class_code' || key === 'textbooks') {
-            this.timetable[key] = value
-        } else {
-            this.timetable[index].lesson_diary[key] = value
-        }
+    // updateDiary(index, key, value) {
+    //     if (key === 'class_code' || key === 'textbooks') {
+    //         this.timetable[key] = value
+    //     } else {
+    //         this.timetable[index].lesson_diary[key] = value
+    //     }
+    // }
+
+    updateDairy(data) {
+        this.timetable.lesson_diary = data
     }
 
     addDiary() {
