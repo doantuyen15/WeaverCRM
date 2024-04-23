@@ -365,11 +365,11 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
     const [staffList, setStaffList] = useState([])
     // const [dataSheet, setDataSheet] = useState(data.lesson_diary || [{ name: 'Sheet1', celldata: [{ r: 0, c: 0, v: null }] }])
     const [dataSheet, setDataSheet] = useState(lessonDairyTest)
+    const dataUpdate = useRef([])
 
     useEffect(() => {
         if (!open) setEditMode(false)
-        console.log('data', lessonDairyTest); 
-
+        getDataSheet()
     }, [open])
     
     const settings = {
@@ -379,12 +379,31 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
         //     // data.updateDairy(dataSheet)
         // },
         onChange: (dataChange) => {
-            setDataSheet(lessonDairyTest)
-            console.log('onChange', dataSheet);
+            // setDataSheet(lessonDairyTest)
+            console.log('onChange', dataChange);
+            dataUpdate.current = dataChange
         },
         lang: 'en' // set language
-        // More other settings...
     }
+
+    const getDataSheet = () => {
+        console.log('lessonDairyTest', lessonDairyTest);
+
+        lessonDairyTest.forEach((sheet, sheetIndex) => {
+            sheet.data?.forEach((row, rowIndex) => {
+                row.forEach((cell, columnIndex) => {
+                    lessonDairyTest[sheetIndex]?.celldata.push({
+                        r: rowIndex,
+                        c: columnIndex,
+                        v: cell,
+                    });
+                });
+            })
+        });
+        setDataSheet([...dataSheet])
+    }
+    console.log('dataSheet', dataSheet);
+
 
     // const loadDataSheet = () => {
     //     loadExcelTemplate().then((res) => {
