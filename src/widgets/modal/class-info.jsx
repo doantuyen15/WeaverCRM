@@ -365,11 +365,11 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
     const [staffList, setStaffList] = useState([])
     // const [dataSheet, setDataSheet] = useState(data.lesson_diary || [{ name: 'Sheet1', celldata: [{ r: 0, c: 0, v: null }] }])
     const [dataSheet, setDataSheet] = useState(lessonDairyTest)
-    const dataUpdate = useRef([])
+    const dataUpdate = useRef(lessonDairyTest)
 
     useEffect(() => {
         if (!open) setEditMode(false)
-        getDataSheet()
+        convertDataSheet()
     }, [open])
     
     const settings = {
@@ -386,13 +386,16 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
         lang: 'en' // set language
     }
 
-    const getDataSheet = () => {
+    const convertDataSheet = () => {
         console.log('lessonDairyTest', lessonDairyTest);
 
         lessonDairyTest.forEach((sheet, sheetIndex) => {
+            if (!dataUpdate.current[sheetIndex]?.celldata) {
+                dataUpdate.current[sheetIndex].celldata = []
+            }
             sheet.data?.forEach((row, rowIndex) => {
                 row.forEach((cell, columnIndex) => {
-                    lessonDairyTest[sheetIndex]?.celldata.push({
+                    dataUpdate.current[sheetIndex]?.celldata.push({
                         r: rowIndex,
                         c: columnIndex,
                         v: cell,
@@ -400,10 +403,11 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                 });
             })
         });
-        setDataSheet([...dataSheet])
-    }
-    console.log('dataSheet', dataSheet);
+        console.log('dataUpdate.current', dataUpdate.current);
 
+        setDataSheet([...dataUpdate.current])
+        return dataUpdate.current
+    }
 
     // const loadDataSheet = () => {
     //     loadExcelTemplate().then((res) => {
@@ -522,7 +526,7 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                 </CardHeader>
                 <CardBody className="flex flex-col p-0 px-0 overflow-auto max-h-[70vh]">
                 <div className="h-[70vh] w-full">
-                    {dataSheet && <Workbook {...settings} data={lessonDairyTest} />}
+                    {dataSheet && <Workbook {...settings} data={dataSheet} />}
                 </div>
                     {/* <LuckySheet /> */}
                     {/* <table className="w-full min-w-max border-separate border-spacing-0 text-left">
@@ -744,18 +748,13 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                     </Typography>
                     {userInfo.roles === '1' && (
                         <div className="flex item-center justify-end gap-2">
-                            {editMode ? (
+                            {/* {editMode ? (
                                 <>
                                     <Button variant="gradient" size="sm"
                                         onClick={() => setEditMode(false)}
                                     >
                                         Cancel
                                     </Button>
-                                    {/* <Button variant="gradient" size="sm"
-                                        onClick={() => addRowDiary()}
-                                    >
-                                        Add Row
-                                    </Button> */}
                                     <Button variant="gradient" color="deep-orange" size="sm"
                                         loading={loading}
                                         onClick={() => {
@@ -775,7 +774,16 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                                 >
                                     Edit
                                 </Button>
-                            )}
+                            )} */}
+                            <Button variant="gradient" color="deep-orange" size="sm"
+                                loading={loading}
+                                onClick={() => {
+                                    console.log('dataSheet', dataSheet);
+                                    handleCallback(true, convertDataSheet())
+                                }}
+                            >
+                                Save
+                            </Button>
                         </div>
                     )}
                     {/* <div className="flex gap-2">
