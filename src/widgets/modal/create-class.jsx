@@ -77,10 +77,12 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
     
     useEffect(() => {
         if (open) {
-            getStudentList()
-            getStaffList()
-            getAllCourse()
             handleAdd()
+            if (isShow) {
+                getStudentList()
+                getStaffList()
+                getAllCourse()
+            }
             // getAllCourse()
         } else {
             setClassList([])
@@ -179,14 +181,14 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
 
     const updateClassList = (index, key, value) => {
         classList[index].updateInfo(key, value)
-        if ((key === 'end_date' || key === 'start_date' || key === 'class_schedule_id') && !!classList[index].start_date && !!classList[index].end_date) {
-            if (moment(classList[index].start_date).isValid() || moment(classList[index].end_date).isValid()) {
-                const timetable = generateCalendar(classList[index])
-                classList[index].updateInfo('timetable', timetable)
-            } else {
-                toast.error('Ngày không hợp lệ!')
-            }
-        }
+        // if ((key === 'end_date' || key === 'start_date' || key === 'class_schedule_id') && !!classList[index].start_date && !!classList[index].end_date) {
+        //     if (moment(classList[index].start_date).isValid() || moment(classList[index].end_date).isValid()) {
+        //         const timetable = generateCalendar(classList[index])
+        //         classList[index].updateInfo('timetable', timetable)
+        //     } else {
+        //         toast.error('Ngày không hợp lệ!')
+        //     }
+        // }
         forceUpdate()
         // setClassList(classList)
     }

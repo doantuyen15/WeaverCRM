@@ -12,6 +12,8 @@ import ScoreTemplateTest from "./reports/report_score_test.docx";
 import FinanceTemplateDoc from "./reports/report_finance.docx";
 import FinanceTemplateExcel from "./reports/mau-so-quy-tm.xlsx";
 import formatNum from '../formatNumber/formatNum';
+import { glb_sv } from '../../service';
+const ipcRenderer = window.ipcRenderer
 
 const exportExcel = ({ reportName = '', data = {}, info = {} }) => {
     switch (reportName) {
@@ -219,6 +221,86 @@ const exportTuition = async (data, info) => {
     } catch (error) {
         console.error('Error:', error);
     }
+}
+
+export const createLessonDairy = async (item, teacherList) => {
+    const workbook = new ExcelJS.Workbook();
+    const resp = await fetch('./assets/reports/testdrive2.xlsx')
+    const buffer = await resp.arrayBuffer()
+    const excel = await workbook.xlsx.load(buffer)
+    const worksheet = excel.getWorksheet(1)
+
+    const classInfo = item.data[0]
+    const startDate = moment(classInfo.start_date);
+    const endDate = moment(classInfo.end_date);
+    // Lấy mảng các ngày trong tháng
+    const days = [];
+
+    for (let i = 0; i <= endDate.diff(startDate, 'days'); i++) {
+        days.push(startDate.clone().add(i, 'days'));
+    }
+    const timetable = []
+    days.forEach(day => {
+        if (glb_sv.offday.includes(moment(day).format('DD/MM'))) {
+            // nghỉ
+        } else if (
+            (classInfo.class_schedule_id === 0 && (day.day() === 1 || day.day() === 3)) || // thú 2 4
+            (classInfo.class_schedule_id === 1 && (day.day() === 2 || day.day() === 4)) || // thú 3 5
+            (classInfo.class_schedule_id === 2 && (day.day() === 6 || day.day() === 7)) || // thú 7 cn
+            (classInfo.class_schedule_id === 3 && (day.day() === 5)) // thú 6
+        ) {
+            timetable.push(formatDate(day))
+        }
+    })
+
+    timetable.forEach((day, index) => {
+        worksheet.insertRow(index + 7, [
+            index + 1,
+            moment(day, 'DD/MM/YYYY').format('M'),
+            day,
+            '',
+        ])
+        const row = worksheet.getRow(index + 7)
+        for(var indexCell = 1; indexCell <= 11; indexCell++) {
+            const cell = row.getCell(indexCell)
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' },
+            };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' }
+            if (indexCell == 4) {
+                cell.dataValidation = {
+                    type: 'list',
+                    allowBlank: true,
+                    formulae: [`"${teacherList?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id))?.map(item => item.short_name)}"`]
+                };
+            }
+        }
+    })
+
+    ipcRenderer?.on("google_api", (event, msg) => {
+        if (msg.type === 'error') {
+            console.log('google_api error', msg.error);
+        } else if (msg.type === 'success') {
+            console.log('google_api success', msg.sheetId);
+        }
+        ipcRenderer?.removeAllListeners("google_api");
+    });
+
+    await workbook.xlsx.writeBuffer().then(function (buffer) {
+        ipcRenderer?.send("google_api", { buffer, fileName: classInfo.id});
+        // newBuffer = new Blob([data], {
+        //     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        // });
+        // const url = window.URL.createObjectURL(blob);
+        // const anchor = document.createElement("a");
+        // anchor.href = url;
+        // anchor.download = `Test`;
+        // anchor.click();
+        // window.URL.revokeObjectURL(url);
+    });
 }
 
 const saveDocFile = (doc) => {

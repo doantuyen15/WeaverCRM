@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, globalShortcut } = require("electron");
+const { app, BrowserWindow, ipcMain, globalShortcut, dialog } = require("electron");
 const { autoUpdater } = require("electron-updater");
 const { createTray } = require("./utils/createTray");
 const { createMainWindow } = require("./utils/createMainWindow");
@@ -10,7 +10,12 @@ const remote = require("@electron/remote/main");
 const config = require("./utils/configElectron");
 const fs = require('fs');
 if (config.isDev) require("electron-reloader")(module);
-const path = require('path')
+const path = require('path');
+const {google} = require('googleapis');
+let stream = require('stream');
+
+// const dotenv = require('dotenv');
+// dotenv.config({ path: '../../.env' });
 
 remote.initialize();
 
@@ -89,6 +94,47 @@ ipcMain.on("finish_init_app", async (event, arg) => {
 		}
 		config.mainWindow.maximize()
 	}, 1500);
+});
+
+ipcMain.on("google_api", async (event, msg) => {
+	try {
+		let bufferStream = new stream.PassThrough();
+		bufferStream.end(msg.buffer);
+		const auth = new google.auth.GoogleAuth({
+			keyFile: './public/driveapi.json',
+			scopes: 'https://www.googleapis.com/auth/drive'
+		})
+		const drive = google.drive({
+			version: 'v3',
+			auth
+		})
+		var fileMetadata = {
+			name: msg.fileName,
+			mimeType: "application/vnd.google-apps.spreadsheet",
+			parents: ['1UKCuyGcVY3yPvH_dJmuirnqcpKGXglQg']
+		};
+		var media = {
+			mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",  // Modified
+			body: bufferStream,  // Modified
+		};
+		
+		drive.files.create(
+			{
+				resource: fileMetadata,
+				media: media,
+				fields: "id",
+			},
+			function (err, file) {
+				if (err) {
+					config.mainWindow.webContents.send("google_api", { error: err, type: 'error' });
+				} else {
+					config.mainWindow.webContents.send("google_api", { type: 'success', sheetId: file.data.id });
+				}
+			}
+		);
+	} catch (error) {
+		config.mainWindow.webContents.send("google_api", { error: error, type: 'error' });
+	}
 });
 
 autoUpdater.on('update-not-available', (event, arg) => {

@@ -2,7 +2,6 @@ import { getDoc, getDocs } from "firebase/firestore"
 import moment from "moment"
 import StudentInfo from "./studentInfo"
 import formatDate from "../../utils/formatNumber/formatDate"
-import { deburr } from 'lodash'
 
 export default class ClassInfo {
     constructor(data) {

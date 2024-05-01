@@ -1,10 +1,11 @@
 import moment from "moment"
-
+import { deburr } from 'lodash'
 export default class StaffInfo {
     constructor(info) {
         this.id = info?.id || ''
         this.phone = info?.phone || '', 
         this.full_name = info?.full_name || '', 
+        this.short_name = info?.short_name || '', 
         this.id_number = info?.id_number || '', 
         this.id_date = info?.id_date || '', 
         this.id_place = info?.id_place || '', 
@@ -30,7 +31,10 @@ export default class StaffInfo {
     updateInfo(key, value) {
         if (this[key] !== undefined) {
             this[key] = value
-            // if (!this.id) this.id = this.first_name + ' ' + this.last_name
+            if (key === 'full_name') {
+                const nameSplit = value.split(' ')
+                this.short_name = deburr(nameSplit[nameSplit.length - 1] + nameSplit[0][0])
+            }
         }
     }
 }
