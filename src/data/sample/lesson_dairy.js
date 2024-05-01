@@ -1417,6 +1417,22 @@ const lessonDairyTest = [
             "colReadOnly": {},
             "colhidden": {}
         },
+        "dataVerification": {
+            "6_3": {
+                "type": "dropdown",
+                "type2": "true",
+                "rangeTxt": "D7",
+                "value1": "a,bbbb,c",
+                "value2": "",
+                "validity": "",
+                "remote": false,
+                "prohibitInput": false,
+                "hintShow": false,
+                "hintValue": "",
+                "checked": false
+            }
+        },
+
         "row": 30,
         "column": 12
     }
