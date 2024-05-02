@@ -13,7 +13,6 @@ import FinanceTemplateDoc from "./reports/report_finance.docx";
 import FinanceTemplateExcel from "./reports/mau-so-quy-tm.xlsx";
 import formatNum from '../formatNumber/formatNum';
 import { glb_sv } from '../../service';
-const ipcRenderer = window.ipcRenderer
 
 const exportExcel = ({ reportName = '', data = {}, info = {} }) => {
     switch (reportName) {
@@ -280,27 +279,8 @@ export const createLessonDairy = async (item, teacherList) => {
         }
     })
 
-    ipcRenderer?.on("google_api", (event, msg) => {
-        if (msg.type === 'error') {
-            console.log('google_api error', msg.error);
-        } else if (msg.type === 'success') {
-            console.log('google_api success', msg.sheetId);
-        }
-        ipcRenderer?.removeAllListeners("google_api");
-    });
-
-    await workbook.xlsx.writeBuffer().then(function (buffer) {
-        ipcRenderer?.send("google_api", { buffer, fileName: classInfo.id});
-        // newBuffer = new Blob([data], {
-        //     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        // });
-        // const url = window.URL.createObjectURL(blob);
-        // const anchor = document.createElement("a");
-        // anchor.href = url;
-        // anchor.download = `Test`;
-        // anchor.click();
-        // window.URL.revokeObjectURL(url);
-    });
+    const newBuffer = await workbook.xlsx.writeBuffer()
+    return newBuffer
 }
 
 const saveDocFile = (doc) => {

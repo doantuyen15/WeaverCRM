@@ -403,8 +403,6 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                 });
             })
         });
-        console.log('dataUpdate.current', dataUpdate.current);
-
         setDataSheet([...dataUpdate.current])
         return dataUpdate.current
     }
@@ -446,7 +444,26 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
             }}
             className={"bg-transparent shadow-none"}
         >
-            <iframe width="100%" style={{ height: '90vh' }} src="https://docs.google.com/spreadsheets/d/1DMbyJ-QDcanfKfRuGxii9khLA7v67pc5aZQWr6wiG5o/edit?widget=false&headers=false&chrome=false"></iframe> 
+            <Card className="mx-auto h-full w-full">
+                <CardHeader floated={false} shadow={false} className="rounded-none">
+                    <Typography variant="h4" color="blue-gray" className="w-full pb-2 text-center">
+                        Lesson Dairy
+                    </Typography>
+                </CardHeader>
+                <CardBody className="flex flex-col p-0 px-0 overflow-auto h-[85vh]">
+                    <iframe
+                        width="100%"
+                        height="100%"
+                        style={{ borderRadius: '.5rem' }}
+                        src={`https://docs.google.com/spreadsheets/d/${classData.sheetId}/edit?widget=false&headers=false&rm=demo`}
+                    />
+                </CardBody>
+                <CardFooter className="p-0 flex justify-end">
+                    <Button variant="text" color="blue-gray" onClick={() => handleCallback(false)}>
+                        Close
+                    </Button>
+                </CardFooter>
+            </Card>
         </Dialog>
     )
 }

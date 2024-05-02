@@ -51,9 +51,10 @@ export default class ClassInfo {
             // },
             attendance: {}
         }]
-        this.lesson_diary = data?.lesson_diary || [{ name: 'Sheet1', column: 10, celldata: [{ r: 0, c: 0, v: null }] }]
+        this.lesson_diary = data?.lesson_diary || ''
         this.student = data?.student || ''
         this.student_id = data?.student_id || ''
+        this.sheetId = data?.sheetId || ''
     }
 
     getStudentList() {

@@ -173,7 +173,7 @@ export function AddStudentToClass({ loading, classList, open, handleCallback }) 
                                                 React.cloneElement(element, {
                                                     disabled: true,
                                                     className:
-                                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none",
+                                                        "flex items-center opacity-100 px-0 gap-2 pointer-events-none text-clip overflow-hidden",
                                                 })
                                             }
                                         >

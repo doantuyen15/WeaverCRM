@@ -40,6 +40,7 @@ import moment from "moment";
 import { LoadingProcess } from "../../widgets/modal/loading-process";
 import { createLessonDairy } from "../../utils/exportExcel";
 import useStorage from "../../utils/localStorageHook";
+import { glb_sv } from "../../service";
 
 const header = [
     "STT",
@@ -93,11 +94,23 @@ export function Approval() {
         useFirebase('get_approval_list')
             .then(data => {
                 console.log('data', data);
-                setLoading(false)
                 setList(groupData(data))
                 tableRef.current = data
             })
             .catch(err => console.log(err))
+            .finally(() => setLoading(false))
+    }
+
+    const getCredentials = (item) => {
+        setLoading(true)
+        useFirebase('get_credentials')
+            .then(data => {
+                console.log('data', data);
+                glb_sv.apiCredentials = data
+                handleCreateLessonDairy(item)
+            })
+            .catch(err => console.log(err))
+            .finally(() => setLoading(false))
     }
 
     const getStaffList = (item) => {
@@ -105,9 +118,10 @@ export function Approval() {
         useFirebase('get_staff_list')
         .then((list) => {
             useStorage('set', 'staffList', list)
-            handleApprove(true, item)
+            handleCreateLessonDairy(item)
         })
         .catch(() => setLoading(false))
+        .finally(() => setLoading(false))
     }
 
     const handleSort = (indexCol) => {
@@ -129,34 +143,60 @@ export function Approval() {
         }, {});
     }
 
-    const handleApprove = async (ok, item, { signal } = {}) => {
+    const handleApprove = async (ok, item) => {
+        console.log('handleApprove', item);
         setLoading(true)
-        console.log('item', item);
-        if (item.type === 'add_classes') {
-            setLoadingProcess(true)
-            const staffList = useStorage('get', 'staffList')
-            if (!staffList) {
-                getStaffList(item)
-                return
+        if (item.type === 'add_classes' && !item.hasDairy) {
+            handleCreateLessonDairy(item)
+            return
+        }
+        useFirebase("update_approval", { approval: item, ok })
+            .then(res => {
+                getApprovalList()
+                toast.success(ok ? 'Duyệt thành công!' : 'Huỷ duyệt thành công!')
+            })
+            .catch(err => {
+                toast.error(err)
+                console.log(err.code);
+            })
+            .finally(() => {
+                setLoading(false)
+                setLoadingProcess(false)
+            })
+    }
+
+    const handleCreateLessonDairy = async (item) => {
+        setLoadingProcess(true)
+        const staffList = useStorage('get', 'staffList')
+        const credentials = glb_sv.apiCredentials
+        if (!staffList) {
+            getStaffList(item)
+            return
+        } else if (!credentials) {
+            getCredentials(item)
+            return
+        }
+
+        const ipcRenderer = window.ipcRenderer
+        credentials.private_key = credentials?.private_key?.replace(/\\n/gm, "\n")
+        const sheetBuffer = await createLessonDairy(item, staffList)
+        const classInfo = item
+
+        ipcRenderer?.on("google_api", (event, msg) => {
+            if (msg.type === 'error') {
+                console.log('google_api error', msg.error);
+            } else if (msg.type === 'success') {
+                classInfo.hasDairy = true
+                classInfo.data[0].sheetId = msg.sheetId
+                handleApprove(true, classInfo)
+                console.log('google_api success', msg.sheetId);
             }
-            await createLessonDairy(item, staffList)
+            ipcRenderer?.removeAllListeners("google_api");
             setTimeout(() => {
                 setLoadingProcess(false)
-            }, 500);
-        }
-        // useFirebase("update_approval", { approval: item, ok })
-        //     .then(res => {
-        //         getApprovalList()
-        //         toast.success(ok ? 'Duyệt thành công!' : 'Huỷ duyệt thành công!')
-        //     })
-        //     .catch(err => {
-        //         toast.error(err)
-        //         console.log(err.code);
-        //     })
-        //     .finally(() => {
-        //         setLoading(false)
-        //         setLoadingProcess(false)
-        //     })
+            }, 300);
+        });
+        ipcRenderer?.send("google_api", { buffer: sheetBuffer, fileName: classInfo.data[0].id, credentials });
     }
 
     const openApproveDetail = (item, type) => {

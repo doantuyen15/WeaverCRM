@@ -46,6 +46,7 @@ export function useFirebase(service: string, params: any) {
         case 'get_staff_attendance': return getStaffAttendance()
         case 'get_all_course': return getAllCourse(params)
         case 'get_finance_table': return getFinanceTable(params)
+        case 'get_credentials': return getCredentials()
         case 'query_finance_table': return queryFinanceTable(params)
         case 'query_tuition': return queryTuition(params)
         case 'query_class_list': return queryClassList(params)
@@ -313,6 +314,22 @@ const getFinanceTable = (params: string) => {
                 (snap) => {
                     try {
                         resolve(snap.docs.map(doc => doc.data()) || [])
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            )
+            .catch(reject)
+    });
+}
+
+const getCredentials = () => {
+    return new useRequest((resolve: any, reject: any) => {
+        getDoc(doc(db, 'secret_key', 'driveApi'))
+            .then(
+                (snap) => {
+                    try {
+                        resolve(snap.data() || [])
                     } catch (error) {
                         reject(error)
                     }

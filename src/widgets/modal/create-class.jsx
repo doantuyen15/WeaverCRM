@@ -153,17 +153,17 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                     status: 0, //0 active, 1 nghỉ, 2 lý do khác
                     reason: '',
                     day: formatDate(day),
-                    lesson_diary: {
-                        lesson_id: timetable.length + 1,
-                        day: formatDate(day),
-                        teacher: '',
-                        unit: '',
-                        unit_lesson: '',
-                        content: '',
-                        homework: '',
-                        performance: '',
-                        checked: false,
-                    },
+                    // lesson_diary: {
+                    //     lesson_id: timetable.length + 1,
+                    //     day: formatDate(day),
+                    //     teacher: '',
+                    //     unit: '',
+                    //     unit_lesson: '',
+                    //     content: '',
+                    //     homework: '',
+                    //     performance: '',
+                    //     checked: false,
+                    // },
                     attendance: {}
                 })
                 //         days.forEach(day => () && timetable.push({[moment(day).valueOf()]: new Object()}));
@@ -181,14 +181,14 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
 
     const updateClassList = (index, key, value) => {
         classList[index].updateInfo(key, value)
-        // if ((key === 'end_date' || key === 'start_date' || key === 'class_schedule_id') && !!classList[index].start_date && !!classList[index].end_date) {
-        //     if (moment(classList[index].start_date).isValid() || moment(classList[index].end_date).isValid()) {
-        //         const timetable = generateCalendar(classList[index])
-        //         classList[index].updateInfo('timetable', timetable)
-        //     } else {
-        //         toast.error('Ngày không hợp lệ!')
-        //     }
-        // }
+        if ((key === 'end_date' || key === 'start_date' || key === 'class_schedule_id') && !!classList[index].start_date && !!classList[index].end_date) {
+            if (moment(classList[index].start_date).isValid() || moment(classList[index].end_date).isValid()) {
+                const timetable = generateCalendar(classList[index])
+                classList[index].updateInfo('timetable', timetable)
+            } else {
+                toast.error('Ngày không hợp lệ!')
+            }
+        }
         forceUpdate()
         // setClassList(classList)
     }

@@ -96,14 +96,13 @@ ipcMain.on("finish_init_app", async (event, arg) => {
 	}, 1500);
 });
 
-ipcMain.on("google_api", async (event, msg, credentials) => {
+ipcMain.on("google_api", async (event, msg) => {
 	try {
 		let bufferStream = new stream.PassThrough();
 		bufferStream.end(msg.buffer);
-
 		const auth = new google.auth.GoogleAuth({
 			// keyFile: './public/driveapi.json',
-			credentials: credentials,
+			credentials: msg.credentials,
 			scopes: 'https://www.googleapis.com/auth/drive'
 		})
 		const drive = google.drive({
@@ -113,7 +112,7 @@ ipcMain.on("google_api", async (event, msg, credentials) => {
 		var fileMetadata = {
 			name: msg.fileName,
 			mimeType: "application/vnd.google-apps.spreadsheet",
-			parents: ['1UKCuyGcVY3yPvH_dJmuirnqcpKGXglQg']
+			parents: [`${msg.credentials.folderId}`]
 		};
 		var media = {
 			mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",  // Modified

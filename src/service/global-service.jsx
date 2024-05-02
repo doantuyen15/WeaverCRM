@@ -178,6 +178,7 @@ class globalService {
             }
             return dayArr
         }
+        this.apiCredentials = null
     }
 }
 
