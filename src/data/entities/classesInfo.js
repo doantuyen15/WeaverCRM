@@ -1,7 +1,8 @@
-import { getDoc, getDocs } from "firebase/firestore"
+import { doc, getDoc, getDocs } from "firebase/firestore"
 import moment from "moment"
 import StudentInfo from "./studentInfo"
 import formatDate from "../../utils/formatNumber/formatDate"
+import { glb_sv } from "../../service"
 
 export default class ClassInfo {
     constructor(data) {
@@ -106,9 +107,21 @@ export default class ClassInfo {
         if (this[key] !== undefined) {
             this[key] = value
             if (this.program === 'EXTRA') {
+                if (key === 'student_id') {
+                    this.student_list?.push(doc(glb_sv.database, 'student', value))
+                }
                 this.id = this.program?.toUpperCase() + '_' + this.level?.toUpperCase() + '_' + this.student?.normalize('NFD').replace(/[\u0300-\u036f\s]/g, '')?.toUpperCase() + '_' + formatDate(this.start_date, 'DDMMYY')
-            } else if (key === 'program' || key === 'level' || key === 'start_date') 
+            } else if (key === 'program' || key === 'level' || key === 'start_date') {
                 this.id = this.program?.toUpperCase() + '_' + this.level?.toUpperCase() + '_' + formatDate(this.start_date, 'DDMMYY')
+            }
+            // if (key === 'end_date') {
+            //     const startDate = moment(this.start_date);
+            //     const endDate = moment(this.end_date);
+            //     for (let i = 0; i <= endDate.diff(startDate, 'days'); i++) {
+            //         days.push(startDate.clone().add(i, 'days'));
+            //         glb_sv.offday.includes(moment(startDate.clone().add(i, 'days')).format('DD/MM'))
+            //     }
+            // }
         }
     }
 

@@ -78,7 +78,7 @@ class globalService {
         ]
         this.offday = [
             '05/02', '06/02', '07/02', '08/02', '09/02', '10/02', '11/02', '12/02', '13/02', '14/02', '15/02', '16/02', '17/02', '18/02', //nghỉ tết
-            '30/04', '01/05',
+            '30/04', '01/05', '02/09'
         ]
         this.getTuitionFee = {
             'LIFE': [
@@ -177,6 +177,142 @@ class globalService {
                 dayArr.push(currentDay)
             }
             return dayArr
+        }
+        this.all_course = {
+            "EXTRA": {
+                "SKILL": {
+                    "course_id": "EXTRA",
+                    "week": "5",
+                    "hour": "1",
+                    "tuition": "400000",
+                    "level_id": "SKILL"
+                },
+                "IELST": {
+                    "course_id": "EXTRA",
+                    "hour": "1",
+                    "level_id": "IELST",
+                    "week": "10",
+                    "tuition": "400000"
+                }
+            },
+            "IELTS": {
+                "DIAMONDA": {
+                    "week": "12",
+                    "course_id": "IELTS",
+                    "tuition": "4600000",
+                    "hour": "48",
+                    "level_id": "DIAMOND A"
+                },
+                "SILVERB": {
+                    "tuition": "4000000",
+                    "hour": "48",
+                    "course_id": "IELTS",
+                    "level_id": "SILVER B",
+                    "week": "12"
+                },
+                "MASTERA": {
+                    "week": "12",
+                    "course_id": "IELTS",
+                    "hour": "48",
+                    "level_id": "MASTER A",
+                    "tuition": "4900000"
+                },
+                "GOLDA": {
+                    "week": "12",
+                    "level_id": "GOLD A",
+                    "tuition": "4300000",
+                    "hour": "48",
+                    "course_id": "IELTS"
+                },
+                "GOLDB": {
+                    "level_id": "GOLD B",
+                    "hour": "48",
+                    "course_id": "IELTS",
+                    "tuition": "4300000",
+                    "week": "12"
+                },
+                "MASTERB": {
+                    "week": "12",
+                    "hour": "48",
+                    "level_id": "MASTER B",
+                    "course_id": "IELTS",
+                    "tuition": "4900000"
+                },
+                "SILVERA": {
+                    "level_id": "SILVER A",
+                    "tuition": "4000000",
+                    "hour": "48",
+                    "week": "12",
+                    "course_id": "IELTS"
+                },
+                "DIAMONDB": {
+                    "hour": "48",
+                    "week": "12",
+                    "course_id": "IELTS",
+                    "level_id": "DIAMOND B",
+                    "tuition": "4600000"
+                }
+            },
+            "LIFE": {
+                "A2B1": {
+                    "week": "48",
+                    "level_id": "A2B1",
+                    "hour": "144",
+                    "course_id": "LIFE",
+                    "tuition": "700000"
+                },
+                "A1A2": {
+                    "course_id": "LIFE",
+                    "hour": "144",
+                    "level_id": "A1A2",
+                    "tuition": "700000",
+                    "week": "48"
+                }
+            },
+            "TEENS": {
+                "1A": {
+                    "tuition": "5000000",
+                    "hour": "64",
+                    "level_id": "1A",
+                    "course_id": "TEENS",
+                    "week": "16"
+                },
+                "2B": {
+                    "level_id": "2B",
+                    "tuition": "5400000",
+                    "week": "14",
+                    "course_id": "TEENS",
+                    "hour": "64"
+                },
+                "2A": {
+                    "tuition": "5300000",
+                    "week": "14",
+                    "level_id": "2A",
+                    "course_id": "TEENS",
+                    "hour": "64"
+                },
+                "3A": {
+                    "week": "14",
+                    "level_id": "3A",
+                    "tuition": "5400000",
+                    "course_id": "TEENS",
+                    "hour": "64"
+                },
+                "3B": {
+                    "tuition": "5300000",
+                    "hour": "64",
+                    "course_id": "TEENS",
+                    "week": "14",
+                    "level_id": "3B"
+                },
+                "1B": {
+                    "week": "16",
+                    "tuition": "5000000",
+                    "level_id": "1B",
+                    "hour": "64",
+                    "course_id": "TEENS"
+                }
+            }
         }
         this.apiCredentials = null
     }

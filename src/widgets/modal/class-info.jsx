@@ -449,6 +449,29 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
                     <Typography variant="h4" color="blue-gray" className="w-full pb-2 text-center">
                         Lesson Dairy
                     </Typography>
+                    <div className="absolute right-0 top-0">
+                        <IconButton
+                            color="blue-gray"
+                            size="sm"
+                            variant="text"
+                            onClick={() => handleCallback(false)}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                className="h-5 w-5"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </IconButton>
+                    </div>
                 </CardHeader>
                 <CardBody className="flex flex-col p-0 px-0 overflow-auto h-[85vh]">
                     <iframe

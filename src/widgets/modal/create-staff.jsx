@@ -269,13 +269,13 @@ export function CreateStaff({ open, handleCallback, staffInfo }) {
                                             value={formatDate(newStaff.work_date, 'YYYY-MM-DD')}
                                             onChange={(e) => updateStaffList('work_date', formatDate(e.target.value))}
                                         />
-                                        <Input
+                                        {/* <Input
                                             type="date"
                                             variant="outlined"
                                             label="Ngày kết thúc"
                                             value={newStaff.end_date ? formatDate(newStaff.end_date, 'YYYY-MM-DD') : ''}
                                             onChange={(e) => updateStaffList('end_date', formatDate(e.target.value))}
-                                        />
+                                        /> */}
                                         <div className="col-span-2">
                                             <Input
                                                 variant="outlined"

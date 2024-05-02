@@ -224,12 +224,18 @@ const exportTuition = async (data, info) => {
 
 export const createLessonDairy = async (item, teacherList) => {
     const workbook = new ExcelJS.Workbook();
-    const resp = await fetch('./assets/reports/testdrive2.xlsx')
+    const resp = await fetch('./assets/reports/template_life.xlsx')
     const buffer = await resp.arrayBuffer()
     const excel = await workbook.xlsx.load(buffer)
     const worksheet = excel.getWorksheet(1)
 
     const classInfo = item.data[0]
+
+    worksheet.getCell('B2').value = classInfo.program + ' ' + classInfo.level
+    worksheet.getCell('B3').value = classInfo.class_schedule
+    worksheet.getCell('B4').value = classInfo.teacher + ' - ' + classInfo.sub_teacher
+    worksheet.getCell('F3').value = formatDate(classInfo.start_date)
+
     const startDate = moment(classInfo.start_date);
     const endDate = moment(classInfo.end_date);
     // Lấy mảng các ngày trong tháng
@@ -239,6 +245,7 @@ export const createLessonDairy = async (item, teacherList) => {
         days.push(startDate.clone().add(i, 'days'));
     }
     const timetable = []
+    // let offDay = 0
     days.forEach(day => {
         if (glb_sv.offday.includes(moment(day).format('DD/MM'))) {
             // nghỉ
@@ -268,8 +275,16 @@ export const createLessonDairy = async (item, teacherList) => {
                 bottom: { style: 'thin' },
                 right: { style: 'thin' },
             };
+            cell.font = {
+                name: 'Arial'
+            }
             cell.alignment = { horizontal: 'center', vertical: 'middle' }
             if (indexCell == 4) {
+                cell.font = {
+                    color: {argb: "ffed7d31"},
+                    name: 'Arial',
+                    bold: true
+                }
                 cell.dataValidation = {
                     type: 'list',
                     allowBlank: true,

@@ -105,7 +105,6 @@ export function Approval() {
         setLoading(true)
         useFirebase('get_credentials')
             .then(data => {
-                console.log('data', data);
                 glb_sv.apiCredentials = data
                 handleCreateLessonDairy(item)
             })

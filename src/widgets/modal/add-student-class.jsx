@@ -14,7 +14,7 @@ import {
 } from "@material-tailwind/react";
 import { useController } from "../../context";
 import formatNum from "../../utils/formatNumber/formatNum";
-import { PlusIcon } from "@heroicons/react/24/solid";
+import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { MinusCircleIcon } from "@heroicons/react/24/outline";
 import useStorage from "../../utils/localStorageHook";
 import {useFetch, useFirebase} from "../../utils/api/request";
@@ -35,6 +35,7 @@ export function AddStudentToClass({ loading, classList, open, handleCallback }) 
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
     const [errorMsg, setErrorMsg] = useState('')
+    const tableRef = useRef([])
 
     // useEffect(() => {
     //     if (!tuition?.length) getTuition()
@@ -56,7 +57,7 @@ export function AddStudentToClass({ loading, classList, open, handleCallback }) 
         useFirebase('get_student')
             .then(data => {
                 console.log('getStudentList', data);
-                // tableRef.current = data
+                tableRef.current = data
                 setStudentList(data)
                 // useStorage('set', 'studentInfo', data)
             })
@@ -143,6 +144,18 @@ export function AddStudentToClass({ loading, classList, open, handleCallback }) 
         setUpdateList(update)
         forceUpdate()
     }
+
+    const handleSearch = (searchValue) => {
+        try {
+            var search = tableRef.current?.filter(item => 
+                item.full_name.toLowerCase().includes(searchValue.toLowerCase()) ||
+                item.id?.includes(searchValue)
+            );
+            setStudentList(search)
+        } catch (error) {
+            console.log('error', error);
+        }
+    }
     
     return (
         <Dialog
@@ -187,11 +200,20 @@ export function AddStudentToClass({ loading, classList, open, handleCallback }) 
                                     <div className="grid grow grid-col-1 gap-y-3 menu-fixed">
                                         {classInfo.student?.map((student, studentIndex) => (
                                             <Select
+                                                onBlur={() => setStudentList(tableRef.current)}
                                                 key={studentIndex}
                                                 value={student.id ? (student.id + ' - ' + student?.full_name) : undefined}
                                                 placeholder="Student"
                                                 label="Select Student"
                                             >
+                                                <div>
+                                                    <Input
+                                                        autoFocus
+                                                        label="Search"
+                                                        icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                                                        onChange={(e) => handleSearch(e.target.value)}
+                                                    />
+                                                </div>
                                                 {studentIndex != 0 ? (
                                                     <Option onClick={() => updateClassInfo({ key: 'student', value: {}, index: index, studentIndex: studentIndex, isDelete: true })} key={studentIndex} value={'None'} className="flex items-center gap-2">
                                                         {'None'}

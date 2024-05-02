@@ -70,10 +70,11 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
     const [tuition, setTuition] = useState(useStorage('get', 'tuition') || [])
     const [studentList, setStudentList] = useState([])
     const [staffList, setStaffList] = useState([])
-    const [courseList, setCourseList] = useState([])
+    const [courseList, setCourseList] = useState(glb_sv.all_course)
     const tableRef = useRef([])
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
+    const timeout = useRef(null)
     
     useEffect(() => {
         if (open) {
@@ -183,8 +184,11 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
         classList[index].updateInfo(key, value)
         if ((key === 'end_date' || key === 'start_date' || key === 'class_schedule_id') && !!classList[index].start_date && !!classList[index].end_date) {
             if (moment(classList[index].start_date).isValid() || moment(classList[index].end_date).isValid()) {
-                const timetable = generateCalendar(classList[index])
-                classList[index].updateInfo('timetable', timetable)
+                if (timeout.current) clearTimeout(timeout.current)
+                timeout.current = setTimeout(() => {
+                    const timetable = generateCalendar(classList[index])
+                    classList[index].updateInfo('timetable', timetable)
+                }, 5000);
             } else {
                 toast.error('Ngày không hợp lệ!')
             }
@@ -292,7 +296,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                                 </Option>
                                             ))}
                                         </Select>
-                                        {(info.program && courseList[info.program] ) ? 
+                                        {(info.program && courseList[info.program]) ? 
                                         <Select
                                             // disabled={!info.program}
                                             label="Class level"
@@ -454,11 +458,14 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             disabled={!info.program || !info.level}
                                             value={!info.start_date ? '' : formatDate(info.start_date, 'YYYY-MM-DD')}
                                             onChange={(e) => {
-                                                updateClassList(index, 'start_date', formatDate(e.target.value, 'moment'))
-                                                updateClassList(index, 'end_date',
-                                                    moment(e.target.value, 'YYYY-MM-DD')
-                                                        .add(courseList?.[info.program]?.[info.level]?.week, 'week').valueOf()
-                                                )
+                                                console.log(e.target.value);
+                                                if (e.target.value.startsWith('2')) {
+                                                    updateClassList(index, 'start_date', formatDate(e.target.value, 'moment'))
+                                                    updateClassList(index, 'end_date',
+                                                        moment(e.target.value, 'YYYY-MM-DD')
+                                                            .add(courseList?.[info.program]?.[info.level]?.week, 'week').valueOf()
+                                                    )
+                                                } else updateClassList(index, 'start_date', e.target.value)
                                             }}
                                         />
                                         <Input

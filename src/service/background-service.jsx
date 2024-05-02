@@ -43,9 +43,9 @@ export function BackgroundService() {
         const firebaseConfig = config.firebaseConfig
         const app = initializeApp(firebaseConfig);
         // const auth = getAuth(app);
-        // const db = getFirestore(app);
+        const db = getFirestore(app);
         // const functions = getFunctions(app);
-        // glb_sv.database = db;
+        glb_sv.database = db;
         // glb_sv.auth = auth
         // glb_sv.functions = functions
         glb_sv.app = app
