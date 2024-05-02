@@ -96,12 +96,14 @@ ipcMain.on("finish_init_app", async (event, arg) => {
 	}, 1500);
 });
 
-ipcMain.on("google_api", async (event, msg) => {
+ipcMain.on("google_api", async (event, msg, credentials) => {
 	try {
 		let bufferStream = new stream.PassThrough();
 		bufferStream.end(msg.buffer);
+
 		const auth = new google.auth.GoogleAuth({
-			keyFile: './public/driveapi.json',
+			// keyFile: './public/driveapi.json',
+			credentials: credentials,
 			scopes: 'https://www.googleapis.com/auth/drive'
 		})
 		const drive = google.drive({
