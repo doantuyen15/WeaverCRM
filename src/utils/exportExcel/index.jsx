@@ -223,18 +223,12 @@ const exportTuition = async (data, info) => {
 }
 
 export const createLessonDairy = async (item, teacherList) => {
+    const classInfo = item.data[0]
     const workbook = new ExcelJS.Workbook();
-    const resp = await fetch('./assets/reports/template_life.xlsx')
+    const resp = await fetch(classInfo.program === 'IELTS' ? './assets/reports/template_ielts.xlsx' : './assets/reports/template_life.xlsx')
     const buffer = await resp.arrayBuffer()
     const excel = await workbook.xlsx.load(buffer)
     const worksheet = excel.getWorksheet(1)
-
-    const classInfo = item.data[0]
-
-    worksheet.getCell('B2').value = classInfo.program + ' ' + classInfo.level
-    worksheet.getCell('B3').value = classInfo.class_schedule
-    worksheet.getCell('B4').value = classInfo.teacher + ' - ' + classInfo.sub_teacher
-    worksheet.getCell('F3').value = formatDate(classInfo.start_date)
 
     const startDate = moment(classInfo.start_date);
     const endDate = moment(classInfo.end_date);
@@ -259,40 +253,83 @@ export const createLessonDairy = async (item, teacherList) => {
         }
     })
 
-    timetable.forEach((day, index) => {
-        worksheet.insertRow(index + 7, [
-            index + 1,
-            moment(day, 'DD/MM/YYYY').format('M'),
-            day,
-            '',
-        ])
-        const row = worksheet.getRow(index + 7)
-        for(var indexCell = 1; indexCell <= 11; indexCell++) {
-            const cell = row.getCell(indexCell)
-            cell.border = {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' },
-            };
-            cell.font = {
-                name: 'Arial'
-            }
-            cell.alignment = { horizontal: 'center', vertical: 'middle' }
-            if (indexCell == 4) {
-                cell.font = {
-                    color: {argb: "ffed7d31"},
-                    name: 'Arial',
-                    bold: true
-                }
-                cell.dataValidation = {
-                    type: 'list',
-                    allowBlank: true,
-                    formulae: [`"${teacherList?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id))?.map(item => item.short_name)}"`]
+    if (classInfo.program === 'IELTS') {
+        timetable.forEach((day, index) => {
+            worksheet.insertRow(index + 6, [
+                index + 1,
+                day,
+                '',
+            ])
+            const row = worksheet.getRow(index + 6)
+            for(var indexCell = 1; indexCell <= 9; indexCell++) {
+                const cell = row.getCell(indexCell)
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' },
                 };
+                cell.font = {
+                    name: 'Arial'
+                }
+                cell.alignment = { horizontal: 'center', vertical: 'middle' }
+                if (indexCell == 3) {
+                    cell.font = {
+                        color: {argb: "ffed7d31"},
+                        name: 'Arial',
+                        bold: true
+                    }
+                    cell.dataValidation = {
+                        type: 'list',
+                        allowBlank: true,
+                        formulae: [`"${teacherList?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id))?.map(item => item.short_name)}"`]
+                    };
+                }
             }
-        }
-    })
+        })
+    } else { //LIFE
+        worksheet.getCell('B2').value = classInfo.program + ' ' + classInfo.level
+        worksheet.getCell('B3').value = classInfo.class_schedule
+        worksheet.getCell('B4').value = classInfo.teacher + ' - ' + classInfo.sub_teacher
+        worksheet.getCell('F3').value = formatDate(classInfo.start_date)
+    
+        timetable.forEach((day, index) => {
+            worksheet.insertRow(index + 7, [
+                index + 1,
+                moment(day, 'DD/MM/YYYY').format('M'),
+                day,
+                '',
+            ])
+            const row = worksheet.getRow(index + 7)
+            for(var indexCell = 1; indexCell <= 11; indexCell++) {
+                const cell = row.getCell(indexCell)
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' },
+                };
+                cell.font = {
+                    name: 'Arial'
+                }
+                cell.alignment = { horizontal: 'center', vertical: 'middle' }
+                if (indexCell == 4) {
+                    cell.font = {
+                        color: {argb: "ffed7d31"},
+                        name: 'Arial',
+                        bold: true
+                    }
+                    cell.dataValidation = {
+                        type: 'list',
+                        allowBlank: true,
+                        formulae: [`"${teacherList?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id))?.map(item => item.short_name)}"`]
+                    };
+                }
+            }
+        })
+    }
+
+
 
     const newBuffer = await workbook.xlsx.writeBuffer()
     return newBuffer

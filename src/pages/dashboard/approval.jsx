@@ -145,7 +145,7 @@ export function Approval() {
     const handleApprove = async (ok, item) => {
         console.log('handleApprove', item);
         setLoading(true)
-        if (item.type === 'add_classes' && !item.hasDairy) {
+        if (item.type === 'add_classes' && !item.hasDairy && ok) {
             handleCreateLessonDairy(item)
             return
         }
