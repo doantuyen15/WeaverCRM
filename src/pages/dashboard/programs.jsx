@@ -82,7 +82,6 @@ export function Programs() {
                 // console.log('get_class_list', await data[0].getStudentList());
                 tableRef.current = data
                 setClassList(data)
-                // handleSort(1)
                 glb_sv.classList = data
                 // useStorage('set', 'classList', data)
             })
@@ -232,7 +231,7 @@ export function Programs() {
                                                         variant="small"
                                                         className="text-[11px] font-bold text-blue-gray-400 grow pl-6"
                                                     >
-                                                        {item.teacher}
+                                                        {item.teacher_short_name}
                                                     </Typography>
                                                     <Tooltip content={item.teacher_phone || 'No phone'}>
                                                         <PhoneIcon
@@ -252,9 +251,9 @@ export function Programs() {
                                                         variant="small"
                                                         className="text-[11px] font-bold text-blue-gray-400 grow pl-6"
                                                     >
-                                                        {item.sub_teacher}
+                                                        {item.teacher_2_short_name}
                                                     </Typography>
-                                                    <Tooltip content={item.sub_teacher_phone || 'No phone'}>
+                                                    <Tooltip content={item.techer_2_phone || 'No phone'}>
                                                         <PhoneIcon
                                                             strokeWidth={2}
                                                             className="h-2.5 w-2.5 ml-1"
@@ -266,20 +265,17 @@ export function Programs() {
                                                         variant="small"
                                                         className="text-[11px] font-bold text-blue-gray-400 grow-0"
                                                     >
-                                                        TA: 
+                                                        Sub teacher: 
                                                     </Typography>
                                                     <Typography
                                                         variant="small"
                                                         className="text-[11px] font-bold text-blue-gray-400 grow pl-6"
                                                     >
-                                                        {item.ta_teacher}
+                                                        {item.sub_teacher_short_name.map((sub, index) => {
+                                                            if (index === item.sub_teacher_short_name?.length - 1) return sub
+                                                            else return sub + ', '
+                                                        })}
                                                     </Typography>
-                                                    <Tooltip content={item.ta_teacher_phone || 'No phone'}>
-                                                        <PhoneIcon
-                                                            strokeWidth={2}
-                                                            className="h-2.5 w-2.5 ml-1"
-                                                        />
-                                                    </Tooltip>
                                                 </div>
                                                 <div className="flex">
                                                     <Typography

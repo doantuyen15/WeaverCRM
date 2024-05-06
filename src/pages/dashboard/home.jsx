@@ -34,10 +34,13 @@ import moment from "moment";
 import { useFirebase } from "../../utils/api/request";
 import { ClassInfo } from "./classes";
 import { ModalClassInfo } from "../../widgets/modal/class-info";
+import { useController } from "../../context";
 
 const calendar = glb_sv.calenderWeek()
 
 export function Home() {
+  const [controller] = useController();
+  const { userInfo } = controller;
   const navigate = useNavigate();
   const [classList, setClassList] = useState([])
   const [openModalClass, setOpenModalClass] = useState(false)
@@ -52,7 +55,7 @@ export function Home() {
     useFirebase('query_class_list', {end_date: current})
     .then(data => {
       console.log('query_class_list', data);
-      setClassList(data.filter(item => item.start_date < current))
+      setClassList(data.filter(item => item.start_date < current && (item.teacher_id == userInfo.staff_id || item.teacher_2_id == userInfo.staff_id || item.sub_teacher_id.includes(userInfo.uid))))
     })
     .catch(err => console.log(err))
   }
@@ -143,6 +146,7 @@ export function Home() {
             <div>
               <Typography variant="h6" color="blue-gray" className="mb-1">
                 Thời khóa biểu
+
               </Typography>
               <Typography
                 variant="small"

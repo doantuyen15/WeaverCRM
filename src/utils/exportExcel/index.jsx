@@ -290,7 +290,7 @@ export const createLessonDairy = async (item, teacherList) => {
     } else { //LIFE
         worksheet.getCell('B2').value = classInfo.program + ' ' + classInfo.level
         worksheet.getCell('B3').value = classInfo.class_schedule
-        worksheet.getCell('B4').value = classInfo.teacher + ' - ' + classInfo.sub_teacher
+        worksheet.getCell('B4').value = classInfo.teacher_short_name + ' - ' + classInfo.teacher_2_short_name
         worksheet.getCell('F3').value = formatDate(classInfo.start_date)
     
         timetable.forEach((day, index) => {

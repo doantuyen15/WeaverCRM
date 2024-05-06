@@ -91,7 +91,10 @@ export function Class() {
                 // setList(groupedData)
                 // console.log('get_class_list', await data[0].getStudentList());
                 tableRef.current = data
-                setClassList(data)
+                // if (userInfo.role == '1' || userInfo.role == '7') setClassList(data)
+                // else setClassList(data.filter(item => item.teacher_id != userInfo.uid && item.teacher_2_id != userInfo.uid && !item.sub_teacher_id.includes(userInfo.uid)))
+                setClassList(data.filter(item => item.teacher_id == userInfo.staff_id || item.teacher_2_id == userInfo.staff_id || item.sub_teacher_id.includes(userInfo.uid)))
+                // setClassList(data)
                 console.log('class', data);
                 // handleSort(1)
                 // glb_sv.classList = data
@@ -280,9 +283,9 @@ export const ClassInfo = ({ item, openModal }) => {
                             variant="small"
                             className="text-[11px] font-bold text-blue-gray-400 grow pl-6"
                         >
-                            {item.sub_teacher}
+                            {item.teacher_2}
                         </Typography>
-                        <Tooltip content={item.sub_teacher_phone || 'No phone'}>
+                        <Tooltip content={item.teacher_2_phone || 'No phone'}>
                             <PhoneIcon
                                 strokeWidth={2}
                                 className="h-2.5 w-2.5 ml-1"

@@ -11,6 +11,10 @@ import {
     Checkbox,
     Select,
     Option,
+    Menu,
+    MenuHandler,
+    MenuList,
+    MenuItem,
 } from "@material-tailwind/react";
 import { useController } from "../../context";
 import formatNum from "../../utils/formatNumber/formatNum";
@@ -375,7 +379,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             Thông tin giáo viên
                                         </Typography>
                                         <Select
-                                            label="Teacher"
+                                            label="Teacher 1"
                                             value={info.teacher ? info.teacher : undefined}
                                         >
                                             {info.teacher &&
@@ -391,6 +395,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                                 <Option
                                                     onClick={() => {
                                                         updateClassList(index, 'teacher', item.full_name)
+                                                        updateClassList(index, 'teacher_short_name', item.short_name)
                                                         updateClassList(index, 'teacher_id', item.id)
                                                         updateClassList(index, 'teacher_phone', item.phone)
                                                     }} key={item.id} value={item.full_name} className="flex items-center gap-2">
@@ -399,14 +404,15 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             ))}
                                         </Select>
                                         <Select
-                                            label="Sub Teacher"
-                                            value={info.sub_teacher ? info.sub_teacher : undefined}
+                                            label="Teacher 2"
+                                            value={info.teacher_2 ? info.teacher_2 : undefined}
                                         >
-                                            {info.sub_teacher &&
+                                            {info.teacher_2 &&
                                                 <Option onClick={() => {
-                                                    updateClassList(index, 'sub_teacher', '')
-                                                    updateClassList(index, 'sub_teacher_id', '')
-                                                    updateClassList(index, 'sub_teacher_phone', '')
+                                                    updateClassList(index, 'teacher_2', '')
+                                                    updateClassList(index, 'teacher_2_short_name', '')
+                                                    updateClassList(index, 'teacher_2_id', '')
+                                                    updateClassList(index, 'teacher_2_phone', '')
                                                 }} key={'Clear'} value={'Clear'} className="flex items-center gap-2">
                                                     Clear
                                                 </Option>
@@ -414,38 +420,87 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                             {(staffList || [])?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id))?.map(item => (
                                                 <Option
                                                     onClick={() => {
-                                                        updateClassList(index, 'sub_teacher', item.full_name)
-                                                        updateClassList(index, 'sub_teacher_phone', item.phone)
-                                                        updateClassList(index, 'sub_teacher_id', item.id)
+                                                        updateClassList(index, 'teacher_2', item.full_name)
+                                                        updateClassList(index, 'teacher_2_short_name', item.short_name)
+                                                        updateClassList(index, 'teacher_2_phone', item.phone)
+                                                        updateClassList(index, 'teacher_2_id', item.id)
                                                     }} key={item.id} value={item.full_name} className="flex items-center gap-2">
                                                     {item.full_name}
                                                 </Option>
                                             ))}
                                         </Select>
-                                        <Select
-                                            label="TA"
-                                            value={info.ta_teacher ? info.ta_teacher : undefined}
+                                        <Menu
+                                            dismiss={{
+                                                itemPress: false,
+                                            }}
                                         >
-                                            {info.ta_teacher &&
-                                                <Option onClick={() => {
-                                                    updateClassList(index, 'ta_teacher', '')
-                                                    updateClassList(index, 'ta_teacher_id', '')
-                                                    updateClassList(index, 'ta_teacher_phone', '')
-                                                }} key={'Clear'} value={'Clear'} className="flex items-center gap-2">
-                                                    Clear
-                                                </Option>
-                                            }
-                                            {(staffList || [])?.filter(staff => staff.roles_id === 5)?.map(item => (
+                                            <MenuHandler>
+                                                {/* <Input
+                                                    className=" pt-2 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                                                    labelProps={{
+                                                        className: "before:content-none after:content-none",
+                                                    }}
+                                                /> */}
+                                                {info.sub_teacher_short_name?.length > 0 ? (
+                                                    <Button variant="outlined" color="blue-gray">
+                                                        {info.sub_teacher_short_name.map((item, index) => {
+                                                            if (index === info.sub_teacher_short_name?.length - 1) return item
+                                                            else return item + ', '
+                                                        })}
+                                                    </Button>
+                                                ) : (
+                                                    <Button variant="outlined" color="blue-gray">
+                                                        Thêm teacher
+                                                    </Button>
+                                                )}
+                                            </MenuHandler>
+                                            <MenuList className="z-[999999]">
+                                                {/* <Input
+                                                    label="Search"
+                                                    containerProps={{
+                                                        className: "mb-4",
+                                                    }}
+                                                /> */}
+                                                {(staffList || [])?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id))?.map(item => (
+                                                    <MenuItem key={item.id} value={item.full_name} className="flex items-center gap-2">
+                                                        <Checkbox onClick={(e) => {
+                                                            if (info.sub_teacher.findIndex(sub => sub == item.full_name) < 0) {
+                                                                updateClassList(index, 'sub_teacher', item.full_name)
+                                                                updateClassList(index, 'sub_teacher_id', item.id)
+                                                                updateClassList(index, 'sub_teacher_short_name', item.short_name)
+                                                            } else {
+                                                                info.sub_teacher = info.sub_teacher.filter(sub => sub != item.full_name)
+                                                                info.sub_teacher_id = info.sub_teacher_id.filter(sub => sub != item.id)
+                                                                info.sub_teacher_short_name = info.sub_teacher_short_name.filter(sub => sub != item.short_name)
+                                                                forceUpdate()
+                                                            }
+                                                        }} className="w-4 h-4" checked={info.sub_teacher?.includes(item.full_name)} />
+                                                        {item.full_name}
+                                                    </MenuItem>
+                                                ))}
+                                            </MenuList>
+                                        </Menu>
+                                        {/* <Select
+                                            label="Sub Teacher"
+                                        >
+                                            {(staffList || [])?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id))?.map(item => (
                                                 <Option
-                                                    onClick={() => {
-                                                        updateClassList(index, 'ta_teacher', item.full_name)
-                                                        updateClassList(index, 'ta_teacher_phone', item.phone)
-                                                        updateClassList(index, 'ta_teacher_id', item.id)
-                                                    }} key={item.id} value={item.full_name} className="flex items-center gap-2">
-                                                    {item.full_name}
+                                                    onClick={(e) => {
+                                                        updateClassList(index, 'sub_teacher', item.full_name)
+                                                        updateClassList(index, 'sub_teacher_id', item.id)
+                                                        updateClassList(index, 'sub_teacher_short_name', item.short_name)
+                                                    }} key={item.id} value={item.full_name} className="flex items-center gap-2"
+                                                >
+                                                    <div className="flex w-full items-center" onClick={(e) => {
+                                                        //
+                                                    }}>
+                                                        <Checkbox className="w-4 h-4" checked={info.sub_teacher?.includes(item.full_name)} />
+                                                        {item.full_name}
+                                                    </div>
                                                 </Option>
                                             ))}
-                                        </Select>
+                                        </Select> */}
+
                                     </div>
                                     <div className="grid gap-x-1 gap-y-3">
                                         <Typography variant="h6" color="black">

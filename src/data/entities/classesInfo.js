@@ -13,9 +13,13 @@ export default class ClassInfo {
         this.end_date = data?.end_date || '',
         this.student_list = data?.student_list || [],
         this.teacher = data?.teacher || '',
+        this.teacher_2 = data?.teacher || '',
+        this.teacher_short_name = data?.teacher_short_name || '',
+        this.teacher_2_short_name = data?.teacher_short_name || '',
         this.teacher_phone = data?.teacher_phone || '',
-        this.sub_teacher = data?.sub_teacher || '',
-        this.sub_teacher_phone = data?.sub_teacher_phone || '',
+        this.teacher_2_phone = data?.teacher_phone || '',
+        this.sub_teacher = data?.sub_teacher || [],
+        // this.sub_teacher_phone = data?.sub_teacher_phone || '',
         this.ta_teacher_phone = data?.ta_teacher_phone || '',
         this.ta_teacher = data?.ta_teacher || '',
         this.cs_staff = data?.cs_staff || '',
@@ -23,7 +27,8 @@ export default class ClassInfo {
         this.class_schedule_id = data?.class_schedule_id || 0,
         this.converted = false,
         this.teacher_id = data?.teacher_id || '',
-        this.sub_teacher_id = data?.sub_teacher_id || '',
+        this.teacher_2_id = data?.teacher_id || '',
+        this.sub_teacher_id = data?.sub_teacher_id || [],
         this.ta_teacher_id = data?.ta_teacher_id || '',
         this.cs_staff_id = data?.cs_staff_id || '',
         this.class_code = data?.class_code || '',
@@ -56,6 +61,7 @@ export default class ClassInfo {
         this.student = data?.student || ''
         this.student_id = data?.student_id || ''
         this.sheetId = data?.sheetId || ''
+        this.sub_teacher_short_name = data?.sub_teacher_short_name || []
     }
 
     getStudentList() {
@@ -105,6 +111,10 @@ export default class ClassInfo {
 
     updateInfo(key, value) {
         if (this[key] !== undefined) {
+            if (['sub_teacher', 'sub_teacher_id', 'sub_teacher_short_name'].includes(key)) {
+                this[key].push(value)
+                return
+            }
             this[key] = value
             if (this.program === 'EXTRA') {
                 if (key === 'student_id') {

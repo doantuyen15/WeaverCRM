@@ -49,11 +49,8 @@ export function SignIn() {
     e.preventDefault()
     await useFirebase('get_token', loginInfo)
       .then((userInfoRef) => {
-        console.log('userInfoRef', userInfoRef);
-        useStorage('set', 'userInfo', userInfoRef || {})
-        setUserInfo(dispatch, userInfoRef)
         glb_sv.userInfo = userInfoRef
-        navigate("/dashboard/home")
+        getUserInfo(e.target[0].value)
       })
       .catch((error) => {
         // const errorCode = error.code;
@@ -91,17 +88,19 @@ export function SignIn() {
     //   .finally(() => getUserInfo());
   }
 
-  const getUserInfo = async () => {
+  const getUserInfo = async (userName) => {
     console.log('checkRoles');
     const db = glb_sv.database
 
-    await getDoc(doc(db, "account", glb_sv.userInfo.uid))
+    await getDoc(doc(db, "account", userName))
       .then(info => {
         const userRef = info.data()
         glb_sv.userInfo = {
           ...glb_sv.userInfo,
           ...userRef
         }
+        setUserInfo(dispatch, glb_sv.userInfo)
+        useStorage('set', 'userInfo', glb_sv.userInfo || {})
         navigate("/dashboard/home")
       });
     // const querySnapshot = await getDocs(usersRef);
