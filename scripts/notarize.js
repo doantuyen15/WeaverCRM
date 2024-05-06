@@ -10,10 +10,12 @@ exports.default = async function notarizing(context) {
   const appName = context.packager.appInfo.productFilename;
 
   return await notarize({
+    tool: "notarytool", // thêm
     appBundleId: 'vn.altisss.premium',
     appPath: `${appOutDir}/${appName}.app`,
     appleId: 'altissssolution@gmail.com',
-    appleIdPassword: 'qjrr-dwci-mpqy-fgzg',
-    ascProvider: '3894P43295'
+    appleIdPassword: 'lpcd-bkzi-izro-ljya',
+    ascProvider: '3894P43295',
+    teamId: '3894P43295' // thêm 
   });
 };

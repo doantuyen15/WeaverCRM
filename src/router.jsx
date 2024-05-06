@@ -65,7 +65,7 @@ export const routes = [
 				name: "Duyệt",
 				path: "/approval",
 				element: <Approval />,
-				roles: ["1"]
+				roles: ["1" , "7"]
 			},
 			{
 				icon: <UserCircleIcon {...menu} />,
@@ -107,35 +107,35 @@ export const routes = [
 				name: "Danh sách học viên",
 				path: "/student",
 				element: <StudentTable />,
-				roles: ["1", "4", "6"]
+				roles: ["1", "3", "4", "7"]
 			},
 			{
 				icon: <DocumentMagnifyingGlassIcon {...menu} />,
 				name: "Report",
 				path: "/report",
 				element: <ReportScore />,
-				roles: ["1", "4"]
+				roles: ["1", "3", "4", "7"]
 			},
 			{
 				icon: <BanknotesIcon {...menu} />,
 				name: "Học phí",
 				path: "/tuition",
 				element: <Tuition />,
-				roles: ["1"]
+				roles: ["1", "3", "4", "7"]
 			},
 			{
 				icon: <TableCellsIcon {...menu} />,
 				name: "Danh sách Lớp",
 				path: "/class",
 				element: <Class />,
-				roles: ["1", "4", "6"]
+				roles: ["1", "3", "4", "7"]
 			},
 			{
 				icon: <SwatchIcon {...menu} />,
 				name: "Khoá học",
 				path: "/programs",
 				element: <Programs />,
-				roles: ["1", "4"]
+				roles: ["1", "7"]
 			},
 			{
 				icon: <AttachMoneyIcon {...menu} />,
