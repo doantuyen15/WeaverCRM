@@ -244,7 +244,7 @@ export function Home() {
             </table>
           </CardBody>
         </Card>
-        <Card className="border border-blue-gray-100 shadow-sm">
+        {/* <Card className="border border-blue-gray-100 shadow-sm">
           <CardHeader
             floated={false}
             shadow={false}
@@ -254,16 +254,6 @@ export function Home() {
             <Typography variant="h6" color="blue-gray" className="mb-2">
               Bảng thông tin
             </Typography>
-            {/* <Typography
-              variant="small"
-              className="flex items-center gap-1 font-normal text-blue-gray-600"
-            >
-              <ArrowUpIcon
-                strokeWidth={3}
-                className="h-3.5 w-3.5 text-green-500"
-              />
-              <strong>24%</strong> this month
-            </Typography> */}
           </CardHeader>
           <CardBody className="pt-0">
             {ordersOverviewData.map(
@@ -299,7 +289,7 @@ export function Home() {
               )
             )}
           </CardBody>
-        </Card>
+        </Card> */}
       </div>
       {openModalClass ? <ModalClassInfo getClassList={queryClassList} classList={classList} handleOpen={setOpenModalClass} open={openModalClass} data={selectedClass} /> : null}
     </div>
