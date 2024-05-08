@@ -15,7 +15,7 @@ export default class ClassInfo {
         this.teacher = data?.teacher || '',
         this.teacher_2 = data?.teacher || '',
         this.teacher_short_name = data?.teacher_short_name || '',
-        this.teacher_2_short_name = data?.teacher_short_name || '',
+        this.teacher_2_short_name = data?.teacher_2_short_name || '',
         this.teacher_phone = data?.teacher_phone || '',
         this.teacher_2_phone = data?.teacher_phone || '',
         this.sub_teacher = data?.sub_teacher || [],

@@ -14,15 +14,9 @@ import {
     Option,
 } from "@material-tailwind/react";
 import { useFirebase } from "../../utils/api/request";
+import { glb_sv } from "../../service";
 
-const Roles = [
-    'Admin',
-	'Quản lý vận hành',
-	'Quản lý tài chính',
-	'Sale',
-	'Kiểm soát chất lượng',
-	'Giáo Viên'
-]
+const Roles = glb_sv.roles
 
 export function CreateAccount({ open, handleOpen, handleCallback, editAccount = {} }) {
     const [staffList, setStaffList] = useState([])

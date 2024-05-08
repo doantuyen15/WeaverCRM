@@ -66,6 +66,10 @@ const status = [
     'Từ chối'
 ]
 
+const roleCheck = {
+    "5": ['staff_checkin', 'make_finance', 'make_tuition', 'make_refunds']
+}
+
 export function Approval() {
     const [controller] = useController();
     const { userInfo } = controller;
@@ -94,7 +98,8 @@ export function Approval() {
         useFirebase('get_approval_list')
             .then(data => {
                 console.log('data', data);
-                setList(groupData(data))
+                if (userInfo.roles === '5') setList(groupData(data.filter(item => !roleCheck[userInfo.roles].includes(Object.keys(item)[0]))))
+                else setList(groupData(data))
                 tableRef.current = data
             })
             .catch(err => console.log(err))

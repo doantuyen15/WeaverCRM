@@ -41,13 +41,13 @@ class globalService {
             ],
         }
         this.roles = [
-            'CEO',
-            'Kế toán',
-            'Giáo Vụ',
-            'Giáo viên',
-            'Trợ giảng',
-            'Nhân viên',
-            'Điều hành'
+            'Admin',
+            'Quản lý vận hành',
+            'Quản lý tài chính',
+            'Sale',
+            'Kiểm soát chất lượng',
+            'Giáo Viên',
+            // 'Nhân viên'
         ]
         this.department = [
             "All",

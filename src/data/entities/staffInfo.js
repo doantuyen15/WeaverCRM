@@ -1,5 +1,5 @@
 import moment from "moment"
-import { deburr } from 'lodash'
+import Deburr from "../../utils/formatNumber/deburr"
 export default class StaffInfo {
     constructor(info) {
         this.id = info?.id || ''
@@ -33,7 +33,7 @@ export default class StaffInfo {
             this[key] = value
             if (key === 'full_name') {
                 const nameSplit = value.split(' ')
-                this.short_name = deburr(nameSplit[nameSplit.length - 1] + nameSplit[0][0])
+                this.short_name = Deburr(nameSplit[nameSplit.length - 1] + nameSplit[0][0])
             }
         }
     }

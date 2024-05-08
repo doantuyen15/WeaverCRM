@@ -72,7 +72,7 @@ export function AccountInfo({open, handleOpen, handleSignOut, userInfo}) {
                 Roles
               </Typography>
               <Typography className="-mb-2 font-bold" variant="h6">
-                {glb_sv.roles[Number(userInfo.roles)]}
+                {glb_sv.roles[Number(userInfo.roles) - 1]}
               </Typography>
             </div>
             {openchangePassword ? (

@@ -47,7 +47,7 @@ import encryptString from "../../utils/encode/DataCryption";
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { glb_sv } from "../../service";
 
-const Header = ["Tên", "Chức vụ", "Mật khẩu", "Số điện thoại", ""]
+const Header = ["Tên", "Chức vụ", "Số điện thoại", ""]
 // ['full_name', 'user_name', 'password', 'id_staff', 'id_user', 'id_card', 'id_card_date', 'issued_by', 'address', 'mail', 'phone', 'id_department', 'act_no_bank', 'bank_brch', 'academic_lv', 'college_graduation', 'working_status', 'dt_start', 'dt_end', 'note']
 
 export function Roles() {
@@ -214,7 +214,8 @@ export function Roles() {
                                                         email,
                                                         username,
                                                         uid,
-                                                        roles }, key) => {
+                                                        roles,
+                                                        role2 }, key) => {
                                                         const className = `py-3 px-5 ${key === staffList.length - 1
                                                             ? ""
                                                             : "border-b border-blue-gray-50"
@@ -240,14 +241,15 @@ export function Roles() {
                                                                 </td>
                                                                 <td className={className}>
                                                                     <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                                        {roles}
+                                                                        {glb_sv.roles[Number(roles) - 1]}
+                                                                        {role2 ? ', ' + glb_sv.roles[Number(role2) - 1] : null}
                                                                     </Typography>
                                                                 </td>
-                                                                <td className={className}>
+                                                                {/* <td className={className}>
                                                                     <Typography className="text-xs font-semibold text-blue-gray-600">
                                                                         {showPassword ? password : '******'}
                                                                     </Typography>
-                                                                </td>
+                                                                </td> */}
                                                                 <td className={className}>
                                                                     <Typography className="text-xs font-semibold text-blue-gray-600">
                                                                         {phoneNumber}

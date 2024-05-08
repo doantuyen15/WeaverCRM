@@ -337,12 +337,12 @@ export default function ReportScore() {
             </CardHeader>
             <CardBody className="p-0 px-0 overflow-auto max-h-[70vh]">
                 <Tabs value={mod}>
-                    {userInfo.roles.includes(['1']) ? (
                         <TabsHeader className="max-w-max mx-auto">
                             <Tab value="score" className="w-48 h-10">
                                 <TableCellsIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
                                 Score
                             </Tab>
+
                             <Tab onClick={() => {
                                 // getCourseTuition()
                                 if (!init) {
@@ -353,6 +353,7 @@ export default function ReportScore() {
                                 <BanknotesIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
                                 Tuition
                             </Tab>
+                        {userInfo.roles != '5' ? (
                             <Tab onClick={() => {
                                 if (!init) {
                                     getFinanceTable([currentMonth])
@@ -362,8 +363,8 @@ export default function ReportScore() {
                                 <AttachMoneyIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
                                 Finance
                             </Tab>
+                        ) : null}
                         </TabsHeader>
-                    ) : null}
                     <TabsBody>
                         <TabPanel key={'score'} value={'score'}>
                             <div className="flex justify-between items-center">

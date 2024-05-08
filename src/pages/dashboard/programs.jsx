@@ -79,7 +79,7 @@ export function Programs() {
                 //     return acc;
                 // }, {});
                 // setList(groupedData)
-                // console.log('get_class_list', await data[0].getStudentList());
+                console.log('get_class_list', data);
                 tableRef.current = data
                 setClassList(data)
                 glb_sv.classList = data
@@ -166,10 +166,12 @@ export function Programs() {
                         <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenModal(true)}>
                             <PlusIcon strokeWidth={2} className="h-4 w-4" /> Create new class
                         </Button>
-                        {userInfo.ro}
-                        <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenCourseEdit(true)}>
-                            <WrenchIcon strokeWidth={2} className="h-4 w-4" /> Course modification
-                        </Button>
+                        {['1', '2'].includes(userInfo.roles) ? (
+                            <Button className="flex items-center gap-3" size="sm" onClick={() => setOpenCourseEdit(true)}>
+                                <WrenchIcon strokeWidth={2} className="h-4 w-4" /> Course modification
+                            </Button>
+                        ) : null}
+
                         <Button
                             className="flex items-center gap-3"
                             size="sm"

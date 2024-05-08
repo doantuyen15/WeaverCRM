@@ -91,9 +91,8 @@ export function Class() {
                 // setList(groupedData)
                 // console.log('get_class_list', await data[0].getStudentList());
                 tableRef.current = data
-                // if (userInfo.role == '1' || userInfo.role == '7') setClassList(data)
-                // else setClassList(data.filter(item => item.teacher_id != userInfo.uid && item.teacher_2_id != userInfo.uid && !item.sub_teacher_id.includes(userInfo.uid)))
-                setClassList(data.filter(item => item.teacher_id == userInfo.staff_id || item.teacher_2_id == userInfo.staff_id || item.sub_teacher_id.includes(userInfo.uid)))
+                if (['1', '2', '3', '5'].includes(userInfo.roles)) setClassList(data)
+                else setClassList(data.filter(item => item.teacher_id == userInfo.staff_id || item.teacher_2_id == userInfo.staff_id || item.sub_teacher_id.includes(userInfo.staff_id)))
                 // setClassList(data)
                 console.log('class', data);
                 // handleSort(1)

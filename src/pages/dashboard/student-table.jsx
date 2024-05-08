@@ -50,6 +50,7 @@ import DefaultSkeleton from './../../widgets/skeleton/index'
 import { glb_sv } from "../../service";
 import { ModalStudent } from "../../widgets/modal/modal-student";
 import importExcel from "../../utils/importExcel";
+import Deburr from "../../utils/formatNumber/deburr";
 
 const TABLE_HEAD = [
     "Tình trạng đăng ký",
@@ -204,7 +205,7 @@ export default function StudentTable() {
 
     const handleSort = (indexCol) => {
         let sorted
-        sorted = orderBy(tableRef.current, (item) => { return deburr(item[Header[indexCol]]) }, [isAsc ? 'asc' : 'desc'])
+        sorted = orderBy(tableRef.current, (item) => { return Deburr(item[Header[indexCol]]) }, [isAsc ? 'asc' : 'desc'])
         setStudentList([...sorted])
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
@@ -1626,7 +1627,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                         </MenuHandler>
                         <MenuList>
                             <MenuItem onClick={() => handleEdit(item, index)}>Edit</MenuItem>
-                            {userInfo.roles == 1 && <MenuItem onClick={() => handleRemove(item, index)}>Remove</MenuItem>}
+                            {(userInfo.roles == 1 || userInfo.roles == 2) && <MenuItem onClick={() => handleRemove(item, index)}>Remove</MenuItem>}
                         </MenuList>
                     </Menu>
                 </td>

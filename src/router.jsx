@@ -65,23 +65,79 @@ export const routes = [
 				name: "Duyệt",
 				path: "/approval",
 				element: <Approval />,
-				roles: ["1" , "7"]
+				roles: ["1", "2", "5"]
 			},
 			{
 				icon: <UserCircleIcon {...menu} />,
 				name: "Tài khoản nhân viên",
 				path: "/roles",
 				element: <Roles />,
-				roles: ["1"]
+				roles: ["1", "2"]
 			},
 			{
 				icon: <BriefcaseIcon {...menu} />,
 				name: "Danh sách nhân viên",
 				path: "/staff",
 				element: <StaffList />,
-				roles: ["1"]
+				roles: ["1", "2"]
+			},
+			{
+				icon: <UserGroupIcon {...menu} />,
+				name: "Danh sách học viên",
+				path: "/student",
+				element: <StudentTable />,
+				roles: ["1", "2", "4", "5"]
+			},
+			{
+				icon: <SwatchIcon {...menu} />,
+				name: "Khoá học",
+				path: "/programs",
+				element: <Programs />,
+				roles: ["1", "2", "5"]
+			},
+			{
+				icon: <TableCellsIcon {...menu} />,
+				name: "Danh sách Lớp",
+				path: "/class",
+				element: <Class />,
+				roles: ["1", "2", "4", "5", "6"]
+			},
+			{
+				icon: <BanknotesIcon {...menu} />,
+				name: "Học phí",
+				path: "/tuition",
+				element: <Tuition />,
+				roles: ["1", "2", "4"]
+			},
+			{
+				icon: <AttachMoneyIcon {...menu} />,
+				name: "Tài chính",
+				path: "/finance",
+				element: <Finance />,
+				roles: ["1", "2"]
+			},
+			{
+				icon: <DocumentMagnifyingGlassIcon {...menu} />,
+				name: "Report",
+				path: "/report",
+				element: <ReportScore />,
+				roles: ["1", "2", "3", "5"]
 			},
 			// {
+			// 	icon: <InformationCircleIcon {...menu} />,
+			// 	name: "notifications",
+			// 	path: "/notifications",
+			// 	element: <Notifications />,
+			// 	roles: ["1"]
+			// },
+			// {
+			// 	icon: <UserGroupIcon {...menu} />,
+			// 	name: "profiles",
+			// 	path: "/profiles",
+			// 	element: <Profile />,
+			// 	roles: ["1"]
+			// }
+						// {
 			// 	icon: <TableCellsIcon {...menu} />,
 			// 	name: "tables",
 			// 	path: "/tables",
@@ -102,62 +158,6 @@ export const routes = [
 			// 		}
 			// 	]
 			// },
-			{
-				icon: <UserGroupIcon {...menu} />,
-				name: "Danh sách học viên",
-				path: "/student",
-				element: <StudentTable />,
-				roles: ["1", "3", "4", "7"]
-			},
-			{
-				icon: <DocumentMagnifyingGlassIcon {...menu} />,
-				name: "Report",
-				path: "/report",
-				element: <ReportScore />,
-				roles: ["1", "3", "4", "7"]
-			},
-			{
-				icon: <BanknotesIcon {...menu} />,
-				name: "Học phí",
-				path: "/tuition",
-				element: <Tuition />,
-				roles: ["1", "3", "4", "7"]
-			},
-			{
-				icon: <TableCellsIcon {...menu} />,
-				name: "Danh sách Lớp",
-				path: "/class",
-				element: <Class />,
-				roles: ["1", "3", "4", "7"]
-			},
-			{
-				icon: <SwatchIcon {...menu} />,
-				name: "Khoá học",
-				path: "/programs",
-				element: <Programs />,
-				roles: ["1", "7"]
-			},
-			{
-				icon: <AttachMoneyIcon {...menu} />,
-				name: "Tài chính",
-				path: "/finance",
-				element: <Finance />,
-				roles: ["1"]
-			},
-			// {
-			// 	icon: <InformationCircleIcon {...menu} />,
-			// 	name: "notifications",
-			// 	path: "/notifications",
-			// 	element: <Notifications />,
-			// 	roles: ["1"]
-			// },
-			// {
-			// 	icon: <UserGroupIcon {...menu} />,
-			// 	name: "profiles",
-			// 	path: "/profiles",
-			// 	element: <Profile />,
-			// 	roles: ["1"]
-			// }
 		],
 	},
 	{
@@ -169,7 +169,7 @@ export const routes = [
 				name: "sign in",
 				path: "/sign-in",
 				element: <SignIn />,
-				roles: ["1", "8"]
+				roles: "All"
 			},
 			// {
 			// 	icon: <RectangleStackIcon {...menu} />,

@@ -32,6 +32,7 @@ import formatDate from "../../utils/formatNumber/formatDate";
 import { loadExcelTemplate } from "../../utils/luckySheet";
 import { Workbook } from "@fortune-sheet/react";
 import lessonDairyTest from '../../data/sample/lesson_dairy'
+import Deburr from "../../utils/formatNumber/deburr";
 
 const HEADER_STUDENT = [
     // "Tình trạng đăng ký",
@@ -499,7 +500,7 @@ const TableStudent = ({ studentList, setStudentList }) => {
 
     const handleSort = (indexCol) => {
         let sorted
-        sorted = orderBy(tableRef.current, (item) => { return deburr(item[Header[indexCol]]) }, [isAsc ? 'asc' : 'desc'])
+        sorted = orderBy(tableRef.current, (item) => { return Deburr(item[Header[indexCol]]) }, [isAsc ? 'asc' : 'desc'])
         setStudentList(sorted)
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
