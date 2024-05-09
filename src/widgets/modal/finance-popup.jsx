@@ -153,7 +153,7 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
             month
         })
             .then(data => {
-                const tuitionFee = Number(courseTuition.current[program]?.[level]?.['tuition'])
+                const tuitionFee = Number(courseTuition.current[program]?.[level?.trim()]?.['tuition'])
                 let totalTuition = 0
 
                 if (data?.length != 0) {
@@ -162,7 +162,7 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                         else totalTuition -= Number(item.amount)
                     })
                 }
-                console.log('getTuitionForCustomer', isPayment, totalTuition);
+                console.log('getTuitionForCustomer', courseTuition.current[program], program, level);
 
 
                 if (program === 'IELTS') {
@@ -432,7 +432,7 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                                         updateFinance('customer', item.full_name)
                                                                         updateFinance('customer_id', item.id)
                                                                         getTuitionForCustomer(currentMonth, newBill.customer_id)
-                                                                        currentClassInfo.current?.program === 'IELTS' && getTuitionForCustomer(item.id)
+                                                                        currentClassInfo.current?.program === 'IELTS' && getTuitionForCustomer('', item.id)
                                                                     }}
                                                                         key={item.id} value={item.full_name} className="flex items-center gap-2">
                                                                         {item.full_name}

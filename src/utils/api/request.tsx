@@ -104,6 +104,8 @@ const queryClassList = (params: any) => {
 }
 
 const queryTuition = (params: any) => {
+    console.log('queryTuition', params);
+    
     return new useRequest((resolve: any, reject: any) => {
         let queryMonth
         if (params.class_id.includes('IELTS')) queryMonth = where("tuition_date", "!=", '')
@@ -163,12 +165,14 @@ const makeFinance = (finance: any) => {
 const updateCourseInfo = (params: any) => {
     return new useRequest((resolve: any, reject: any) => {
         const listUpdate: any[] = Object.values(params)
+        console.log('item.level_id?', listUpdate);
         
         const batch = writeBatch(db);
         listUpdate.forEach(item => {
             const coursesRef = doc(db, 'courses', item.course_id)
+            
             batch.update(coursesRef, {
-                [item.level_id?.replace(' ','')]: item
+                [item.level_id?.replace(' ', '')]: item
             })
         })
         batch.commit()
@@ -492,16 +496,28 @@ const updateStudentAttendance = (data: any) => {
 const addNewProgram = (newProgram: any) => {
     return new useRequest((resolve: any, reject: any) => {
         const programRef = doc(db, `courses/${newProgram.id}`);
-        setDoc(programRef, newProgram.level)
+        const listUpdate: any[] = Object.values(newProgram.level)
+        console.log('item.level_id?', listUpdate);
+        
+        const batch = writeBatch(db);
+        listUpdate.forEach(item => {
+            const coursesRef = doc(db, 'courses', item.course_id)
+            
+            batch.update(coursesRef, {
+                [item.level_id?.replace(' ', '')]: item
+            })
+        })
+        batch.commit()
             .then(resolve)
             .catch(reject)
+        // setDoc(programRef, newProgram.level)
+        //     .then(resolve)
+        //     .catch(reject)
         // const batch = writeBatch(db);
         // newProgram.level?.forEach((level: any) => {
         //     batch.set(programRef, level)
         // })
-        // batch.commit()
-        //     .then(resolve)
-        //     .catch(reject)
+
     })
 }
 
