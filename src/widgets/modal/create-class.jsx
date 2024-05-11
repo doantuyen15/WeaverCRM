@@ -90,6 +90,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
             }
             // getAllCourse()
         } else {
+            setClassInfo({})
             setClassList([])
         }
     }, [open])

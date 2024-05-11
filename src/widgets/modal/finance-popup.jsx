@@ -73,6 +73,7 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
     useEffect(() => {
         if (open) {
             getClassList()
+            getCourseTuition()
             getStaffList()
             if (!dataStudent?.id_class) {
                 const createBill = new Finance({
@@ -82,7 +83,10 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                     tuition_date: currentMonth,
                     account_type: AccountType[0],
                     account_type_id: 0,
-                    create_date: moment().valueOf()
+                    create_date: moment().valueOf(),
+                    staff_name: glb_sv.userInfo.fullname,
+                    staff_id: glb_sv.userInfo.staff_id
+                    // staff_phone: userInfo
                 })
                 newBillRef.current = createBill
                 setNewBill(createBill)
@@ -91,15 +95,14 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                     isPayment: isPayment,
                     type_id: !isPayment ? 1 : 0,
                     type: !isPayment ? BillType['receive'][1] : BillType['pay'][0],
-                    tuition_date: '',
+                    tuition_date: dataStudent.tuition_date,
                     account_type: AccountType[0],
                     account_type_id: 0,
                     customer_id: dataStudent.id_student,
                     customer: dataStudent.full_name,
                     class_id: dataStudent.id_class,
-                    create_date: moment().valueOf()
+                    create_date: moment().valueOf(),
                 })
-                getCourseTuition()
                 newBillRef.current = createBill
                 setNewBill(createBill)
                 currentClassInfo.current = dataClass.find(item => item.id === dataStudent.id_class) || {}
@@ -279,7 +282,7 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                     max={moment().format('YYYY-MM-DD')}
                                                     className="pl-4 pr-2"
                                                     value={formatDate(newBill.create_date, 'YYYY-MM-DD')}
-                                                    onChange={(e) => updateFinance('create_date', moment().valueOf())}
+                                                    onChange={(e) => updateFinance('create_date', formatDate(e.target.value, 'moment'))}
                                                 />
                                             </div>
                                         </div>

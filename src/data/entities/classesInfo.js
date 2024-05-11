@@ -13,7 +13,7 @@ export default class ClassInfo {
         this.end_date = data?.end_date || '',
         this.student_list = data?.student_list || [],
         this.teacher = data?.teacher || '',
-        this.teacher_2 = data?.teacher || '',
+        this.teacher_2 = data?.teacher_2 || '',
         this.teacher_short_name = data?.teacher_short_name || '',
         this.teacher_2_short_name = data?.teacher_2_short_name || '',
         this.teacher_phone = data?.teacher_phone || '',

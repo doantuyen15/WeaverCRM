@@ -149,6 +149,7 @@ export function Programs() {
                 .catch(err => toast.error(err))
                 .finally(() => setLoading(false))
         }
+        setObjectEdit({})
     }
 
     return (

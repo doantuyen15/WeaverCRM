@@ -204,6 +204,7 @@ export default function Finance() {
       })
       .finally(() => {
         setLoading(false)
+        setOpenModal(false)
       })
     }
   }

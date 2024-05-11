@@ -98,7 +98,7 @@ export function Approval() {
         useFirebase('get_approval_list')
             .then(data => {
                 console.log('data', data);
-                if (userInfo.roles === '5') setList(groupData(data.filter(item => !roleCheck[userInfo.roles].includes(Object.keys(item)[0]))))
+                if (roleCheck[userInfo.roles]) setList(groupData(data.filter(item => !roleCheck[userInfo.roles].includes(Object.keys(item)[0]))))
                 else setList(groupData(data))
                 tableRef.current = data
             })

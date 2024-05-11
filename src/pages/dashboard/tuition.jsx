@@ -60,10 +60,25 @@ export function Tuition() {
   const [selectedStudent, setSelectedStudent] = useState({})
   const [filterTuition, setFilterTuition] = useState(false)
   const [isTuitionDate, setIsTuitionDate] = useState(true)
+  const [courseList, setCourseList] = useState(glb_sv.programs)
+  const courseTuition = useRef({})
 
   useEffect(() => {
     getClassList()
+    getAllCourse()
   }, [])
+
+  const getAllCourse = () => {
+    useFirebase('get_all_course', {getId: true})
+      .then(data => {
+        console.log('get_all_course', data.map(item => item.data()));
+        setCourseList(data.map(item => item.id))
+        data.map(item => courseTuition.current[item.id] = item.data())
+        // useStorage('set', 'programs', data.map(item => item.data()))
+      })
+      .catch(err => console.log(err))
+    // .finally(() => setLoading(false))
+  }
 
   const getClassList = () => {
     setLoading(true)
@@ -110,6 +125,11 @@ export function Tuition() {
         .then(() => {
           setLoading(false)
           toast.success('Đóng tiền thành công, yêu cầu đang chờ duyệt!')
+        })
+        .catch((error) => toast.error(error))
+        .finally(() => {
+          setOpenPayment(false)
+          setLoading(false)
         })
     } else {
       setOpenPayment(false)
@@ -227,7 +247,7 @@ export function Tuition() {
               </Button>
             </div>
           </div>
-          {glb_sv.programs.map((item, index) => (
+          {(courseList).map((item, index) => (
             <ListItem ripple={false} className="hover:bg-transparent focus:bg-transparent active:bg-transparent">
               <Accordion
                 open={!openList.includes(index)}
@@ -250,10 +270,9 @@ export function Tuition() {
                   <List>
                     {classList.map((classInfo, index) => {
                       const tuitiondate = formatDate(classInfo.start_date).slice(0,2)
-                      console.log('classInfo.programs', classInfo.program);
                       let isShow = isTuitionDate || classInfo.program === 'IELTS' ? 
                         moment(tuitiondate + selectedMonth, 'DDMMYYYY').diff(moment(), 'day') <= 1 :
-                        moment(selectedMonth, 'MMYYYY').isBetween(moment(classInfo.start_date).startOf('month').subtract(1, "day"), moment(classInfo.end_date, 'DD/MM/YYYY'))
+                        moment(selectedMonth, 'MMYYYY').isSameOrAfter(moment(classInfo.start_date).startOf('month').subtract(1, "day"), moment(classInfo.end_date, 'DD/MM/YYYY'))
                       // const isPayAll = (Object.values(tuitionTable[classInfo.id] || {})?.length === classInfo.student_list?.length)
                       return (
                         classInfo.id.includes(item) && isShow ? (
@@ -307,7 +326,7 @@ export function Tuition() {
                                 </div>
                               </AccordionHeader>
                               <AccordionBody>
-                                  <TuitionTable handleSelectStudent={handleSelectStudent} filterTuition={filterTuition} classInfo={classInfo} selectedMonth={selectedMonth} />
+                                  <TuitionTable courseTuition={courseTuition.current} handleSelectStudent={handleSelectStudent} filterTuition={filterTuition} classInfo={classInfo} selectedMonth={selectedMonth} />
                                 {/* {!isPayAll || !filterTuition ?
                                 } */}
                               </AccordionBody>
@@ -343,10 +362,11 @@ export function Tuition() {
 
 export default Tuition;
 
-export const TuitionTable = ({ filterTuition, classInfo, selectedMonth, handleSelectStudent }) => {
+export const TuitionTable = ({ courseTuition = {}, filterTuition, classInfo, selectedMonth, handleSelectStudent }) => {
   const [studentTuitionList, setStudentTuitionList] = useState([])
   const classStudentListRef = useRef([])
-  const tuitionDefault = glb_sv.getTuitionFee[classInfo.id.split('_')[0]][0].value
+  const tuitionDefault = Number(courseTuition[classInfo.program]?.[classInfo.level?.trim()]?.['tuition']) || 0
+  // const tuitionDefault = glb_sv.getTuitionFee[classInfo.id.split('_')[0]][0].value
 
   useEffect(() => {
     // const classTuition = tuitionList[classInfo.id] || {}
@@ -420,7 +440,7 @@ export const TuitionTable = ({ filterTuition, classInfo, selectedMonth, handleSe
             }`;
           if ((tuitionDefault - amount === 0) && !filterTuition) return (<></>)
           return (
-            <tr key={index} onDoubleClick={() => handleSelectStudent({id_student: id, id_class: classInfo.id, full_name, month: selectedMonth})}>
+            <tr key={index} onDoubleClick={() => handleSelectStudent({id_student: id, id_class: classInfo.id, full_name, month: selectedMonth, tuition_date: moment().format('MMYYYY')})}>
               <td className={className}>
                 <Typography className="text-xs font-normal text-blue-gray-500">
                   {id}

@@ -365,15 +365,41 @@ const changePassword = (params: any) => {
 
 const makeTuition = (list: any) => {
     return new useRequest((resolve: any, reject: any) => {
-        addDoc(collection(db, 'approval'), {
-            make_tuition: {
-                'data': {...list},
-                'requesting_username': userInfo.displayName,
-                'created_at': moment().valueOf()
-            }
-        })
-            .then(resolve)
-            .catch(reject)
+        let checkDuplicate = false
+        getDocs(collection(db, "approval"))
+            .then(
+                (snap: any) => {
+                    try {
+                        snap.docs.forEach((docRef: any) => {
+                            const approveInfo = docRef.data()
+                            if (approveInfo.make_tuition) {
+                                checkDuplicate =
+                                    approveInfo.make_tuition?.data?.customer_id === list?.customer_id &&
+                                    approveInfo.make_tuition?.data?.class_id === list?.class_id
+                                if (checkDuplicate) {
+                                    reject('Phiếu thu đã tồn tại, vui lòng chờ Admin duyệt!')
+                                    return
+                                }
+                            }
+                        })
+                        // resolve(data)
+                    } catch (error) {
+                        reject(error)
+                    }
+                    if (!checkDuplicate) {
+                        addDoc(collection(db, 'approval'), {
+                            make_tuition: {
+                                'data': { ...list },
+                                'requesting_username': userInfo.displayName,
+                                'created_at': moment().valueOf()
+                            }
+                        })
+                            .then(resolve)
+                            .catch(reject)
+                    }
+                    // if (docRef.data())
+                }
+            )
     })
 }
 
@@ -639,7 +665,7 @@ const getClassList = () => {
     });
 }
 
-const updateApproval = ({approval, ok}: any) => {
+const updateApproval = async ({approval, ok}: any) => {
     return new useRequest(async (resolve: any, reject: any) => {
         const approvalRef = doc(db, 'approval', approval?.id)
         const batch = writeBatch(db);

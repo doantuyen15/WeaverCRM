@@ -1,4 +1,5 @@
 import moment from "moment"
+import formatDate from "../../utils/formatNumber/formatDate"
 
 export default class Finance {
     constructor(info) {
@@ -29,7 +30,7 @@ export default class Finance {
                 this.staff_id = -1
                 this.staff_name = ''
             }
-            if (['create_date', 'type_id'].includes(key)) this.code = (this.isPayment ? 'C' : 'T') + this.type_id + '-' + moment(this.create_date, 'DDMMYY').format('DDMMYY') + moment().format('-HHmmSS')
+            if (['create_date', 'type_id'].includes(key)) this.code = (this.isPayment ? 'C' : 'T') + this.type_id + '-' + formatDate(this.create_date, 'DDMMYY') + moment().format('-HHmmSS')
         }
     }
 }

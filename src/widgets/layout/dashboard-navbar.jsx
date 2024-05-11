@@ -62,7 +62,7 @@ export function DashboardNavbar() {
         displayName: glb_sv.userInfo.displayName || "",
         photoURL: glb_sv.userInfo.photoURL || "",
         roles: glb_sv.userInfo.roles || "",
-        id: glb_sv.userInfo.uid || "",
+        id: glb_sv.userInfo.staff_id || "",
         status: 1
       })
         .then(() => {
