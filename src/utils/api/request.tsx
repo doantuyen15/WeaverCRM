@@ -781,17 +781,13 @@ const updateApproval = async ({approval, ok}: any) => {
                     approver_id: userInfo.uid
                 })
                 batch.update(classRef, {
-                    tuition: {
-                        [tuition_date]: {
-                            [customer_id]: {
-                                class_id,
-                                customer_id,
-                                code,
-                                create_date,
-                                explain,
-                                amount: approval.type === 'make_tuition' ? (currentTuition + amount) : (currentTuition - amount)
-                            }
-                        }
+                    [`tuition.${tuition_date}.${customer_id}`]: {
+                        class_id,
+                        customer_id,
+                        code,
+                        create_date,
+                        explain,
+                        amount: approval.type === 'make_tuition' ? (currentTuition + amount) : (currentTuition - amount)
                     }
                 })
                 batch.delete(approvalRef)
