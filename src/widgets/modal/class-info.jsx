@@ -289,15 +289,17 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
                             <div className="p-4">
                                 <TableSkeleton />
                             </div>
-                        ) : openAttendance ? (
-                            <Attendance
-                                open={openAttendance}
-                                studentList={studentList}
-                                classInfo={data}
-                                calendar={(data.timetable || []).sort(({day:a}, {day:b}) => b-a)}
-                                setCalendar={setCalendar}
-                            />
-                        ) : openInputScore ? (
+                        ) 
+                        // : openAttendance ? (
+                        //     <Attendance
+                        //         open={openAttendance}
+                        //         studentList={studentList}
+                        //         classInfo={data}
+                        //         calendar={(data.timetable || []).sort(({day:a}, {day:b}) => b-a)}
+                        //         setCalendar={setCalendar}
+                        //     />
+                        // ) 
+                        : openInputScore ? (
                             <ScoreTable setStudentList={setStudentList} studentList={studentList} data={data} classId={data.id} />
                         ) : (
                             <TableStudent setStudentList={setStudentList} studentList={studentList} />
@@ -319,11 +321,6 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
                             ) : null}
                             {mode === 'normal' && (
                                 <>
-                                    <Button variant="text" size="sm"
-                                        onClick={() => { mode === 'addStudent' ? handleUpdateAttendance() : changeMode('addStudent') }}
-                                    >
-                                        {mode !== 'addStudent' ? 'Thêm học sinh' : 'Xác nhận thêm học sinh'}
-                                    </Button>
                                     <Button
                                         variant="text"
                                         size="sm"
@@ -333,10 +330,15 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
                                     >
                                         {mode !== 'score' ? 'Nhập điểm' : 'Xác nhận'}
                                     </Button>
+                                    <Button size="sm" variant="gradient"
+                                        onClick={() => { mode === 'addStudent' ? () => { } : changeMode('addStudent') }}
+                                    >
+                                        {mode !== 'addStudent' ? 'Thêm học sinh' : 'Xác nhận thêm học sinh'}
+                                    </Button>
                                 </>
                             )}
 
-                            <Button variant="gradient" size="sm"
+                            {/* <Button variant="gradient" size="sm"
                                 loading={loading}
                                 onClick={() => handleConfirm()}
                             >
@@ -345,7 +347,7 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
                                         : mode === 'addStudent' ? 'Xác nhận thêm học sinh'
                                             : 'Điểm danh'
                                 }
-                            </Button>
+                            </Button> */}
                         </div>
                     </CardFooter>
                 </Card>

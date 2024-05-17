@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import { getDocs, collection, getFirestore, doc, getDoc, query, deleteDoc, Firestore, updateDoc, addDoc, DocumentReference, writeBatch, setDoc, arrayUnion, collectionGroup, where, increment } from "firebase/firestore";
+import { getDocs, collection, getFirestore, doc, getDoc, query, deleteDoc, Firestore, updateDoc, addDoc, DocumentReference, writeBatch, setDoc, arrayUnion, collectionGroup, where, increment, deleteField } from "firebase/firestore";
 import glb_sv from '../../service/global-service'
 import { Functions, getFunctions, httpsCallable } from 'firebase/functions';
 import { getAuth, signInWithCustomToken, updateProfile, Auth } from "firebase/auth";
@@ -63,6 +63,7 @@ export function useFirebase(service: string, params: any) {
         case 'add_new_program': return addNewProgram(params)
         case 'create_user': return createUser(params)
         case 'delete_user': return deleteUser(params)
+        case 'delete_program': return deleteProgram(params)
         case 'update_user': return updateUser(params)
         case 'change_password': return changePassword(params)
         case 'update_student_attendance': return updateStudentAttendance(params)
@@ -985,6 +986,22 @@ const getStaffAccount = () => {
     });
 }
 
+const deleteProgram = (course: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        updateDoc(doc(db, 'courses', course.program), {
+            [course.level]: deleteField()
+        })
+            .then(() => {
+                toast.success(`Delete program ${course.program} - ${course.level} successful!`)
+                resolve('success')
+            })
+            .catch((err) => {
+                toast.error(`error: ${err}`)
+                reject()
+            })
+            .finally(() => clearTimeout(timeoutId))
+    });
+}
 
 const deleteUser = (account: Account) => {
     return new useRequest((resolve: any, reject: any) => {

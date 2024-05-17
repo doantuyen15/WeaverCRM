@@ -71,7 +71,7 @@ export function Tuition() {
   const getAllCourse = () => {
     useFirebase('get_all_course', {getId: true})
       .then(data => {
-        console.log('get_all_course', data.map(item => item.data()));
+        console.log('get_all_course', data.map(item => item.id));
         setCourseList(data.map(item => item.id))
         data.map(item => courseTuition.current[item.id] = item.data())
         // useStorage('set', 'programs', data.map(item => item.data()))
@@ -160,6 +160,17 @@ export function Tuition() {
   const handleSelectStudent = (param) => {
     setSelectedStudent(param)
     setOpenPayment(true)
+  }
+
+  const filterTuitionDate = (classInfo) => {
+    const tuitiondate = formatDate(classInfo.start_date).slice(0, 2)
+    if (classInfo.level == 'DIAMONDPLUS') {
+      moment(selectedMonth, 'MMYYYY').isBetween(moment(classInfo.start_date).startOf('month').subtract(1, 'day'), moment(classInfo.end_date))
+    }
+    const isShow = isTuitionDate || classInfo.program === 'IELTS' ?
+      moment(selectedMonth, 'MMYYYY').isBetween(moment(classInfo.start_date).startOf('month').subtract(1, 'day'), moment(classInfo.end_date)) :
+      moment(tuitiondate + selectedMonth, 'DDMMYYYY').diff(moment(), 'day') <= 5
+      return isShow
   }
 
   return (
@@ -269,10 +280,7 @@ export function Tuition() {
                 <AccordionBody>
                   <List>
                     {classList.map((classInfo, index) => {
-                      const tuitiondate = formatDate(classInfo.start_date).slice(0,2)
-                      let isShow = isTuitionDate || classInfo.program === 'IELTS' ? 
-                        moment(tuitiondate + selectedMonth, 'DDMMYYYY').diff(moment(), 'day') <= 1 :
-                        moment(selectedMonth, 'MMYYYY').isSameOrAfter(moment(classInfo.start_date).startOf('month').subtract(1, "day"), moment(classInfo.end_date, 'DD/MM/YYYY'))
+                      const isShow = filterTuitionDate(classInfo)
                       // const isPayAll = (Object.values(tuitionTable[classInfo.id] || {})?.length === classInfo.student_list?.length)
                       return (
                         classInfo.id.includes(item) && isShow ? (
@@ -373,12 +381,27 @@ export const TuitionTable = ({ courseTuition = {}, filterTuition, classInfo, sel
     const classTuition = classInfo.tuition
     classInfo.getStudentList()
       .then((list) => {
-        setStudentTuitionList(list.map(item => {
-          return {
-            ...item,
-            ...classTuition[selectedMonth]?.[item.id]
-          }
-        }))
+        if (classInfo.program === 'IELTS') { // need update tag monthly
+          setStudentTuitionList(list.map(item => {
+            let amount = 0
+            Object.values(classTuition).forEach(tuition => {
+              if (tuition[item.id]) amount += tuition[item.id]['amount']
+            })
+            console.log('classTuition', amount);
+
+            return {
+              ...item,
+              amount: amount
+            }
+          }))
+        } else {
+          setStudentTuitionList(list.map(item => {
+            return {
+              ...item,
+              ...classTuition[selectedMonth]?.[item.id]
+            }
+          }))
+        }
         // classStudentListRef.current = list
         // if (!tuiList?.length) {
         //   setClassStudentList(list)

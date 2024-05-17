@@ -76,27 +76,26 @@ const BillType = [
 ]
 
 const Header = [
-  'status_res', //0
-  'id', //1
-  "first_name",
-  "last_name",
-  'register_date',
-  'class_id',
-  'has_score',
-  'phone',
-  'dob',
-  'parent_phone',
-  'address',
-  'email', //11
-  'referrer',
-  'advisor',
-  'note'//14
-  // 'writing',
-  // 'reading',
-  // 'speaking',
-  // 'listening',
-  // 'grammar',
-  // 'total',
+  "department",
+  "code",
+  "isPayment",
+  "explain",
+  "account_type",
+  "amount",
+  "approver",
+  "tuition_date",
+  "class_id",
+  "department_id",
+  "approver_id",
+  "create_date",
+  "staff_phone",
+  "staff_name",
+  "staff_id",
+  "customer",
+  "type",
+  "type_id",
+  "customer_id",
+  "account_type_id",
 ]
 
 export default function Finance() {
@@ -158,8 +157,14 @@ export default function Finance() {
         // }
         console.log('query_finance_table', data);
         setFinanceTable(data)
+        tableRef.current = data.map(item => {
+          return {
+            ...item,
+            amount: Number(item.amount)
+          }
+        })
         data?.forEach(item => {
-          if (item.type_id) setTotalReceive(prev => prev += Number(item.amount || 0))
+          if (!item.isPayment) setTotalReceive(prev => prev += Number(item.amount || 0))
           else setTotalPay(prev => prev += Number(item.amount || 0))
         })
       })
@@ -230,6 +235,15 @@ export default function Finance() {
     getFinanceTable()
   }
 
+  const handleSort = (indexCol) => {
+    console.log('handleSort', indexCol, tableRef.current);
+    let sorted
+    sorted = orderBy(tableRef.current, [Header[indexCol]], [isAsc ? 'asc' : 'desc'])
+    setFinanceTable([...sorted])
+    setKeySort(indexCol)
+    setIsAsc(prev => !prev)
+  }
+
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card className="h-full w-full">
@@ -257,9 +271,14 @@ export default function Finance() {
               )}
             </Typography>
           </div>
-          <Typography variant="h6" color="blue-gray" className="mt-1 font-bold">
-            TỔNG THU: {formatNum(totalReceive)} &emsp; | &emsp; TỔNG CHI: {formatNum(totalPay)}
-          </Typography>
+          <div className="text-center">
+            <Typography variant="h6" color="blue-gray" className="mt-1 font-bold">
+              TỔNG THU: {formatNum(totalReceive)} &emsp; | &emsp; TỔNG CHI: {formatNum(totalPay)}
+            </Typography>
+            <Typography variant="h6" color="blue-gray" className="mt-1 font-bold">
+              DOANH THU: {formatNum(totalReceive - totalPay, 0, 'price')}
+            </Typography>
+          </div>
           <div className="gap-4">
             <Button
               className="flex items-center gap-3"
@@ -283,8 +302,11 @@ export default function Finance() {
         <CardBody className="p-0 px-0 overflow-auto max-h-[65vh]">
           <FinanceTable
             // handleRemove={handleRemove}
+            handleSort={handleSort}
             openModalDetail={handleOpenModalDetail}
             financeData={financeTable}
+            keySort={keySort}
+            isAsc={isAsc}
           />
           {/* <Tabs value={mod}>
             <TabsHeader className="max-w-max mx-auto">
@@ -345,7 +367,7 @@ export const ModalFinanceDetail = ({open, handleOpen, data}) => {
       handler={handleOpen}
       className="max-w-[80%]"
     >
-      <DialogHeader className="justify-center">{`Chi tiết ${BillType[data.type_id]}`}</DialogHeader>
+      <DialogHeader className="justify-center">{`Chi tiết ${data.isPayment ? BillType[0] : BillType[1]}`}</DialogHeader>
       <DialogBody>
         <div className="p-4 border-b border-blue-gray-100 flex justify-between">
           <Typography variant="small" color="black">
@@ -429,6 +451,14 @@ export const ModalFinanceDetail = ({open, handleOpen, data}) => {
             {data.approver}
           </Typography>
         </div>
+        <div className="p-4 border-b border-blue-gray-100 flex justify-between">
+          <Typography variant="small" color="black">
+            Diễn giải
+          </Typography>
+          <Typography variant="small" color="black" className="font-bold">
+            {data.explain}
+          </Typography>
+        </div>
       </DialogBody>
       <DialogFooter className="space-x-2">
         <Button variant="gradient" color="deep-orange" onClick={() => handleOpen(prev => !prev)}>
@@ -439,9 +469,7 @@ export const ModalFinanceDetail = ({open, handleOpen, data}) => {
   )
 }
 
-export const FinanceTable = ({ financeData = [], openModalDetail }) => {
-  const [keySort, setKeySort] = useState('')
-  const [isAsc, setIsAsc] = useState(true)
+export const FinanceTable = ({ financeData = [], openModalDetail, keySort, isAsc, handleSort }) => {
 
   return (
     <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
@@ -449,7 +477,7 @@ export const FinanceTable = ({ financeData = [], openModalDetail }) => {
         <tr>
           {TABLE_HEAD.map((head, index) => (
             <th
-              // onClick={() => handleSort(index)}
+              onClick={() => handleSort(index)}
               key={head}
               className="z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors hover:bg-blue-gray-200"
             >
@@ -459,7 +487,7 @@ export const FinanceTable = ({ financeData = [], openModalDetail }) => {
                 className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
               >
                 {head}{" "}
-                {(index === 1 || index === 3) && (
+                {(
                   keySort !== index ? (
                     <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
                   ) : keySort === index && isAsc ? (
@@ -512,7 +540,7 @@ export const FinanceTable = ({ financeData = [], openModalDetail }) => {
                     color="blue-gray"
                     className="font-normal"
                   >
-                    {BillType[item.type_id]}
+                    {item.isPayment ? BillType[0] : BillType[1]}
                   </Typography>
                 </td>
                 <td className={classes}>

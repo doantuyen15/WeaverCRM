@@ -23,6 +23,7 @@ import sortObjByKey from "../../utils/sortObject/sortObjByKey";
 import sortObjByValue from "../../utils/sortObject/sortObjByValue";
 import { CreatePrograms } from "./create-programs";
 import { toast } from "react-toastify";
+import { NotificationDialog } from "./alert-popup";
 
 export function CourseManagement({ loading, open, handleCallback }) {
     const [controller] = useController();
@@ -31,9 +32,12 @@ export function CourseManagement({ loading, open, handleCallback }) {
     const updateList = useRef({})
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
-    const [errorMsg, setErrorMsg] = useState('')
+    const [alertMsg, setAlertMsg] = useState('')
     const [isFocus, setIsFocus] = useState(false)
     const [openCreateCourse, setOpenCreateCourse] = useState(false)
+    const [openAlert, setOpenAlert] = useState(false)
+    const deleteProgramRef = useRef({})
+    const courseRef = useRef([])
 
     // useEffect(() => {
     //     if (!tuition?.length) getTuition()
@@ -52,7 +56,7 @@ export function CourseManagement({ loading, open, handleCallback }) {
             // }])
             updateList.current = {}
             setCourseList([])
-            setErrorMsg('')
+            setAlertMsg('')
         }
     }, [open])
 
@@ -61,6 +65,7 @@ export function CourseManagement({ loading, open, handleCallback }) {
             .then(data => {
                 console.log('getAllCourse', data);
                 setCourseList(data)
+                courseRef.current = data
                 useStorage('set', 'programs', data)
             })
             .catch(err => console.log(err))
@@ -84,6 +89,14 @@ export function CourseManagement({ loading, open, handleCallback }) {
 
     const updateCourseInfo = ({ level, key, value, courseIndex, mod }) => {
         const update = [...courseList]
+        if (mod == 'delete') {
+            delete update[courseIndex][level]
+            console.log('update', update);
+            setCourseList(update)
+            updateList.current = update
+            forceUpdate()
+            return
+        }
         // if (mod === 'delete') {
         //     update[courseIndex] = update[courseIndex]?.filter((levelID) => levelID != level)
         // } 
@@ -105,11 +118,30 @@ export function CourseManagement({ loading, open, handleCallback }) {
                 .catch(err => toast.error('Thêm khoá mới thất bại! Vui lòng chụp lại lỗi và báo IT, lỗi: ' + err))
         }
     }
+
+    const handleDeleteProgram = (ok) => {
+        setOpenAlert(false)
+        console.log('deleteProgramRef.current', deleteProgramRef.current);
+        if (ok) {
+            useFirebase('delete_program', deleteProgramRef.current )
+                .then(() => toast.success('Thêm khoá mới thành công'))
+                .catch(err => toast.error('Thêm khoá mới thất bại! Vui lòng chụp lại lỗi và báo IT, lỗi: ' + err))
+        } else {
+            deleteProgramRef.current = {}
+        }
+    }
+
+    const handleConfirmDelete = (course) => {
+        console.log('handleConfirmDelete', course);
+        deleteProgramRef.current = course
+        setAlertMsg(`Xác nhận xoá program ${course.program} / ${course.level}?`)
+        setOpenAlert(true)
+    }
     
     return (
         <>
             <Dialog
-                size="md"
+                size="sm"
                 open={open}
                 handler={() => {
                     !openCreateCourse && handleCallback(false)
@@ -135,11 +167,11 @@ export function CourseManagement({ loading, open, handleCallback }) {
                                             </Typography>
                                         </div>
 
-                                        <div className="grid grid-col-1 min-w-[4rem] gap-y-3 menu-fixed">
+                                        <div className="grid grid-cols-1 min-w-[8rem] gap-y-3 menu-fixed grow">
                                             {courseInfo.map(info => (
                                                 <Typography
                                                     variant="small"
-                                                    className="text-[12px] font-bold text-blue-gray-400 flex-2"
+                                                    className="text-[12px] font-bold text-blue-gray-400"
                                                 >
                                                     {info.level_id}
                                                 </Typography>
@@ -148,8 +180,8 @@ export function CourseManagement({ loading, open, handleCallback }) {
 
                                         <div className="grid grow grid-row gap-y-3">
                                             {courseInfo.map((info, indexInfo) => (
-                                                <div className="grid grid-cols-2">
-                                                    <div className="flex items-center gap-2 justify-around">
+                                                <div className="flex">
+                                                    <div className="flex items-center gap-2 justify-end flex-1">
                                                         <div className="flex items-center">
                                                             <Typography
                                                                 contentEditable
@@ -183,26 +215,28 @@ export function CourseManagement({ loading, open, handleCallback }) {
                                                                 {'Tuần'}
                                                             </Typography>
                                                         </div>
-                                                        
-
-                                                        {/* <div className="grow-0">
-                                                        <MinusCircleIcon
-                                                            // style={{ visibility: index == 0 ? 'hidden' : 'visible' }}
-                                                            className="w-5 h-5 ml-3 text-blue-gray-200 cursor-pointer"
-                                                        // onClick={() => setCourseList(courseList.filter((_, indexClass) => indexClass !== index))}
-                                                        />
-                                                    </div> */}
                                                     </div>
-                                                    <Typography
-                                                        variant="small"
-                                                        contentEditable
-                                                        onFocus={() => setIsFocus(true)}
-                                                        onBlur={() => setIsFocus(false)}
-                                                        onInput={(e) => updateCourseInfo({ courseIndex: index, level: courseLevel[indexInfo], key: 'tuition', value: e.currentTarget.innerText?.replace(/[^\d.-]+/g, '') })}
-                                                        className="text-[12px] text-right font-bold text-blue-gray-400"
-                                                    >
-                                                        {!isFocus ? formatNum(info.tuition, 0, 'price') : formatNum(info.tuition, 0)}
-                                                    </Typography>
+                                                    <div className="min-w-[8rem] flex-2">
+                                                        <Typography
+                                                            variant="small"
+                                                            contentEditable
+                                                            onFocus={() => setIsFocus(true)}
+                                                            onBlur={() => setIsFocus(false)}
+                                                            onInput={(e) => updateCourseInfo({ courseIndex: index, level: courseLevel[indexInfo], key: 'tuition', value: e.currentTarget.innerText?.replace(/[^\d.-]+/g, '') })}
+                                                            className="text-[12px] text-right font-bold text-blue-gray-400"
+                                                        >
+                                                            {!isFocus ? formatNum(info.tuition, 0, 'price') : formatNum(info.tuition, 0)}
+                                                        </Typography>
+                                                    </div>
+                                                    <div className="self-center mr-2">
+                                                        <MinusCircleIcon
+                                                            className="w-4 h-4 ml-3 text-blue-gray-200 cursor-pointer"
+                                                            onClick={() => {
+                                                                // updateCourseInfo({ mod: 'delete', courseIndex: index, level: courseLevel[indexInfo] }
+                                                                handleConfirmDelete({ program: id, level: courseLevel[indexInfo] })
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -262,6 +296,7 @@ export function CourseManagement({ loading, open, handleCallback }) {
                 </Card>
             </Dialog>
             <CreatePrograms loading={loading} open={openCreateCourse} handleCallback={handleCallBackAddPrograms}/>
+            <NotificationDialog open={openAlert} handleCallback={handleDeleteProgram} message={alertMsg} />
         </>
     );
 }
