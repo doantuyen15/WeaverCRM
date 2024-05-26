@@ -27,7 +27,7 @@ export default class ClassInfo {
         this.class_schedule_id = data?.class_schedule_id || 0,
         this.converted = false,
         this.teacher_id = data?.teacher_id || '',
-        this.teacher_2_id = data?.teacher_id || '',
+        this.teacher_2_id = data?.teacher_2_id || '',
         this.sub_teacher_id = data?.sub_teacher_id || [],
         this.ta_teacher_id = data?.ta_teacher_id || '',
         this.cs_staff_id = data?.cs_staff_id || '',

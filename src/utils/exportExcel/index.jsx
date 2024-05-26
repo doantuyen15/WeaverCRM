@@ -14,6 +14,13 @@ import FinanceTemplateExcel from "./reports/mau-so-quy-tm.xlsx";
 import formatNum from '../formatNumber/formatNum';
 import { glb_sv } from '../../service';
 
+const border = {
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    bottom: { style: 'thin' },
+    right: { style: 'thin' },
+}
+
 const exportExcel = ({ reportName = '', data = {}, info = {} }) => {
     switch (reportName) {
         case 'score':
@@ -135,12 +142,7 @@ const exportFinance = async (data, info) => {
             const row = worksheet.getRow(index + 6)
             for(var indexCell = 1; indexCell <= 6; indexCell++) {
                 const cell = row.getCell(indexCell)
-                cell.border = {
-                    top: { style: 'thin' },
-                    left: { style: 'thin' },
-                    bottom: { style: 'thin' },
-                    right: { style: 'thin' },
-                };
+                cell.border = border;
                 if (indexCell == 4 || indexCell == 5) {
                     cell.alignment = { horizontal: 'right' }
                 }
@@ -191,12 +193,7 @@ const exportTuition = async (data, info) => {
             const row = worksheet.getRow(index + 5)
             for(var indexCell = 1; indexCell <= 6; indexCell++) {
                 const cell = row.getCell(indexCell)
-                cell.border = {
-                    top: { style: 'thin' },
-                    left: { style: 'thin' },
-                    bottom: { style: 'thin' },
-                    right: { style: 'thin' },
-                };
+                cell.border = border;
                 if (indexCell == 5) {
                     cell.alignment = { horizontal: 'right' }
                 }
@@ -225,10 +222,12 @@ const exportTuition = async (data, info) => {
 export const createLessonDairy = async (item, teacherList) => {
     const classInfo = item.data[0]
     const workbook = new ExcelJS.Workbook();
-    const resp = await fetch(classInfo.program === 'IELTS' ? './assets/reports/template_ielts.xlsx' : './assets/reports/template_life.xlsx')
+    // const resp = await fetch(classInfo.program === 'IELTS' ? './assets/reports/template_ielts.xlsx' : './assets/reports/template_life.xlsx')
+    const resp = await fetch('./assets/reports/template_ielts.xlsx')
     const buffer = await resp.arrayBuffer()
     const excel = await workbook.xlsx.load(buffer)
     const worksheet = excel.getWorksheet(1)
+    const attendanceSheet = excel.getWorksheet(2)
 
     const startDate = moment(classInfo.start_date);
     const endDate = moment(classInfo.end_date);
@@ -253,85 +252,75 @@ export const createLessonDairy = async (item, teacherList) => {
         }
     })
 
-    if (classInfo.program === 'IELTS') {
-        timetable.forEach((day, index) => {
-            worksheet.insertRow(index + 6, [
-                index + 1,
-                day,
-                '',
-            ])
-            const row = worksheet.getRow(index + 6)
-            for(var indexCell = 1; indexCell <= 9; indexCell++) {
-                const cell = row.getCell(indexCell)
-                cell.border = {
-                    top: { style: 'thin' },
-                    left: { style: 'thin' },
-                    bottom: { style: 'thin' },
-                    right: { style: 'thin' },
-                };
-                cell.font = {
-                    name: 'Arial'
-                }
-                cell.alignment = { horizontal: 'center', vertical: 'middle' }
-                if (indexCell == 3) {
-                    cell.font = {
-                        color: {argb: "ffed7d31"},
-                        name: 'Arial',
-                        bold: true
-                    }
-                    cell.dataValidation = {
-                        type: 'list',
-                        allowBlank: true,
-                        formulae: [`"${teacherList?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id))?.map(item => item.short_name)}"`]
-                    };
-                }
+    attendanceSheet.getCell('B1').value = attendanceSheet.getCell('B1').value.replace('{class_id}', classInfo.id)
+    attendanceSheet.getCell('D2').value = classInfo.class_schedule
+    attendanceSheet.getCell('D4').value = classInfo.teacher_2_short_name ? `${classInfo.teacher_short_name}-${classInfo.teacher_2_short_name}` : classInfo.teacher_short_name
+
+    let starRow = 6
+    timetable.forEach((day, index) => {
+        const attendanceNum = attendanceSheet.getCell(5, index + 7)
+        attendanceNum.value = index + 1
+        // attendanceNum.border = border
+        attendanceNum.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "ffd8d8d8" },
+          };
+        // attendanceNum.fill.bgColor = { argb: 'ffd8d8d8' }
+        attendanceNum.alignment = { horizontal: 'center', vertical: 'middle' }
+        const attendanceDay = attendanceSheet.getCell(6, index + 7)
+        attendanceDay.value = day
+        // attendanceDay.border = border
+        attendanceDay.alignment = { horizontal: 'center', vertical: 'middle' }
+        
+        worksheet.insertRow(index + starRow, [
+            index + 1,
+            // moment(day, 'DD/MM/YYYY').format('M'),
+            day,
+            '',
+        ])
+        const row = worksheet.getRow(index + 6)
+        for (var indexCell = 1; indexCell <= 9; indexCell++) {
+            const cell = row.getCell(indexCell)
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' },
+            };
+            cell.font = {
+                name: 'Arial'
             }
-        })
-    } else { //LIFE
-        worksheet.getCell('B2').value = classInfo.program + ' ' + classInfo.level
-        worksheet.getCell('B3').value = classInfo.class_schedule
-        worksheet.getCell('B4').value = classInfo.teacher_short_name + ' - ' + classInfo.teacher_2_short_name
-        worksheet.getCell('F3').value = formatDate(classInfo.start_date)
-    
-        timetable.forEach((day, index) => {
-            worksheet.insertRow(index + 7, [
-                index + 1,
-                moment(day, 'DD/MM/YYYY').format('M'),
-                day,
-                '',
-            ])
-            const row = worksheet.getRow(index + 7)
-            for(var indexCell = 1; indexCell <= 11; indexCell++) {
-                const cell = row.getCell(indexCell)
-                cell.border = {
-                    top: { style: 'thin' },
-                    left: { style: 'thin' },
-                    bottom: { style: 'thin' },
-                    right: { style: 'thin' },
-                };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' }
+            if (indexCell == 3) {
                 cell.font = {
-                    name: 'Arial'
+                    color: { argb: "ffed7d31" },
+                    name: 'Arial',
+                    bold: true
                 }
-                cell.alignment = { horizontal: 'center', vertical: 'middle' }
-                if (indexCell == 4) {
-                    cell.font = {
-                        color: {argb: "ffed7d31"},
-                        name: 'Arial',
-                        bold: true
-                    }
-                    cell.dataValidation = {
-                        type: 'list',
-                        allowBlank: true,
-                        formulae: [`"${teacherList?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id))?.map(item => item.short_name)}"`]
-                    };
-                }
+                cell.dataValidation = {
+                    type: 'list',
+                    allowBlank: true,
+                    formulae: [`"${teacherList?.filter(staff => [1, 3, 4, 7].includes(staff.roles_id))?.map(item => item.short_name)}"`]
+                };
             }
-        })
-    }
+        }
+    })
 
 
 
     const newBuffer = await workbook.xlsx.writeBuffer()
+        //     workbook.xlsx.writeBuffer().then(function (data) {
+        //     const blob = new Blob([data], {
+        //         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        //     });
+        //     const url = window.URL.createObjectURL(blob);
+        //     const anchor = document.createElement("a");
+        //     anchor.href = url;
+        //     anchor.download = "download.xlsx";
+        //     anchor.click();
+        //     window.URL.revokeObjectURL(url);
+        // });
     return newBuffer
 }
 

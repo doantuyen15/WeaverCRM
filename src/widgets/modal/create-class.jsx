@@ -83,10 +83,10 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
     useEffect(() => {
         if (open) {
             handleAdd()
+            getAllCourse()
             if (isShow) {
                 getStudentList()
                 getStaffList()
-                getAllCourse()
             }
             // getAllCourse()
         } else {
