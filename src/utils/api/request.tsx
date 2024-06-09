@@ -721,9 +721,9 @@ const updateApproval = async ({approval, ok}: any) => {
                 }
 
                 batch.set(classRef, {...classInfo})
-                batch.update(classRef, {
-                    tuition: doc(db, `classes/${docId}`),
-                })
+                // batch.update(classRef, {
+                //     tuition: doc(db, `classes/${docId}`),
+                // })
                 batch.delete(approvalRef)
                 batch.commit()
                     .then(resolve)

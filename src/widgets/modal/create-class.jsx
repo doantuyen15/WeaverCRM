@@ -312,7 +312,7 @@ export function CreateClasses({ classInfo = {}, setClassInfo, handleUpdateClass,
                                                 </Typography>
                                             }
                                         >
-                                            {Object.values(courseList[info.program])?.map(item => (
+                                            {Object.values(courseList[info.program])?.sort((a, b) => a.level_id.localeCompare(b.level_id))?.map(item => (
                                                 <Option onClick={() => {
                                                     updateClassList(index, 'level', item.level_id?.replace(' ', ''))
                                                     if (info.start_date != '')
