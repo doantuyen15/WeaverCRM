@@ -1625,7 +1625,7 @@ export const StudentRow = ({ hideColumn = false, classes, index, item, handleEdi
                                 <PencilIcon className="h-4 w-4" />
                             </IconButton>
                         </MenuHandler>
-                        <MenuList>
+                        <MenuList className="z-[999999]">
                             <MenuItem onClick={() => handleEdit(item, index)}>Edit</MenuItem>
                             {(userInfo.roles == 1 || userInfo.roles == 2) && <MenuItem onClick={() => handleRemove(item, index)}>Remove</MenuItem>}
                         </MenuList>
