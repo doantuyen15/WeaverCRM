@@ -14,7 +14,7 @@ exports.default = async function notarizing(context) {
     appBundleId: 'vn.altisss.premium',
     appPath: `${appOutDir}/${appName}.app`,
     appleId: 'altissssolution@gmail.com',
-    appleIdPassword: 'lpcd-bkzi-izro-ljya',
+    appleIdPassword: 'rczw-oiur-ysln-says',
     ascProvider: '3894P43295',
     teamId: '3894P43295' // thêm 
   });
