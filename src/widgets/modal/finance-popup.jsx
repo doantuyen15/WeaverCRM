@@ -282,7 +282,10 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                     max={moment().format('YYYY-MM-DD')}
                                                     className="pl-4 pr-2"
                                                     value={formatDate(newBill.create_date, 'YYYY-MM-DD')}
-                                                    onChange={(e) => updateFinance('create_date', formatDate(e.target.value, 'moment'))}
+                                                    onChange={(e) => {
+                                                        updateFinance('create_date', formatDate(e.target.value, 'moment'))
+                                                        updateFinance('tuition_date', formatDate(e.target.value, 'MMYYYY'))
+                                                    }}
                                                 />
                                             </div>
                                         </div>
@@ -401,6 +404,7 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                                     updateFinance('customer', '')
                                                                     updateFinance('customer_id', '')
                                                                     updateFinance('class_id', item.id)
+                                                                    updateFinance('amount', 0)
                                                                     currentClassInfo.current = item
                                                                     if (Object.keys(courseTuition.current).length === 0) getCourseTuition()
                                                                 }}
@@ -434,6 +438,7 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                                     <Option onClick={() => {
                                                                         updateFinance('customer', item.full_name)
                                                                         updateFinance('customer_id', item.id)
+                                                                        updateFinance('amount', 0)
                                                                         getTuitionForCustomer(currentMonth, newBill.customer_id)
                                                                         currentClassInfo.current?.program === 'IELTS' && getTuitionForCustomer('', item.id)
                                                                     }}

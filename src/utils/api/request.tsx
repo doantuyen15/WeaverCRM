@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import { getDocs, collection, getFirestore, doc, getDoc, query, deleteDoc, Firestore, updateDoc, addDoc, DocumentReference, writeBatch, setDoc, arrayUnion, collectionGroup, where, increment, deleteField } from "firebase/firestore";
+import { getDocs, collection, getFirestore, doc, getDoc, query, deleteDoc, Firestore, updateDoc, addDoc, DocumentReference, writeBatch, setDoc, arrayUnion, collectionGroup, where, increment, deleteField, FieldValue, arrayRemove } from "firebase/firestore";
 import glb_sv from '../../service/global-service'
 import { Functions, getFunctions, httpsCallable } from 'firebase/functions';
 import { getAuth, signInWithCustomToken, updateProfile, Auth } from "firebase/auth";
@@ -65,6 +65,7 @@ export function useFirebase(service: string, params: any) {
         case 'delete_user': return deleteUser(params)
         case 'delete_program': return deleteProgram(params)
         case 'update_user': return updateUser(params)
+        case 'delete_student_from_class': return deleteStudentFromClass(params)
         case 'change_password': return changePassword(params)
         case 'update_student_attendance': return updateStudentAttendance(params)
         case 'update_staff_attendance': return updateStaffAttendance(params)
@@ -225,6 +226,28 @@ const deleteStudent = (student: StudentInfo) => {
                 console.log('error', error);
                 reject(error)
             })
+    })
+}
+
+const deleteStudentFromClass = (data: any) => {
+    return new useRequest((resolve: any, reject: any) => {
+        const batch = writeBatch(db);
+        console.log('deleteStudentFromClass', data);
+        
+        const classRef = doc(db, 'classes', data.class_id)
+        const studentRef = doc(db, 'student', data.student_id)
+        batch.update(classRef, {
+            student_list: arrayRemove(studentRef)
+        })
+        batch.commit().then(resolve).catch(reject);
+        // deleteDoc(doc(db, 'student', student.id))
+        //     .then(res => {
+        //         resolve(res)
+        //     })
+        //     .catch((error: any) => {
+        //         console.log('error', error);
+        //         reject(error)
+        //     })
     })
 }
 

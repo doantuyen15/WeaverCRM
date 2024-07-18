@@ -159,6 +159,7 @@ export function ModalStudent({ studentData, open, handleCallback, justShow = fal
 
     return (
         <Dialog
+            key={'modal_student'}
             size="lg"
             open={open}
             handler={() => {

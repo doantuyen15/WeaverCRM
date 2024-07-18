@@ -33,6 +33,7 @@ import { loadExcelTemplate } from "../../utils/luckySheet";
 import { Workbook } from "@fortune-sheet/react";
 import lessonDairyTest from '../../data/sample/lesson_dairy'
 import Deburr from "../../utils/formatNumber/deburr";
+import { ModalStudent } from "./modal-student";
 
 const HEADER_STUDENT = [
     // "Tình trạng đăng ký",
@@ -122,7 +123,10 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
     const [openDiary, setOpenDiary] = useState(false)
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
-    
+
+    const [selectedStudent, setSelectedStudent] = useState({})
+    const [openModalEditStudent, setOpenModalEditStudent] = useState(false)
+
     useEffect(() => {
         getStudent()
     }, [classList])
@@ -131,6 +135,7 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
         setLoading(true)
         data.getStudentList()
             .then((res) => {
+                console.log('getStudentList', );
                 setStudentList(res)
                 setLoading(false)
                 forceUpdate()
@@ -231,14 +236,57 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
         // : mode === 'addStudent' ? handleAddStudent(ok, studentList)
     }
 
+    const handleEditStudent = (item) => {
+        setSelectedStudent(item)
+        setOpenModalEditStudent(true)
+    }
+
+    const handleRemoveStudent = (item) => {
+        useFirebase('delete_student_from_class', { class_id: data.id, student_id: item.id })
+            .then(() => {
+                toast.success("Xoá học viên khỏi lớp thành công!")
+            })
+            .catch((err) => {
+                console.log(err);
+                toast.error(`Xoá học viên khỏi lớp không thành công! Lỗi: ${err}`)
+            })
+            .finally(() => {
+                setLoading(false)
+                setOpenModalEditStudent(false)
+                getClassList()
+            })
+    }
+
+    const handleEditStudentCallback = (ok, studentInfo, isUpdate) => {
+        console.log('handleEditStudentCallback', studentInfo);
+        if (!ok) {
+            setOpenModalEditStudent(false)
+        } else {
+            useFirebase('update_student', studentInfo)
+                .then(() => {
+                    toast.success("Sửa thông tin học viên thành công! Yêu cầu đang chờ duyệt")
+                })
+                .catch((err) => {
+                    console.log(err);
+                    toast.error(`Sửa thông tin học viên không thành công! Lỗi: ${err}`)
+                })
+                .finally(() => {
+                    setSelectedStudent({})
+                    // setLoading(false)
+                    setOpenModalEditStudent(false)
+                })
+        }
+    }
+    
     return (
         <div>
             <Dialog
+                key={'class_info'}
                 size={zoom ? 'xl' : 'lg'}
                 open={open}
                 handler={() => {
                     // handleCallback(false)
-                    if (mode === 'normal' && !openDiary) handleOpen()
+                    if (mode === 'normal' && !openDiary && !openModalEditStudent) handleOpen()
                 }}
                 className={"bg-transparent shadow-none"}
             >
@@ -302,7 +350,7 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
                         : openInputScore ? (
                             <ScoreTable setStudentList={setStudentList} studentList={studentList} data={data} classId={data.id} />
                         ) : (
-                            <TableStudent setStudentList={setStudentList} studentList={studentList} />
+                            <TableStudent setStudentList={setStudentList} studentList={studentList} handleEdit={handleEditStudent} handleRemove={handleRemoveStudent} />
                         )}
                     </CardBody>
                     <CardFooter className="pt-4 flex justify-between">
@@ -354,6 +402,7 @@ export function ModalClassInfo({ open, data, handleOpen, classList, getClassList
             </Dialog>
             <AddStudentToClass loading={loading} classList={classList} open={openAddStudent} handleCallback={handleAddStudent}/>
             <LessonDiary loading={loading} open={openDiary} handleCallback={handleDiaryCallback} data={data}/>
+            <ModalStudent studentData={selectedStudent} open={openModalEditStudent} handleCallback={handleEditStudentCallback} />
         </div>
     );
 }
@@ -494,7 +543,7 @@ const LessonDiary = ({ loading, open, handleCallback, data }) => {
     )
 }
 
-const TableStudent = ({ studentList, setStudentList }) => {
+const TableStudent = ({ studentList, setStudentList, handleEdit, handleRemove }) => {
     const [keySort, setKeySort] = useState('')
     const [isAsc, setIsAsc] = useState(true)
     const tableRef = useRef(studentList)
@@ -554,8 +603,8 @@ const TableStudent = ({ studentList, setStudentList }) => {
                                 item={item}
                                 index={index}
                                 hideColumn={true}
-                            // handleEdit={handleEdit}
-                            // handleRemove={handleRemove}
+                                handleEdit={handleEdit}
+                                handleRemove={handleRemove}
                             />
                         )
                     }

@@ -16,9 +16,10 @@ import { useNavigate } from "react-router-dom";
 import useStorage from '../../utils/localStorageHook';
 import { NotificationDialog } from '../../widgets/modal/alert-popup';
 import { glb_sv } from '../../service';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
+import { ENV } from '../../configs/config';
 
 export function SignIn() {
   const [loading, setLoading] = useState(false)
@@ -38,8 +39,6 @@ export function SignIn() {
   // }, [userInfoRes])
 
   const handleLogin = async (e) => {
-    const auth = glb_sv.auth
-    console.log('auth', auth);
     setLoading(true)
 
     const loginInfo = {
@@ -47,22 +46,36 @@ export function SignIn() {
       password: e.target[1].value
     }
     e.preventDefault()
-    await useFirebase('get_token', loginInfo)
-      .then((userInfoRef) => {
-        glb_sv.userInfo = userInfoRef
-        getUserInfo(e.target[0].value)
-      })
-      .catch((error) => {
-        // const errorCode = error.code;
-        // const errorMessage = error.message;
-        // console.log('error', errorCode, errorMessage);
-        // glb_sv.showAlert({
-        //   content: error,
-        //   handleCallback: null
-        // })
-        toast.error('Đăng nhập thất bại!')
-      })
-      .finally(() => setLoading(false))
+    if (ENV === 'UAT') {
+      const auth = getAuth(glb_sv.app)
+      console.log('auth', auth);
+      signInWithEmailAndPassword(auth, loginInfo.username, loginInfo.password)
+        .then((userCredential) => {
+          // Signed in 
+          const user = userCredential.user;
+          glb_sv.userInfo = user
+          getUserInfo(loginInfo.username)
+          // ...
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log('error', errorCode, errorMessage);
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    } else {
+      await useFirebase('get_token', loginInfo)
+        .then((userInfoRef) => {
+          glb_sv.userInfo = userInfoRef
+          getUserInfo(e.target[0].value)
+        })
+        .catch((error) => {
+          toast.error('Đăng nhập thất bại!')
+        })
+        .finally(() => setLoading(false))
+    }
 
     // await signInWithEmailAndPassword(auth, `${user}@weaver.edu.vn`, password)
     //   .then(async (userCredential) => {

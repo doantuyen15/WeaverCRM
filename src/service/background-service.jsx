@@ -14,7 +14,7 @@ import { NotificationDialog } from "../widgets/modal/alert-popup";
 import useStorage from "../utils/localStorageHook";
 import { Navigate } from "react-router-dom";
 import { glb_sv } from "./index";
-import config from '../configs/config.json';
+import { ENV, fireBaseConfig } from '../configs/config';
 import { getFunctions } from 'firebase/functions';
 import { useController, setUserInfo, setFirebase } from "../context";
 const ipcRenderer = window.ipcRenderer
@@ -30,7 +30,8 @@ export function BackgroundService() {
 
         const commonEvent = glb_sv.commonEvent.subscribe((msg) => {
             if (msg.type === 'ALERT_MODAL') {
-                setAlertParams({ ...msg.params, open: true })
+                setAlertParams(msg.params)
+                setShowAlert(true)
             }
         })
 
@@ -40,10 +41,15 @@ export function BackgroundService() {
     }, [])
 
     const readConfigInfo = async () => {
-        const firebaseConfig = config.firebaseConfig
-        const app = initializeApp(firebaseConfig);
+        const app = initializeApp(fireBaseConfig);
         // const auth = getAuth(app);
-        const db = getFirestore(app);
+        let db
+        console.log('ENV', ENV);
+        if (ENV == 'UAT') {
+            db = getFirestore(app, "production")
+        } else {
+            db = getFirestore(app)
+        }
         // const functions = getFunctions(app);
         glb_sv.database = db;
         // glb_sv.auth = auth
@@ -90,8 +96,8 @@ export function BackgroundService() {
     }
 
     return (
-        <>
-            <NotificationDialog open={alertParams.open} message={alertParams.content} handleCallback={alertParams.handleCallback} />
-        </>
+        <div className="z-[9999999]">
+            <NotificationDialog open={showAlert} handleOpen={setShowAlert} message={alertParams.content} handleCallback={alertParams.handleCallback} />
+        </div>
     );
 }

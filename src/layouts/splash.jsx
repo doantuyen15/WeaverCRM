@@ -13,7 +13,7 @@ import LogoDark from "../assets/logo/we_logo_dark80.png"
 import { useState, useEffect } from "react";
 import {useFetch} from "../utils/api/request";
 const ipcRenderer = window.ipcRenderer
-import config from '../configs/config.json';
+import config from '../configs/config';
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getDoc, getFirestore } from "firebase/firestore";

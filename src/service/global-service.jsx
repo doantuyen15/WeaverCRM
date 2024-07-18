@@ -27,7 +27,7 @@ class globalService {
         this.functions = null
         this.commonEvent = new Subject()
         this.showAlert = ({ content, handleCallback }) => {
-            this.commonEvent.next({ type: 'SHOW_ALERT', params: { content: content, handleCallback: handleCallback } })
+            this.commonEvent.next({ type: 'ALERT_MODAL', params: { content: content, handleCallback: handleCallback } })
         }
         this.billType = {
             'pay': [

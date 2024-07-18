@@ -258,6 +258,7 @@ export default function StudentTable() {
     const handleEdit = (item, index) => {
         setSelectedStudent(item)
         setOpenModal(true)
+        console.log('handleEdit');
         // objectEdit.push(item)
         // currentEditKey.current = {
         //     ...currentEditKey.current,
