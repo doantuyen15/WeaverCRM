@@ -11,6 +11,7 @@ import StudentInfo from "../../data/entities/studentInfo";
 import formatDate from "../formatNumber/formatDate";
 import StaffInfo from "../../data/entities/staffInfo";
 import Finance from "../../data/entities/finance";
+import { ENV } from "../../configs/config";
 
 const controller = new AbortController();
 const timeout = setTimeout(() => controller.abort(), 10000);
@@ -25,7 +26,11 @@ let timeoutId: NodeJS.Timeout;
 export function useFirebase(service: string, params: any) {
     userInfo = glb_sv.userInfo
     auth = getAuth(glb_sv.app);
-    db = getFirestore(glb_sv.app);
+    if (ENV == 'UAT') {
+        db = getFirestore(glb_sv.app, "production")
+    } else {
+        db = getFirestore(glb_sv.app)
+    }
     functions = getFunctions(glb_sv.app);
     // timeoutId = setTimeout(() => {
     //     toast.error(`Query service ${service} timed out, auto retry!`);

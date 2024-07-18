@@ -250,14 +250,17 @@ export default function Finance() {
         <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
           <div className="flex justify-between">
             <Typography variant="h6" color="white">
-              DANH SÁCH THU CHI THÁNG - {moment().format('MM')}
+              DANH SÁCH THU CHI THÁNG - {moment().format("MM")}
             </Typography>
           </div>
-
         </CardHeader>
         <div className="mb-4 flex w-full items-center justify-between p-4">
           <div onClick={getFinanceHistory}>
-            <Typography variant="h6" color="blue-gray" className="flex items-center mr-3 cursor-pointer">
+            <Typography
+              variant="h6"
+              color="blue-gray"
+              className="flex items-center mr-3 cursor-pointer"
+            >
               {currentMonth === selectedMonth ? (
                 <>
                   <ChevronLeftIcon className="h-4 w-4" strokeWidth="2" />
@@ -272,11 +275,20 @@ export default function Finance() {
             </Typography>
           </div>
           <div className="text-center">
-            <Typography variant="h6" color="blue-gray" className="mt-1 font-bold">
-              TỔNG THU: {formatNum(totalReceive)} &emsp; | &emsp; TỔNG CHI: {formatNum(totalPay)}
+            <Typography
+              variant="h6"
+              color="blue-gray"
+              className="mt-1 font-bold"
+            >
+              TỔNG THU: {formatNum(totalReceive)} &emsp; | &emsp; TỔNG CHI:{" "}
+              {formatNum(totalPay)}
             </Typography>
-            <Typography variant="h6" color="blue-gray" className="mt-1 font-bold">
-              DOANH THU: {formatNum(totalReceive - totalPay, 0, 'price')}
+            <Typography
+              variant="h6"
+              color="blue-gray"
+              className="mt-1 font-bold"
+            >
+              DOANH THU: {formatNum(totalReceive - totalPay, 0, "price")}
             </Typography>
           </div>
           <div className="gap-4">
@@ -285,7 +297,12 @@ export default function Finance() {
               size="sm"
               onClick={() => getFinanceTable()}
             >
-              <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
+              <ArrowPathIcon
+                strokeWidth={2}
+                className={`${
+                  loading ? "animate-spin" : ""
+                } w-4 h-4 text-white`}
+              />
             </Button>
           </div>
         </div>
@@ -299,7 +316,7 @@ export default function Finance() {
             </Typography>
           </div>
         </CardHeader> */}
-        <CardBody className="p-0 px-0 overflow-auto max-h-[65vh]">
+        <CardBody className="p-0 px-0 overflow-auto max-h-[54vh]">
           <FinanceTable
             // handleRemove={handleRemove}
             handleSort={handleSort}
@@ -338,13 +355,21 @@ export default function Finance() {
               <ArrowUpTrayIcon strokeWidth={2} className="h-4 w-4" /> 
               Confirm & Request
             </Button> */}
-            <Button variant="gradient" color="deep-orange" className="flex items-center gap-3" size="sm"
+            <Button
+              variant="gradient"
+              color="deep-orange"
+              className="flex items-center gap-3"
+              size="sm"
               onClick={() => handleOpenModal(false)}
             >
-              <PlusCircleIcon strokeWidth={2} className="h-5 w-5" /> 
+              <PlusCircleIcon strokeWidth={2} className="h-5 w-5" />
               Lập phiếu thu
             </Button>
-            <Button variant="gradient" color="blue-gray" className="flex items-center gap-3" size="sm"
+            <Button
+              variant="gradient"
+              color="blue-gray"
+              className="flex items-center gap-3"
+              size="sm"
               onClick={() => handleOpenModal(true)}
             >
               <MinusCircleIcon strokeWidth={2} className="h-5 w-5" />
@@ -353,8 +378,16 @@ export default function Finance() {
           </div>
         </CardFooter>
       </Card>
-      <FinancePopup open={openModal} handleCallback={handleFinanceCallback} isPayment={isPayment}/>
-      <ModalFinanceDetail open={openModalDetail} handleOpen={setOpenModalDetail} data={objectDetail}/>
+      <FinancePopup
+        open={openModal}
+        handleCallback={handleFinanceCallback}
+        isPayment={isPayment}
+      />
+      <ModalFinanceDetail
+        open={openModalDetail}
+        handleOpen={setOpenModalDetail}
+        data={objectDetail}
+      />
     </div>
   );
 }
@@ -383,6 +416,14 @@ export const ModalFinanceDetail = ({open, handleOpen, data}) => {
           </Typography>
           <Typography variant="small" color="black" className="font-bold">
             {formatDate(data.create_date, 'DD/MM/YYYY')}
+          </Typography>
+        </div>
+        <div className="p-4 border-b border-blue-gray-100 flex justify-between">
+          <Typography variant="small" color="black">
+            Tháng thực thu
+          </Typography>
+          <Typography variant="small" color="black" className="font-bold">
+            {moment(data.tuition_date, 'MMYYYY').format('MM/YYYY')}
           </Typography>
         </div>
         <div className="p-4 border-b border-blue-gray-100 flex justify-between">

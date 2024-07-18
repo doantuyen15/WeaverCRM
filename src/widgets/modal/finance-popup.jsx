@@ -284,6 +284,26 @@ export function FinancePopup({ open, handleCallback, isPayment = false, dataClas
                                                     value={formatDate(newBill.create_date, 'YYYY-MM-DD')}
                                                     onChange={(e) => {
                                                         updateFinance('create_date', formatDate(e.target.value, 'moment'))
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-3 self-center">
+                                            <div className="max-w-max relative self-center">
+                                                <Typography variant="small" color="black">
+                                                    Tháng thực thu 
+                                                </Typography>
+                                            </div>
+                                            <div className="col-span-2 pb-3">
+                                                <Input
+                                                    autoFocus={true}
+                                                    variant="standard"
+                                                    type="month"
+                                                    max={moment().format('YYYY-MM-DD')}
+                                                    className="pl-4 pr-2"
+                                                    // value={formatDate(newBill.tuition_date, 'YYYY-MM-DD')}
+                                                    onChange={(e) => {
                                                         updateFinance('tuition_date', formatDate(e.target.value, 'MMYYYY'))
                                                     }}
                                                 />

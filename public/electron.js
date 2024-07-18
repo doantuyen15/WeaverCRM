@@ -113,6 +113,7 @@ ipcMain.on("google_api", async (event, msg) => {
 			name: msg.fileName,
 			mimeType: "application/vnd.google-apps.spreadsheet",
 			parents: [`${msg.credentials.folderId}`]
+			// parents: ['1F8-Y4OmlJ1AD9cwSpGdc5hYYBZDuDdvW']
 		};
 		var media = {
 			mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",  // Modified

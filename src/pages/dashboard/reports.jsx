@@ -170,6 +170,7 @@ export default function ReportScore() {
     const monthOfYear = [...monthOfQuarter.I, ...monthOfQuarter.II, ...monthOfQuarter.III, ...monthOfQuarter.IV]
     const queryFinance = useRef(currentMonth)
     const [financeTable, setFinanceTable] = useState([])
+    const financeTableRef = useRef([])
     const [openModalDetail, setOpenModalDetail] = useState(false)
     const [objectDetail, setObjectDetail] = useState({})
 
@@ -222,6 +223,7 @@ export default function ReportScore() {
             setLoading(false)
             console.log('query_finance_table', data);
             setFinanceTable(data)
+            financeTableRef.current = data
           })
           .catch(err => console.log(err))
           .finally(() => setLoading(false))
@@ -255,6 +257,15 @@ export default function ReportScore() {
         setKeySort(indexCol)
         setIsAsc(prev => !prev)
     }
+
+    const handleSortFinance = (indexCol) => {
+        console.log('handleSort', indexCol, financeTableRef.current);
+        let sorted
+        sorted = orderBy(financeTableRef.current, [glb_sv.FINANCE_HEAD[indexCol]], [isAsc ? 'asc' : 'desc'])
+        setFinanceTable([...sorted])
+        setKeySort(indexCol)
+        setIsAsc(prev => !prev)
+      }
 
     const handleConfirmCallback = (ok) => {
         if (ok) {
@@ -322,321 +333,442 @@ export default function ReportScore() {
       }
 
     return (
-        <Card className="h-full w-full">
-            <CardHeader floated={false} shadow={false} className="rounded-none pb-6">
-                <div className="mb-4 flex items-center justify-between gap-8">
-                    <div>
-                        {/* <Typography variant="h5" color="blue-gray">
+      <Card className="h-full w-full">
+        <CardHeader
+          floated={false}
+          shadow={false}
+          className="rounded-none pb-6"
+        >
+          <div className="mb-4 flex items-center justify-between gap-8">
+            <div>
+              {/* <Typography variant="h5" color="blue-gray">
                             Report
                         </Typography> */}
-                        <Typography variant="h5" color="blue-gray" className="mt-1 font-bold">
-                            Export reports
-                        </Typography>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardBody className="p-0 px-0 overflow-auto max-h-[70vh]">
-                <Tabs value={mod}>
-                        <TabsHeader className="max-w-max mx-auto">
-                            <Tab value="score" className="w-48 h-10">
-                                <TableCellsIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
-                                Score
-                            </Tab>
+              <Typography
+                variant="h5"
+                color="blue-gray"
+                className="mt-1 font-bold"
+              >
+                Export reports
+              </Typography>
+            </div>
+          </div>
+        </CardHeader>
+        <CardBody className="p-0 px-0 overflow-auto max-h-[70vh]">
+          <Tabs value={mod}>
+            <TabsHeader className="max-w-max mx-auto">
+              <Tab value="score" className="w-48 h-10">
+                <TableCellsIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
+                Score
+              </Tab>
 
-                            <Tab onClick={() => {
-                                // getCourseTuition()
-                                if (!init) {
-                                    getTuitionTable([currentMonth])
-                                    setInit(true)
-                                }
-                            }} value="tuition" className="w-48 h-10">
-                                <BanknotesIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
-                                Tuition
-                            </Tab>
-                        {userInfo.roles != '5' ? (
-                            <Tab onClick={() => {
-                                if (!init) {
-                                    getFinanceTable([currentMonth])
-                                    setInit(true)
-                                }
-                            }} value="finance" className="w-48 h-10">
-                                <AttachMoneyIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
-                                Finance
-                            </Tab>
-                        ) : null}
-                        </TabsHeader>
-                    <TabsBody>
-                        <TabPanel key={'score'} value={'score'}>
-                            <div className="flex justify-between items-center">
-                                <div className="w-full md:w-72 mb-2">
-                                    <Input
-                                        className=""
-                                        placeholder="Student name"
-                                        label="Search student"
-                                        icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-                                        onChange={(e) => handleSearch(e.target.value)}
-                                    />
-                                </div>
-                                <Button
-                                    className="h-8"
-                                    size="sm"
-                                    onClick={() => getTuitionTable([selectedMonth])}
-                                >
-                                    <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
-                                </Button>
-                            </div>
-                            <div className="flex flex-col p-0 px-0 overflow-auto max-h-[55vh]">
-                                <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
-                                    <thead>
-                                        <tr>
-                                            {STUDENT_HEAD.map((head, index) => (
-                                                <th
-                                                    onClick={() => handleSort(index)}
-                                                    key={head}
-                                                    className="z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors hover:bg-blue-gray-200"
-                                                >
-                                                    <Typography
-                                                        variant="small"
-                                                        color="blue-gray"
-                                                        className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
-                                                    >
-                                                        {head}{" "}
-                                                        {(index === 1 || index === 3) && (
-                                                            keySort !== index ? (
-                                                                <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
-                                                            ) : keySort === index && isAsc ? (
-                                                                <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
-                                                            ) : (
-                                                                <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
-                                                            )
-                                                        )}
-                                                    </Typography>
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {studentList?.map(
-                                            (item, index) => {
-                                                const testScore = item.score_table.find(item => item.class_id === 'test') || {}
-                                                const isLast = index === studentList.length - 1;
-                                                const classes = isLast
-                                                    ? "py-2 px-4"
-                                                    : "py-2 px-4 border-b border-blue-gray-50";
-                                                return (
-                                                    <StudentRow
-                                                        classes={classes}
-                                                        item={item}
-                                                        index={index}
-                                                        handleEdit={handleEdit}
-                                                        handleRemove={handleRemove}
-                                                    />
-                                                );
-                                            },
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </TabPanel>
-                        <TabPanel key={'tuition'} value={'tuition'}>
-                            <div className="grid grid-cols-4">
-                                <div className="flex col-start-2 col-span-2 mb-2">
-                                    <Menu>
-                                        <MenuHandler>
-                                            <Button
-                                                size="md"
-                                                ripple={false}
-                                                // onClick={() => setSelectQuarter(prev => !prev)}
-                                                // color={email ? "gray" : "blue-gray"}
-                                                // disabled={!email}
-                                                className="rounded-r-none min-w-max"
-                                            >
-                                                {selectTime ? selectTime : 'Other'}
-                                            </Button>
-                                        </MenuHandler>
-                                        <MenuList onClick={() => setSelectedMonth('')}>
-                                            <MenuItem onClick={() => {
-                                                getTuitionTable(monthOfQuarter.I)
-                                                setSelectedMonth(monthOfQuarter.I)
-                                                setSelectTime('Quarter I')
-                                            }}>Quarter I</MenuItem>
-                                            <MenuItem onClick={() => {
-                                                getTuitionTable(monthOfQuarter.II)
-                                                setSelectedMonth(monthOfQuarter.II)
-                                                setSelectTime('Quarter II')
-                                            }}>Quarter II</MenuItem>
-                                            <MenuItem onClick={() => {
-                                                getTuitionTable(monthOfQuarter.III)
-                                                setSelectedMonth(monthOfQuarter.III)
-                                                setSelectTime('Quarter III')
-                                            }}>Quarter III</MenuItem>
-                                            <MenuItem onClick={() => {
-                                                getTuitionTable(monthOfQuarter.IV)
-                                                setSelectedMonth(monthOfQuarter.IV)
-                                                setSelectTime('Quarter IV')
-                                            }}>Quarter IV</MenuItem>
-                                            <MenuItem onClick={() => {
-                                                getTuitionTable(monthOfYear)
-                                                setSelectedMonth(monthOfYear)
-                                                setSelectTime('Year')
-                                            }}>Year</MenuItem>
-                                        </MenuList>
-                                    </Menu>
-                                    <Input
-                                        type="month"
-                                        value={moment(selectedMonth, 'MMYYYY').format('YYYY-MM')}
-                                        onChange={(e) => {
-                                            if (!e.target.value) setSelectedMonth(moment().format('MMYYYY'))
-                                            else setSelectedMonth(moment(e.target.value, 'YYYY-MM').format('MMYYYY'))
-                                            getTuitionTable([moment(e.target.value, 'YYYY-MM').format('MMYYYY')])
-                                            setSelectTime('Other')
-                                        }}
-                                        className="rounded-none !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                        labelProps={{
-                                            className: "before:content-none after:content-none",
-                                        }}
-                                        containerProps={{
-                                            className: "min-w-0",
-                                        }}
-                                    />
-                                    <Button
-                                        size="md"
-                                        ripple={false}
-                                        onClick={() => {
-                                            console.log('click export', tuitionTable);
-                                            exportExcel({
-                                                reportName: 'tuition', 
-                                                data: tuitionTable, 
-                                                info: {time: selectTime === 'Other' || !selectTime ? selectedMonth : (selectTime + ' - ' + moment().format('YYYY'))
-                                            }})
-                                        }}
-                                        className="rounded-l-none"
-                                    >
-                                        Export
-                                    </Button>
-                                </div>
-                                <div className="col-start-4 justify-self-end self-center">
-                                    <Button
-                                        className="h-8"
-                                        size="sm"
-                                        onClick={() => getTuitionTable(selectedMonth)}
-                                    >
-                                        <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
-                                    </Button>
-                                </div>
-                            </div>
-                            <div className="flex flex-col p-0 px-0 overflow-auto max-h-[55vh]">
-                                <TuitionTable tuitionTable={tuitionTable} setTuitionTable={setTuitionTable} courseTuition={courseTuition.current} />
-                            </div>
-                        </TabPanel>
-                        <TabPanel key={'finance'} value={'finance'}>
-                            <div className="grid grid-cols-4">
-                                <div className="flex col-start-2 col-span-2 mb-2">
-                                    <Menu>
-                                        <MenuHandler>
-                                            <Button
-                                                size="md"
-                                                ripple={false}
-                                                className="rounded-r-none min-w-max"
-                                            >
-                                                {selectTime ? selectTime : 'Other'}
-                                            </Button>
-                                        </MenuHandler>
-                                        <MenuList onClick={() => setSelectedMonth('')}>
-                                            <MenuItem onClick={() => {
-                                                getFinanceTable(monthOfQuarter.I)
-                                                setSelectTime('Quarter I')
-                                                setSelectedMonth(monthOfQuarter.I)
-                                            }}>Quarter I</MenuItem>
-                                            <MenuItem onClick={() => {
-                                                getFinanceTable(monthOfQuarter.II)
-                                                setSelectTime('Quarter II')
-                                                setSelectedMonth(monthOfQuarter.II)
-                                            }}>Quarter II</MenuItem>
-                                            <MenuItem onClick={() => {
-                                                getFinanceTable(monthOfQuarter.III)
-                                                setSelectTime('Quarter III')
-                                                setSelectedMonth(monthOfQuarter.III)
-                                            }}>Quarter III</MenuItem>
-                                            <MenuItem onClick={() => {
-                                                getFinanceTable(monthOfQuarter.IV)
-                                                setSelectTime('Quarter IV')
-                                                setSelectedMonth(monthOfQuarter.IV)
-                                            }}>Quarter IV</MenuItem>
-                                            <MenuItem onClick={() => {
-                                                getFinanceTable(monthOfYear)
-                                                setSelectTime('Year')
-                                                setSelectedMonth(monthOfYear)
-                                            }}>Year</MenuItem>
-                                        </MenuList>
-                                    </Menu>
-                                    <Input
-                                        type="month"
-                                        value={moment(selectedMonth, 'MMYYYY').format('YYYY-MM')}
-                                        onChange={(e) => {
-                                            if (!e.target.value) setSelectedMonth(moment().format('MMYYYY'))
-                                            else setSelectedMonth(moment(e.target.value, 'YYYY-MM').format('MMYYYY'))
-                                            getFinanceTable([moment(e.target.value, 'YYYY-MM').format('MMYYYY')])
-                                            setSelectTime('Other')
-                                        }}
-                                        className="rounded-none !border-t-blue-gray-200 focus:!border-t-gray-900"
-                                        labelProps={{
-                                            className: "before:content-none after:content-none",
-                                        }}
-                                        containerProps={{
-                                            className: "min-w-0",
-                                        }}
-                                    />
-                                    <Button
-                                        size="md"
-                                        ripple={false}
-                                        // color={email ? "gray" : "blue-gray"}
-                                        // disabled={!email}
-                                        onClick={() => {
-                                            console.log('click export', tuitionTable, selectTime, selectedMonth);
-                                            exportExcel({
-                                                reportName: 'finance', 
-                                                data: financeTable, 
-                                                info: {time: selectTime === 'Other' || !selectTime ? selectedMonth : (selectTime + ' - ' + moment().format('YYYY'))
-                                            }})
-                                        }}
-                                        className="rounded-l-none"
-                                    >
-                                        Export
-                                    </Button>
-                                </div>
-                                <div className="col-start-4 justify-self-end self-center">
-                                    <Button
-                                        className="h-8"
-                                        size="sm"
-                                        onClick={() => getFinanceTable([selectedMonth])}
-                                    >
-                                        <ArrowPathIcon strokeWidth={2} className={`${loading ? 'animate-spin' : ''} w-4 h-4 text-white`} />
-                                    </Button>
-                                </div>
-                            </div>
-                            <div className="flex flex-col p-0 px-0 overflow-auto max-h-[55vh]">
-                                <FinanceTable openModalDetail={handleOpenModalDetail} financeData={financeTable} />
-                            </div>
-                        </TabPanel>
-                    </TabsBody>
-                </Tabs>
-            </CardBody>
-            {/* <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
+              <Tab
+                onClick={() => {
+                  // getCourseTuition()
+                  if (!init) {
+                    getTuitionTable([currentMonth]);
+                    setInit(true);
+                  }
+                }}
+                value="tuition"
+                className="w-48 h-10"
+              >
+                <BanknotesIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
+                Tuition
+              </Tab>
+              {userInfo.roles != "5" ? (
+                <Tab
+                  onClick={() => {
+                    if (!init) {
+                      getFinanceTable([currentMonth]);
+                      setInit(true);
+                    }
+                  }}
+                  value="finance"
+                  className="w-48 h-10"
+                >
+                  <AttachMoneyIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
+                  Finance
+                </Tab>
+              ) : null}
+            </TabsHeader>
+            <TabsBody>
+              <TabPanel key={"score"} value={"score"}>
+                <div className="flex justify-between items-center">
+                  <div className="w-full md:w-72 mb-2">
+                    <Input
+                      className=""
+                      placeholder="Student name"
+                      label="Search student"
+                      icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                      onChange={(e) => handleSearch(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    className="h-8"
+                    size="sm"
+                    onClick={() => getTuitionTable([selectedMonth])}
+                  >
+                    <ArrowPathIcon
+                      strokeWidth={2}
+                      className={`${
+                        loading ? "animate-spin" : ""
+                      } w-4 h-4 text-white`}
+                    />
+                  </Button>
+                </div>
+                <div className="flex flex-col p-0 px-0 overflow-auto max-h-[55vh]">
+                  <table className="w-full min-w-max table-auto text-left border-separate border-spacing-0">
+                    <thead>
+                      <tr>
+                        {STUDENT_HEAD.map((head, index) => (
+                          <th
+                            onClick={() => handleSort(index)}
+                            key={head}
+                            className="z-10 sticky top-0 cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50 p-4 transition-colors hover:bg-blue-gray-200"
+                          >
+                            <Typography
+                              variant="small"
+                              color="blue-gray"
+                              className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
+                            >
+                              {head}{" "}
+                              {(index === 1 || index === 3) &&
+                                (keySort !== index ? (
+                                  <ChevronUpDownIcon
+                                    strokeWidth={2}
+                                    className="h-4 w-4"
+                                  />
+                                ) : keySort === index && isAsc ? (
+                                  <ChevronDownIcon
+                                    strokeWidth={2}
+                                    className="h-4 w-4"
+                                  />
+                                ) : (
+                                  <ChevronUpIcon
+                                    strokeWidth={2}
+                                    className="h-4 w-4"
+                                  />
+                                ))}
+                            </Typography>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {studentList?.map((item, index) => {
+                        const testScore =
+                          item.score_table.find(
+                            (item) => item.class_id === "test"
+                          ) || {};
+                        const isLast = index === studentList.length - 1;
+                        const classes = isLast
+                          ? "py-2 px-4"
+                          : "py-2 px-4 border-b border-blue-gray-50";
+                        return (
+                          <StudentRow
+                            classes={classes}
+                            item={item}
+                            index={index}
+                            handleEdit={handleEdit}
+                            handleRemove={handleRemove}
+                          />
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </TabPanel>
+              <TabPanel key={"tuition"} value={"tuition"}>
+                <div className="grid grid-cols-4">
+                  <div className="flex col-start-2 col-span-2 mb-2">
+                    <Menu>
+                      <MenuHandler>
+                        <Button
+                          size="md"
+                          ripple={false}
+                          // onClick={() => setSelectQuarter(prev => !prev)}
+                          // color={email ? "gray" : "blue-gray"}
+                          // disabled={!email}
+                          className="rounded-r-none min-w-max"
+                        >
+                          {selectTime ? selectTime : "Other"}
+                        </Button>
+                      </MenuHandler>
+                      <MenuList onClick={() => setSelectedMonth("")}>
+                        <MenuItem
+                          onClick={() => {
+                            getTuitionTable(monthOfQuarter.I);
+                            setSelectedMonth(monthOfQuarter.I);
+                            setSelectTime("Quarter I");
+                          }}
+                        >
+                          Quarter I
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            getTuitionTable(monthOfQuarter.II);
+                            setSelectedMonth(monthOfQuarter.II);
+                            setSelectTime("Quarter II");
+                          }}
+                        >
+                          Quarter II
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            getTuitionTable(monthOfQuarter.III);
+                            setSelectedMonth(monthOfQuarter.III);
+                            setSelectTime("Quarter III");
+                          }}
+                        >
+                          Quarter III
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            getTuitionTable(monthOfQuarter.IV);
+                            setSelectedMonth(monthOfQuarter.IV);
+                            setSelectTime("Quarter IV");
+                          }}
+                        >
+                          Quarter IV
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            getTuitionTable(monthOfYear);
+                            setSelectedMonth(monthOfYear);
+                            setSelectTime("Year");
+                          }}
+                        >
+                          Year
+                        </MenuItem>
+                      </MenuList>
+                    </Menu>
+                    <Input
+                      type="month"
+                      value={moment(selectedMonth, "MMYYYY").format("YYYY-MM")}
+                      onChange={(e) => {
+                        if (!e.target.value)
+                          setSelectedMonth(moment().format("MMYYYY"));
+                        else
+                          setSelectedMonth(
+                            moment(e.target.value, "YYYY-MM").format("MMYYYY")
+                          );
+                        getTuitionTable([
+                          moment(e.target.value, "YYYY-MM").format("MMYYYY"),
+                        ]);
+                        setSelectTime("Other");
+                      }}
+                      className="rounded-none !border-t-blue-gray-200 focus:!border-t-gray-900"
+                      labelProps={{
+                        className: "before:content-none after:content-none",
+                      }}
+                      containerProps={{
+                        className: "min-w-0",
+                      }}
+                    />
+                    <Button
+                      size="md"
+                      ripple={false}
+                      onClick={() => {
+                        console.log("click export", tuitionTable);
+                        exportExcel({
+                          reportName: "tuition",
+                          data: tuitionTable,
+                          info: {
+                            time:
+                              selectTime === "Other" || !selectTime
+                                ? selectedMonth
+                                : selectTime + " - " + moment().format("YYYY"),
+                          },
+                        });
+                      }}
+                      className="rounded-l-none"
+                    >
+                      Export
+                    </Button>
+                  </div>
+                  <div className="col-start-4 justify-self-end self-center">
+                    <Button
+                      className="h-8"
+                      size="sm"
+                      onClick={() => getTuitionTable(selectedMonth)}
+                    >
+                      <ArrowPathIcon
+                        strokeWidth={2}
+                        className={`${
+                          loading ? "animate-spin" : ""
+                        } w-4 h-4 text-white`}
+                      />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex flex-col p-0 px-0 overflow-auto max-h-[55vh]">
+                  <TuitionTable
+                    tuitionTable={tuitionTable}
+                    setTuitionTable={setTuitionTable}
+                    courseTuition={courseTuition.current}
+                  />
+                </div>
+              </TabPanel>
+              <TabPanel key={"finance"} value={"finance"}>
+                <div className="grid grid-cols-4">
+                  <div className="flex col-start-2 col-span-2 mb-2">
+                    <Menu>
+                      <MenuHandler>
+                        <Button
+                          size="md"
+                          ripple={false}
+                          className="rounded-r-none min-w-max"
+                        >
+                          {selectTime ? selectTime : "Other"}
+                        </Button>
+                      </MenuHandler>
+                      <MenuList onClick={() => setSelectedMonth("")}>
+                        <MenuItem
+                          onClick={() => {
+                            getFinanceTable(monthOfQuarter.I);
+                            setSelectTime("Quarter I");
+                            setSelectedMonth(monthOfQuarter.I);
+                          }}
+                        >
+                          Quarter I
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            getFinanceTable(monthOfQuarter.II);
+                            setSelectTime("Quarter II");
+                            setSelectedMonth(monthOfQuarter.II);
+                          }}
+                        >
+                          Quarter II
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            getFinanceTable(monthOfQuarter.III);
+                            setSelectTime("Quarter III");
+                            setSelectedMonth(monthOfQuarter.III);
+                          }}
+                        >
+                          Quarter III
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            getFinanceTable(monthOfQuarter.IV);
+                            setSelectTime("Quarter IV");
+                            setSelectedMonth(monthOfQuarter.IV);
+                          }}
+                        >
+                          Quarter IV
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            getFinanceTable(monthOfYear);
+                            setSelectTime("Year");
+                            setSelectedMonth(monthOfYear);
+                          }}
+                        >
+                          Year
+                        </MenuItem>
+                      </MenuList>
+                    </Menu>
+                    <Input
+                      type="month"
+                      value={moment(selectedMonth, "MMYYYY").format("YYYY-MM")}
+                      onChange={(e) => {
+                        if (!e.target.value)
+                          setSelectedMonth(moment().format("MMYYYY"));
+                        else
+                          setSelectedMonth(
+                            moment(e.target.value, "YYYY-MM").format("MMYYYY")
+                          );
+                        getFinanceTable([
+                          moment(e.target.value, "YYYY-MM").format("MMYYYY"),
+                        ]);
+                        setSelectTime("Other");
+                      }}
+                      className="rounded-none !border-t-blue-gray-200 focus:!border-t-gray-900"
+                      labelProps={{
+                        className: "before:content-none after:content-none",
+                      }}
+                      containerProps={{
+                        className: "min-w-0",
+                      }}
+                    />
+                    <Button
+                      size="md"
+                      ripple={false}
+                      // color={email ? "gray" : "blue-gray"}
+                      // disabled={!email}
+                      onClick={() => {
+                        console.log(
+                          "click export",
+                          tuitionTable,
+                          selectTime,
+                          selectedMonth
+                        );
+                        exportExcel({
+                          reportName: "finance",
+                          data: financeTable,
+                          info: {
+                            time:
+                              selectTime === "Other" || !selectTime
+                                ? selectedMonth
+                                : selectTime + " - " + moment().format("YYYY"),
+                          },
+                        });
+                      }}
+                      className="rounded-l-none"
+                    >
+                      Export
+                    </Button>
+                  </div>
+                  <div className="col-start-4 justify-self-end self-center">
+                    <Button
+                      className="h-8"
+                      size="sm"
+                      onClick={() => getFinanceTable([selectedMonth])}
+                    >
+                      <ArrowPathIcon
+                        strokeWidth={2}
+                        className={`${
+                          loading ? "animate-spin" : ""
+                        } w-4 h-4 text-white`}
+                      />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex flex-col p-0 px-0 overflow-auto max-h-[55vh]">
+                  <FinanceTable
+                    openModalDetail={handleOpenModalDetail}
+                    keySort={keySort}
+                    isAsc={isAsc}
+                    financeData={financeTable}
+                    handleSort={handleSortFinance}
+                  />
+                </div>
+              </TabPanel>
+            </TabsBody>
+          </Tabs>
+        </CardBody>
+        {/* <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
                 </CardFooter> */}
 
-            <ModalFinanceDetail open={openModalDetail} handleOpen={setOpenModalDetail} data={objectDetail} />
-            
-            <ModalConfirmUpdate
-                open={openModalConfirm}
-                handleOpen={setOpenModalConfirm}
-                objectNew={objectNew}
-                objectEdit={objectEdit}
-                handleConfirmCallback={handleConfirmCallback}
-                loading={loading}
-                StudentRow={StudentRow}
-            />
-        </Card>
+        <ModalFinanceDetail
+          open={openModalDetail}
+          handleOpen={setOpenModalDetail}
+          data={objectDetail}
+        />
+
+        <ModalConfirmUpdate
+          open={openModalConfirm}
+          handleOpen={setOpenModalConfirm}
+          objectNew={objectNew}
+          objectEdit={objectEdit}
+          handleConfirmCallback={handleConfirmCallback}
+          loading={loading}
+          StudentRow={StudentRow}
+        />
+      </Card>
     );
 }
 import ExcelJS from 'exceljs'

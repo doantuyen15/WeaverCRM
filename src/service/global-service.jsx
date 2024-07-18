@@ -166,7 +166,28 @@ class globalService {
             }
         ]
         this.HEADER_TUITION = ['Mã HS', 'Tên', 'Ngày đóng', 'Số tiền còn lại', 'Ghi chú']
-
+        this.FINANCE_HEAD = [
+          "department",
+          "code",
+          "isPayment",
+          "explain",
+          "account_type",
+          "amount",
+          "approver",
+          "tuition_date",
+          "class_id",
+          "department_id",
+          "approver_id",
+          "create_date",
+          "staff_phone",
+          "staff_name",
+          "staff_id",
+          "customer",
+          "type",
+          "type_id",
+          "customer_id",
+          "account_type_id",
+        ];
         this.calenderWeek = () => {
             let dayArr = []
             for (let i = 1; i <= 7; i++) {

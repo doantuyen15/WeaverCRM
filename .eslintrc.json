@@ -15,7 +15,11 @@
   "rules": {
     "no-unsafe-optional-chaining": 0,
     "no-empty-function": 0,
-    "@typescript-eslint/no-empty-function": 0
+    "@typescript-eslint/no-empty-function": 0,
+    "import/no-unresolved": [
+      2, 
+      { "caseSensitive": false }
+    ]
   },
   "parser": "@typescript-eslint/parser"
 }

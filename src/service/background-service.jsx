@@ -44,7 +44,7 @@ export function BackgroundService() {
         const app = initializeApp(fireBaseConfig);
         // const auth = getAuth(app);
         let db
-        console.log('ENV', ENV);
+        console.log('ENV', getFirestore(app, "production"), getFirestore(app))
         if (ENV == 'UAT') {
             db = getFirestore(app, "production")
         } else {
