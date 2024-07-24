@@ -10,7 +10,7 @@
 		"releaseType": "draft"
 	},
 	"license": "GPL-3.0",
-	"version": "1.1.10",
+	"version": "1.1.11",
 	"private": true,
 	"devDependencies": {
 		"@types/node": "^18.11.10",
