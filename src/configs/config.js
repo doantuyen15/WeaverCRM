@@ -1,4 +1,5 @@
-export const ENV = 'UAT'
+export const ENV = 'PROD'
+// export const ENV = 'UAT'
 
 export const fireBaseConfig = {
     "apiKey": "AIzaSyByvZ4ShMb7ROh7mh9xHByn58bTZqQuDKQ",
